@@ -1,11 +1,25 @@
 import type { Request, Response, NextFunction } from 'express';
 import multer from 'multer';
+import path from 'path';
+import fs from 'fs';
 import { createOrder, importOrdersFromCsv, listOrders } from '../services/order.service';
 import { createError } from '../middleware/errorHandler';
 
 const upload = multer({
-  storage: multer.memoryStorage(),
-  limits: { fileSize: 10 * 1024 * 1024 }, 
+  storage: multer.diskStorage({
+    destination: (_req, _file, cb) => {
+      const uploadDir = path.join(process.cwd(), 'uploads');
+      if (!fs.existsSync(uploadDir)) {
+        fs.mkdirSync(uploadDir, { recursive: true });
+      }
+      cb(null, uploadDir);
+    },
+    filename: (_req, file, cb) => {
+      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+      cb(null, file.fieldname + '-' + uniqueSuffix + '.csv');
+    }
+  }),
+  limits: { fileSize: 10 * 1024 * 1024 },
   fileFilter: (_req, file, cb) => {
     if (file.mimetype === 'text/csv' || file.originalname.endsWith('.csv')) {
       cb(null, true);
@@ -27,9 +41,18 @@ export async function importOrders(
       return next(createError('CSV file is required (field name: "file")', 400));
     }
 
-    const result = await importOrdersFromCsv(req.file.buffer);
+    const filePath = req.file.path;
+    const result = await importOrdersFromCsv(filePath);
+
+    fs.unlink(filePath, (err) => {
+      if (err) console.error(`Failed to delete file ${filePath}:`, err);
+    });
+
     res.status(200).json(result);
   } catch (err) {
+    if (req.file?.path) {
+      fs.unlink(req.file.path, () => { });
+    }
     next(err);
   }
 }
@@ -43,7 +66,11 @@ export async function createOrderHandler(
     const order = await createOrder(req.body);
     res.status(201).json(order);
   } catch (err) {
-    if (err instanceof Error && err.message.includes('outside New York State')) {
+    if (
+      err instanceof Error &&
+      (err.message.includes('outside New York State') ||
+        err.message.includes('must be within New York State'))
+    ) {
       return next(createError(err.message, 422));
     }
     next(err);

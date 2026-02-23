@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken';
-import { config } from '../../config';
+import { config } from '../config';
 import type { LoginDto, AuthResponse, JwtPayload } from '../models/auth';
 
 export function login(dto: LoginDto): AuthResponse {

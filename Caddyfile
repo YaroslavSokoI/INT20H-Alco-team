@@ -1,0 +1,14 @@
+{
+    auto_https off
+}
+
+http://localhost {
+    handle {
+        reverse_proxy tax_frontend:5173
+    }
+    
+    handle_path /api/* {
+        rewrite * {path}
+        reverse_proxy tax_backend:3000
+    }
+}

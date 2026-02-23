@@ -1,11 +1,12 @@
 import { calculateTax } from './tax.service';
 import { isWithinNYState } from '../utils/geo';
-import { parseCsv } from '../utils/csv.parser';
+import { parseCsvStream } from '../utils/csv.parser';
 import {
   insertOrder,
   insertOrdersBatch,
   findOrders,
 } from '../repositories/order.repository';
+import pLimit from 'p-limit';
 import type {
   Order,
   CreateOrderDto,
@@ -35,53 +36,74 @@ export interface ImportResult {
   errors: Array<{ row: number; reason: string }>;
 }
 
-export async function importOrdersFromCsv(buffer: Buffer): Promise<ImportResult> {
-  const rows = await parseCsv(buffer);
-
+export async function importOrdersFromCsv(filePath: string): Promise<ImportResult> {
   const errors: ImportResult['errors'] = [];
-  const validItems: Array<{
-    index: number;
-    dto: CreateOrderDto;
-  }> = [];
+  let imported = 0;
+  let skipped = 0;
 
-  for (let i = 0; i < rows.length; i++) {
-    const row = rows[i];
-    if (!isWithinNYState(row.latitude, row.longitude)) {
-      errors.push({
-        row: i + 2,
-        reason: `Coordinates (${row.latitude}, ${row.longitude}) are outside New York State`,
-      });
-    } else {
-      validItems.push({ index: i + 2, dto: row });
+  const BATCH_SIZE = 100;
+  let validBatch: Array<{ index: number; dto: CreateOrderDto }> = [];
+
+  const processBatch = async (batch: typeof validBatch) => {
+    if (batch.length === 0) return;
+
+    const limit = pLimit(1);
+
+    const results = await Promise.allSettled(
+      batch.map(({ index, dto }) =>
+        limit(() =>
+          calculateTax(dto.latitude, dto.longitude, dto.subtotal)
+            .then(({ jurisdiction, tax, taxAmount, totalAmount }) => ({
+              dto, tax, jurisdiction, taxAmount, totalAmount,
+            }))
+            .catch((err: unknown) => {
+              errors.push({
+                row: index,
+                reason: err instanceof Error ? err.message : String(err),
+              });
+              return null;
+            })
+        )
+      )
+    );
+
+    const toInsert = results
+      .map((r) => (r.status === 'fulfilled' ? r.value : null))
+      .filter((v): v is NonNullable<typeof v> => v !== null);
+
+    if (toInsert.length > 0) {
+      await insertOrdersBatch(toInsert);
+      imported += toInsert.length;
     }
-  }
+  };
 
-  const results = await Promise.allSettled(
-    validItems.map(({ index, dto }) =>
-      calculateTax(dto.latitude, dto.longitude, dto.subtotal)
-        .then(({ jurisdiction, tax, taxAmount, totalAmount }) => ({
-          dto, tax, jurisdiction, taxAmount, totalAmount,
-        }))
-        .catch((err: unknown) => {
-          errors.push({
-            row: index,
-            reason: err instanceof Error ? err.message : String(err),
-          });
-          return null;
-        })
-    )
-  );
+  try {
+    for await (const row of parseCsvStream(filePath)) {
+      if (!isWithinNYState(row.dto.latitude, row.dto.longitude)) {
+        errors.push({
+          row: row.index,
+          reason: `Coordinates (${row.dto.latitude}, ${row.dto.longitude}) are outside New York State`,
+        });
+        skipped++;
+      } else {
+        validBatch.push(row);
+      }
 
-  const toInsert = results
-    .map((r) => (r.status === 'fulfilled' ? r.value : null))
-    .filter((v): v is NonNullable<typeof v> => v !== null);
+      if (validBatch.length >= BATCH_SIZE) {
+        await processBatch(validBatch);
+        validBatch = [];
+      }
+    }
 
-  if (toInsert.length > 0) {
-    await insertOrdersBatch(toInsert);
+    if (validBatch.length > 0) {
+      await processBatch(validBatch);
+    }
+  } catch (err) {
+    throw new Error(`Streaming failed: ${err instanceof Error ? err.message : String(err)}`);
   }
 
   return {
-    imported: toInsert.length,
+    imported,
     skipped: errors.length,
     errors,
   };

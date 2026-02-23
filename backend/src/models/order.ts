@@ -39,19 +39,25 @@ export interface CreateOrderDto {
 
 export interface OrderRow {
   id: number;
-  latitude: string;
-  longitude: string;
-  subtotal: string;
+  latitude: number;
+  longitude: number;
+  subtotal: number;
   timestamp: Date;
-  composite_tax_rate: string;
-  tax_amount: string;
-  total_amount: string;
-  state_rate: string;
-  county_rate: string;
-  city_rate: string;
-  special_rates: string;
-  jurisdictions: Jurisdiction;
+  composite_tax_rate: number;
+  tax_amount: number;
+  total_amount: number;
+  state_rate: number;
+  county_rate: number;
+  city_rate: number;
+  special_rates: number;
+  jurisdictions: Jurisdiction | string;
   created_at: Date;
+}
+
+declare module 'knex/types/tables' {
+  interface Tables {
+    orders: OrderRow;
+  }
 }
 
 export interface OrderListQuery {

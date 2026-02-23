@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { config } from '../../config';
+import { config } from '../config';
 import { getRedis } from './redis.client';
 import type { TaxBreakdown } from '../models/order';
 

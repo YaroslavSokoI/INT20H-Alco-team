@@ -8,41 +8,40 @@ export interface CsvRow {
   timestamp?: string;
 }
 
-export function parseCsv(buffer: Buffer): Promise<CreateOrderDto[]> {
-  return new Promise((resolve, reject) => {
-    parse(
-      buffer,
-      {
-        columns: true,
-        skip_empty_lines: true,
-        trim: true,
+import fs from 'fs';
+
+export async function* parseCsvStream(filePath: string): AsyncGenerator<{ index: number; dto: CreateOrderDto }> {
+  let recordIndex = 0;
+
+  const parser = fs.createReadStream(filePath).pipe(
+    parse({
+      columns: true,
+      skip_empty_lines: true,
+      trim: true,
+    })
+  );
+
+  for await (const row of parser as AsyncIterable<CsvRow>) {
+    const lat = parseFloat(row.latitude);
+    const lon = parseFloat(row.longitude);
+    const subtotal = parseFloat(row.subtotal);
+
+    if (isNaN(lat) || isNaN(lon) || isNaN(subtotal)) {
+      throw new Error(
+        `Invalid numeric value at row ${recordIndex + 2}: lat=${row.latitude}, lon=${row.longitude}, subtotal=${row.subtotal}`
+      );
+    }
+
+    yield {
+      index: recordIndex + 2,
+      dto: {
+        latitude: lat,
+        longitude: lon,
+        subtotal,
+        timestamp: row.timestamp || undefined,
       },
-      (err, records: CsvRow[]) => {
-        if (err) {
-          return reject(new Error(`CSV parse error: ${err.message}`));
-        }
+    };
 
-        const parsed: CreateOrderDto[] = records.map((row, index) => {
-          const lat = parseFloat(row.latitude);
-          const lon = parseFloat(row.longitude);
-          const subtotal = parseFloat(row.subtotal);
-
-          if (isNaN(lat) || isNaN(lon) || isNaN(subtotal)) {
-            throw new Error(
-              `Invalid numeric value at row ${index + 2}: lat=${row.latitude}, lon=${row.longitude}, subtotal=${row.subtotal}`
-            );
-          }
-
-          return {
-            latitude: lat,
-            longitude: lon,
-            subtotal,
-            timestamp: row.timestamp || undefined,
-          };
-        });
-
-        resolve(parsed);
-      }
-    );
-  });
+    recordIndex++;
+  }
 }

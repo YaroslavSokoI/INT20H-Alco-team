@@ -9,6 +9,8 @@ export interface TaxCalculationResult {
   totalAmount: number;
 }
 
+import Decimal from 'decimal.js';
+
 export async function calculateTax(
   lat: number,
   lon: number,
@@ -20,10 +22,20 @@ export async function calculateTax(
     throw new Error(`Could not determine postcode for coordinates (${lat}, ${lon})`);
   }
 
+  const stateUpper = jurisdiction.state?.toUpperCase();
+  if (stateUpper !== 'NEW YORK' && stateUpper !== 'NY') {
+    throw new Error(
+      `Coordinates (${lat}, ${lon}) resolve to ${jurisdiction.state || 'an unknown state'}, but must be within New York State.`
+    );
+  }
+
   const tax = await getTaxRateByZip(jurisdiction.postcode);
 
-  const taxAmount = Math.round(subtotal * tax.compositeRate * 10000) / 10000;
-  const totalAmount = Math.round((subtotal + taxAmount) * 10000) / 10000;
+  const sub = new Decimal(subtotal);
+  const rate = new Decimal(tax.compositeRate);
+
+  const taxAmount = sub.times(rate).toDecimalPlaces(4).toNumber();
+  const totalAmount = sub.plus(taxAmount).toDecimalPlaces(4).toNumber();
 
   return { jurisdiction, tax, taxAmount, totalAmount };
 }

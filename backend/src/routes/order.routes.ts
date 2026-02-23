@@ -27,8 +27,192 @@ const listOrdersSchema = z.object({
   dateTo: z.string().datetime().optional(),
 });
 
+/**
+ * @swagger
+ * components:
+ *   securitySchemes:
+ *     bearerAuth:
+ *       type: http
+ *       scheme: bearer
+ *       bearerFormat: JWT
+ * 
+ * security:
+ *   - bearerAuth: []
+ */
+
+/**
+ * @swagger
+ * /orders/import:
+ *   post:
+ *     summary: Import orders from CSV
+ *     description: Upload a CSV file containing bulk orders. Max file size is 10MB.
+ *     tags: [Orders]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               file:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       200:
+ *         description: Successfully imported orders.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 imported:
+ *                   type: number
+ *                 skipped:
+ *                   type: number
+ *                 errors:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       row:
+ *                         type: number
+ *                       reason:
+ *                         type: string
+ *       400:
+ *         description: Missing or invalid file.
+ *       401:
+ *         description: Unauthorized.
+ */
 router.post('/import', requireAuth, csvUploadMiddleware, importOrders);
+
+/**
+ * @swagger
+ * /orders:
+ *   post:
+ *     summary: Create a single order
+ *     description: Creates an order and calculates New York State taxes.
+ *     tags: [Orders]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - latitude
+ *               - longitude
+ *               - subtotal
+ *             properties:
+ *               latitude:
+ *                 type: number
+ *               longitude:
+ *                 type: number
+ *               subtotal:
+ *                 type: number
+ *               timestamp:
+ *                 type: string
+ *                 format: date-time
+ *     responses:
+ *       201:
+ *         description: Order created successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: number
+ *                 subtotal:
+ *                   type: number
+ *                 taxAmount:
+ *                   type: number
+ *                 totalAmount:
+ *                   type: number
+ *                 compositeTaxRate:
+ *                   type: number
+ *       422:
+ *         description: Validation error or coordinates outside NY State.
+ *       401:
+ *         description: Unauthorized.
+ */
 router.post('/', requireAuth, validateBody(createOrderSchema), createOrderHandler);
+
+/**
+ * @swagger
+ * /orders:
+ *   get:
+ *     summary: List orders
+ *     description: Retrieves a paginated list of orders, optionally filtered.
+ *     tags: [Orders]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: string
+ *         description: Page number
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: string
+ *         description: Items per page
+ *       - in: query
+ *         name: state
+ *         schema:
+ *           type: string
+ *         description: Filter by state
+ *       - in: query
+ *         name: city
+ *         schema:
+ *           type: string
+ *         description: Filter by city
+ *       - in: query
+ *         name: dateFrom
+ *         schema:
+ *           type: string
+ *           format: date-time
+ *         description: Start date
+ *       - in: query
+ *         name: dateTo
+ *         schema:
+ *           type: string
+ *           format: date-time
+ *         description: End date
+ *     responses:
+ *       200:
+ *         description: Returns the paginated list of orders.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: number
+ *                       totalAmount:
+ *                         type: number
+ *                       jurisdictions:
+ *                         type: object
+ *                 total:
+ *                   type: number
+ *                 page:
+ *                   type: number
+ *                 limit:
+ *                   type: number
+ *                 totalPages:
+ *                   type: number
+ *       401:
+ *         description: Unauthorized.
+ */
 router.get('/', requireAuth, validateQuery(listOrdersSchema), getOrders);
 
 export default router;

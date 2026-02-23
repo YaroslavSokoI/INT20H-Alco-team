@@ -1,29 +1,29 @@
 import { db } from './db';
 import type {
   Order,
-  OrderRow,
   CreateOrderDto,
   TaxBreakdown,
   Jurisdiction,
   OrderListQuery,
   PaginatedOrders,
+  OrderRow,
 } from '../models/order';
 
 function rowToOrder(row: OrderRow): Order {
   return {
     id: row.id,
-    latitude: parseFloat(row.latitude),
-    longitude: parseFloat(row.longitude),
-    subtotal: parseFloat(row.subtotal),
+    latitude: typeof row.latitude === 'string' ? parseFloat(row.latitude) : row.latitude,
+    longitude: typeof row.longitude === 'string' ? parseFloat(row.longitude) : row.longitude,
+    subtotal: typeof row.subtotal === 'string' ? parseFloat(row.subtotal) : row.subtotal,
     timestamp: row.timestamp,
-    compositeTaxRate: parseFloat(row.composite_tax_rate),
-    taxAmount: parseFloat(row.tax_amount),
-    totalAmount: parseFloat(row.total_amount),
-    stateRate: parseFloat(row.state_rate),
-    countyRate: parseFloat(row.county_rate),
-    cityRate: parseFloat(row.city_rate),
-    specialRates: parseFloat(row.special_rates),
-    jurisdictions: row.jurisdictions,
+    compositeTaxRate: typeof row.composite_tax_rate === 'string' ? parseFloat(row.composite_tax_rate) : row.composite_tax_rate,
+    taxAmount: typeof row.tax_amount === 'string' ? parseFloat(row.tax_amount) : row.tax_amount,
+    totalAmount: typeof row.total_amount === 'string' ? parseFloat(row.total_amount) : row.total_amount,
+    stateRate: typeof row.state_rate === 'string' ? parseFloat(row.state_rate) : row.state_rate,
+    countyRate: typeof row.county_rate === 'string' ? parseFloat(row.county_rate) : row.county_rate,
+    cityRate: typeof row.city_rate === 'string' ? parseFloat(row.city_rate) : row.city_rate,
+    specialRates: typeof row.special_rates === 'string' ? parseFloat(row.special_rates) : row.special_rates,
+    jurisdictions: typeof row.jurisdictions === 'string' ? JSON.parse(row.jurisdictions) : row.jurisdictions,
     createdAt: row.created_at,
   };
 }
@@ -54,7 +54,7 @@ export async function insertOrder(data: InsertOrderData): Promise<Order> {
       special_rates: tax.specialRates,
       jurisdictions: JSON.stringify(jurisdiction),
     })
-    .returning<OrderRow[]>('*');
+    .returning('*');
 
   return rowToOrder(row);
 }
@@ -77,7 +77,7 @@ export async function insertOrdersBatch(items: InsertOrderData[]): Promise<Order
     jurisdictions: JSON.stringify(jurisdiction),
   }));
 
-  const inserted = await db('orders').insert(rows).returning<OrderRow[]>('*');
+  const inserted = await db('orders').insert(rows).returning('*');
   return inserted.map(rowToOrder);
 }
 
@@ -86,7 +86,7 @@ export async function findOrders(query: OrderListQuery): Promise<PaginatedOrders
   const limit = Math.min(query.limit ?? 20, 100);
   const offset = (page - 1) * limit;
 
-  let baseQuery = db<OrderRow>('orders');
+  let baseQuery = db('orders');
 
   if (query.state) {
     baseQuery = baseQuery.whereRaw(`jurisdictions->>'state' = ?`, [query.state]);
@@ -101,8 +101,10 @@ export async function findOrders(query: OrderListQuery): Promise<PaginatedOrders
     baseQuery = baseQuery.where('timestamp', '<=', new Date(query.dateTo));
   }
 
-  const [{ count }] = await baseQuery.clone().count<[{ count: string }]>('id as count');
-  const total = parseInt(count, 10);
+  const countResult = await baseQuery.clone().count('id as count');
+  const countObj = countResult[0] as unknown as { count: string | number };
+  const count = countObj?.count || 0;
+  const total = typeof count === 'string' ? parseInt(count, 10) : Number(count);
 
   const rows = await baseQuery
     .clone()

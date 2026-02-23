@@ -1,6 +1,7 @@
 import axios from 'axios';
-import { config } from '../../config';
+import { config } from '../config';
 import type { Jurisdiction } from '../models/order';
+import { getRedis } from './redis.client';
 
 interface NominatimAddress {
   postcode?: string;
@@ -15,7 +16,23 @@ interface NominatimResponse {
   address: NominatimAddress;
 }
 
+const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
 export async function reverseGeocode(lat: number, lon: number): Promise<Jurisdiction> {
+  const cacheKey = `geocode:${lat}:${lon}`;
+  const redis = getRedis();
+
+  try {
+    const cached = await redis.get(cacheKey);
+    if (cached) {
+      return JSON.parse(cached) as Jurisdiction;
+    }
+  } catch (err) {
+    console.error('[Redis] Cache read error for reverseGeocode:', err);
+  }
+
+  await delay(1000);
+
   const response = await axios.get<NominatimResponse>(config.nominatim.baseUrl, {
     params: {
       lat,
@@ -29,12 +46,20 @@ export async function reverseGeocode(lat: number, lon: number): Promise<Jurisdic
     timeout: 10000,
   });
 
-  const addr = response.data.address;
+  const addr = response.data.address || {};
 
-  return {
+  const result: Jurisdiction = {
     postcode: addr.postcode ?? '',
     city: addr.city ?? addr.town ?? addr.village ?? '',
     county: addr.county ?? '',
     state: addr.state ?? '',
   };
+
+  try {
+    await redis.setex(cacheKey, 24 * 60 * 60, JSON.stringify(result));
+  } catch (err) {
+    console.error('[Redis] Cache write error for reverseGeocode:', err);
+  }
+
+  return result;
 }

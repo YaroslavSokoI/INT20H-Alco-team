@@ -4,35 +4,74 @@ services:
   db:
     image: postgres:15
     container_name: tax_db
-    env_file: .env
     ports:
-      - "127.0.0.1:5432:5432"
+      - "5432:5432"
+    env_file: .env
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    networks:
+      - backend_network
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: tax_redis
+    ports:
+      - "6379:6379"
+    networks:
+      - backend_network
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
 
   backend:
     build:
       context: ./backend
     container_name: tax_backend
-    ports:
-      - "127.0.0.1:3000:3000"
     env_file: .env
     depends_on:
       - db
-    volumes:
-      - ./backend/src:/app/src
+      - redis
+    networks:
+      - backend_network
+      - proxy_network
+    restart: unless-stopped
 
   frontend:
     build:
       context: ./frontend
     container_name: tax_frontend
-    ports:
-      - "127.0.0.1:5173:5173"
     env_file: .env
     depends_on:
       - backend
+    networks:
+      - proxy_network
+    restart: unless-stopped
+
+  caddy:
+    image: caddy:2-alpine
+    container_name: tax_caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
     volumes:
-      - ./frontend/src:/app/src
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    networks:
+      - proxy_network
+    depends_on:
+      - frontend
+      - backend
+
+networks:
+  backend_network:
+  proxy_network:
+
 
 volumes:
   postgres_data:
+  redis_data:
+  caddy_data:
+  caddy_config:

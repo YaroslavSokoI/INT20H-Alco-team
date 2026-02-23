@@ -1,5 +1,5 @@
 import app from './app';
-import { config } from '../config';
+import { config } from './config';
 import { db } from './repositories/db';
 import { connectRedis, disconnectRedis } from './clients/redis.client';
 
