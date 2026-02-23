@@ -2,7 +2,7 @@
     auto_https off
 }
 
-http://localhost {
+alco-team.duckdns.org {
     handle {
         reverse_proxy tax_frontend:5173
     }
