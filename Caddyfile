@@ -1,7 +1,3 @@
-{
-    auto_https off
-}
-
 alco-team.ddns.net {
     handle {
         reverse_proxy tax_frontend:5173
