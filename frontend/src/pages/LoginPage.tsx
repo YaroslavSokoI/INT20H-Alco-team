@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { useAuthStore, type UserRole } from "@/store/authStore";
 import { Button } from "@/components/ui/Button";
 
@@ -8,7 +8,7 @@ export default function LoginPage() {
   const [role, setRole] = useState<UserRole>("admin");
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.SubmitEvent) => {
     e.preventDefault();
     setIsLoading(true);
     try {

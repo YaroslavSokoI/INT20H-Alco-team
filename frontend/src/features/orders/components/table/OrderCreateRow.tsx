@@ -1,4 +1,5 @@
 import { createIcon } from "@/assets/assets.ts";
+import { memo } from "react";
 
 interface OrderCreateRowProps {
     newOrder: any;
@@ -6,7 +7,7 @@ interface OrderCreateRowProps {
     onSave: () => void;
 }
 
-export default function OrderCreateRow({ newOrder, setNewOrder, onSave }: OrderCreateRowProps) {
+const OrderCreateRow = memo(({ newOrder, setNewOrder, onSave }: OrderCreateRowProps) => {
     return (
         <tr className="border-t border-border-light bg-black/[0.02] [&>td]:px-5 [&>td]:py-2 text-text-muted">
             <td>
@@ -28,7 +29,11 @@ export default function OrderCreateRow({ newOrder, setNewOrder, onSave }: OrderC
                     className="w-full bg-transparent border-b border-border/50 outline-none pb-0.5 placeholder:text-text-muted/50" 
                     placeholder="Jurisdiction"
                     value={newOrder.jurisdiction}
-                    onChange={(e) => setNewOrder({...newOrder, jurisdiction: e.target.value})}
+                    readOnly
+                    onChange={(e) => {
+                        const val = e.target.value;
+                        setNewOrder({...newOrder, jurisdiction: val});
+                    }}
                 />
             </td>
             <td>
@@ -36,7 +41,18 @@ export default function OrderCreateRow({ newOrder, setNewOrder, onSave }: OrderC
                     className="w-full bg-transparent border-b border-border/50 outline-none pb-0.5 placeholder:text-text-muted/50" 
                     placeholder="0.00"
                     value={newOrder.subtotal}
-                    onChange={(e) => setNewOrder({...newOrder, subtotal: e.target.value})}
+                    onChange={(e) => {
+                        const subtotal = parseFloat(e.target.value) || 0;
+                        const taxRate = parseFloat(newOrder.taxRate) || 0;
+                        const tax = (subtotal * taxRate) / 100;
+                        const total = subtotal + tax;
+                        setNewOrder({
+                            ...newOrder, 
+                            subtotal: e.target.value,
+                            tax: tax.toFixed(2),
+                            total: total.toFixed(2)
+                        });
+                    }}
                 />
             </td>
             <td>
@@ -44,7 +60,18 @@ export default function OrderCreateRow({ newOrder, setNewOrder, onSave }: OrderC
                     className="w-full bg-transparent border-b border-border/50 outline-none pb-0.5 placeholder:text-text-muted/50" 
                     placeholder="0.00"
                     value={newOrder.taxRate}
-                    onChange={(e) => setNewOrder({...newOrder, taxRate: e.target.value})}
+                    onChange={(e) => {
+                        const taxRate = parseFloat(e.target.value) || 0;
+                        const subtotal = parseFloat(newOrder.subtotal) || 0;
+                        const tax = (subtotal * taxRate) / 100;
+                        const total = subtotal + tax;
+                        setNewOrder({
+                            ...newOrder, 
+                            taxRate: e.target.value,
+                            tax: tax.toFixed(2),
+                            total: total.toFixed(2)
+                        });
+                    }}
                 />
             </td>
             <td>
@@ -52,15 +79,15 @@ export default function OrderCreateRow({ newOrder, setNewOrder, onSave }: OrderC
                     className="w-full bg-transparent border-b border-border/50 outline-none pb-0.5 placeholder:text-text-muted/50" 
                     placeholder="0.00"
                     value={newOrder.tax}
-                    onChange={(e) => setNewOrder({...newOrder, tax: e.target.value})}
+                    readOnly
                 />
             </td>
             <td>
                 <input 
-                    className="w-full bg-transparent border-b border-border/50 outline-none pb-0.5 placeholder:text-text-muted/50" 
+                    className="w-full bg-transparent border-b border-border/50 outline-none pb-0.5 placeholder:text-text-muted/50 font-medium" 
                     placeholder="0.00"
                     value={newOrder.total}
-                    onChange={(e) => setNewOrder({...newOrder, total: e.target.value})}
+                    readOnly
                 />
             </td>
             <td>
@@ -92,4 +119,6 @@ export default function OrderCreateRow({ newOrder, setNewOrder, onSave }: OrderC
             </td>
         </tr>
     );
-}
+});
+
+export default OrderCreateRow;
