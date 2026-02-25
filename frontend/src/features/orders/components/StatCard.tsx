@@ -12,11 +12,11 @@ export default function StatCard({ title, value, deltaText, deltaNote, icon }: P
     return (
         <div className="rounded-xl border border-border bg-white p-3.5 shadow-sm">
             <div className="flex items-start justify-between">
-                <div className="grid size-9 place-items-center rounded-lg bg-black/5 text-black/70">
+                <div className="grid size-9 place-items-center rounded-xl bg-surface border border-border/50 text-black/70 shadow-xs">
                     {icon}
                 </div>
 
-                <div className="text-[11px] font-bold text-success uppercase">{deltaText}</div>
+                <div className="text-[11px] font-bold text-success uppercase bg-success/5 px-1.5 py-0.5 rounded-md border border-success/10">{deltaText}</div>
             </div>
 
             <div className="mt-3 text-xs font-medium text-black/60">{title}</div>

@@ -8,6 +8,7 @@ type Props = {
     icon: ReactNode;
     label: string;
     variant?: "default" | "danger";
+    collapsed?: boolean;
 };
 
 export default function SidebarNavItem({
@@ -16,26 +17,35 @@ export default function SidebarNavItem({
                                            icon,
                                            label,
                                            variant = "default",
+                                           collapsed = false,
                                        }: Props) {
     const base =
-        "flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition w-full text-left";
+        "flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition w-full text-left overflow-hidden";
 
     const danger = "text-danger hover:bg-danger/10";
+
+    const content = (
+        <>
+            <span className="grid size-5 shrink-0 place-items-center">{icon}</span>
+            {!collapsed && <span className="whitespace-nowrap">{label}</span>}
+        </>
+    );
 
     if (to) {
         return (
             <NavLink
                 to={to}
+                title={collapsed ? label : undefined}
                 className={({ isActive }) =>
                     cn(
                         base,
                         variant === "danger" ? danger : "text-black/70 ",
-                        isActive && variant !== "danger" && "bg-gradient-primary text-white shadow-sm"
+                        isActive && variant !== "danger" && "bg-gradient-primary text-white shadow-sm",
+                        collapsed && "px-3 justify-center"
                     )
                 }
             >
-                <span className="grid size-5 place-items-center">{icon}</span>
-                <span>{label}</span>
+                {content}
             </NavLink>
         );
     }
@@ -45,10 +55,10 @@ export default function SidebarNavItem({
             type="button"
             variant="ghost"
             onClick={onClick}
-            className={cn(base, variant === "danger" ? danger : "text-black/70", "justify-start")}
+            title={collapsed ? label : undefined}
+            className={cn(base, variant === "danger" ? danger : "text-black/70", "justify-start", collapsed && "px-3 justify-center")}
         >
-            <span className="grid size-5 place-items-center">{icon}</span>
-            <span>{label}</span>
+            {content}
         </Button>
     );
 }

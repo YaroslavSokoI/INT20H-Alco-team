@@ -9,10 +9,11 @@ function cn(...inputs: ClassValue[]) {
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'outline' | 'ghost';
   size?: 'sm' | 'md' | 'lg' | 'icon';
+  isLoading?: boolean;
 }
 
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant = 'primary', size = 'md', ...props }, ref) => {
+  ({ className, variant = 'primary', size = 'md', isLoading, children, ...props }, ref) => {
     const variants = {
       primary: 'bg-primary text-white hover:opacity-95',
       outline: 'border border-border bg-white hover:bg-black/5',
@@ -29,6 +30,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     return (
       <button
         ref={ref}
+        disabled={isLoading || props.disabled}
         className={cn(
           'inline-flex items-center justify-center transition-colors focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 font-medium',
           variants[variant],
@@ -37,7 +39,16 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
           className
         )}
         {...props}
-      />
+      >
+        {isLoading ? (
+          <div className="flex items-center gap-2">
+            <div className="size-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+            {children}
+          </div>
+        ) : (
+          children
+        )}
+      </button>
     );
   }
 );

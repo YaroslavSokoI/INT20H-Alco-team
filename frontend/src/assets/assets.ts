@@ -1,8 +1,5 @@
 import dashboard from './dashboard.svg';
 import logout from './logout.svg';
-import orders from './orders.svg';
-import reports from './reports.svg';
-import settings from './settings.svg';
 import cart from './cart.svg';
 import percent from './percent.svg';
 import dollar from './dollar.svg';
@@ -11,6 +8,11 @@ import arrowRight from './arrow-right.svg';
 import filterIcon from './filter.svg';
 import importIcon from './import.svg';
 import createIcon from './create.svg';
+import deleteIcon from './deleteIcon.svg'
+import editIcon from './editIcon.svg'
+import expandIcon from './expandIcon.svg'
+import userIcon from './user.svg'
+import searchIcon from './search.svg'
 
 
-export { dashboard, logout, orders, reports, settings, cart, percent, dollar, file, arrowRight, filterIcon, importIcon, createIcon };
+export { dashboard, logout, cart, percent, dollar, file, arrowRight, filterIcon, importIcon, createIcon, editIcon, deleteIcon, expandIcon, userIcon, searchIcon };

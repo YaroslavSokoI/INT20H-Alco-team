@@ -9,8 +9,11 @@ export type StatCardDTO = {
 export type OrderRow = {
     id: string;
     date: string;
-    location: string;
+    jurisdiction: string;
     subtotal: number;
-    vat: number;
+    taxRate: number;
+    tax: number;
     total: number;
+    longitude: number;
+    latitude: number;
 };

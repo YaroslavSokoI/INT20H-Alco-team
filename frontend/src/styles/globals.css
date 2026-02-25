@@ -12,7 +12,7 @@
     --color-white: #ffffff;
 
     /* Primary */
-    --color-primary: #4399EF;
+    --color-primary: #60BD6F;
     --color-primary-hover: #0146db;
 
     /* Success */
@@ -42,8 +42,8 @@
 
     --gradient-primary: linear-gradient(
             120deg,
-            #0151FF 0%,
-            #27CBEB 100%
+            #60BD6F 0%,
+            #27ee4b 100%
     );
 }
 
