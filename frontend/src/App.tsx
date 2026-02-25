@@ -1,11 +1,9 @@
-import {} from "@/lib/test"
+import AppShell from "@/components/layout/AppShell.tsx";
 
-function App() {
-
+export default function App() {
   return (
-    <>
-    </>
-  )
+      <div className="min-h-screen bg-surface text-text">
+        <AppShell/>
+      </div>
+  );
 }
-
-export default App

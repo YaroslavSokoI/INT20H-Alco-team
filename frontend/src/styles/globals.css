@@ -1,1 +1,52 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&display=swap');
 @import "tailwindcss";
+
+:root {
+    font-family: 'Manrope', sans-serif;
+    background-color: var(--color-surface);
+}
+
+@theme {
+    /* Base */
+    --color-black: #000000;
+    --color-white: #ffffff;
+
+    /* Primary */
+    --color-primary: #4399EF;
+    --color-primary-hover: #0146db;
+
+    /* Success */
+    --color-success: #16a04d;
+
+    /* Danger */
+    --color-danger: #ff0606;
+
+    /* Surface */
+    --color-surface: #f5f6fa;
+
+    /* Text */
+    --color-text: #000000;
+    --color-text-muted: rgba(0, 0, 0, 0.70);
+    --color-text-soft: rgba(0, 0, 0, 0.60);
+
+    /* Borders */
+    --color-border: rgba(0, 0, 0, 0.10);
+    --color-border-light: rgba(0, 0, 0, 0.05);
+    --color-border-subtle: rgba(0, 0, 0, 0.03);
+
+    /* Overlays */
+    --color-overlay: rgba(0, 0, 0, 0.40);
+    --color-overlay-strong: rgba(0, 0, 0, 0.80);
+
+    /* Disabled */
+
+    --gradient-primary: linear-gradient(
+            120deg,
+            #0151FF 0%,
+            #27CBEB 100%
+    );
+}
+
+@utility bg-gradient-primary {
+    background: var(--gradient-primary);
+}
