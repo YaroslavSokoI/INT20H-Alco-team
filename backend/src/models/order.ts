@@ -15,6 +15,7 @@ export interface Jurisdiction {
 
 export interface Order {
   id: number;
+  uuid: string;
   latitude: number;
   longitude: number;
   subtotal: number;
@@ -39,6 +40,7 @@ export interface CreateOrderDto {
 
 export interface OrderRow {
   id: number;
+  uuid: string;
   latitude: number;
   longitude: number;
   subtotal: number;

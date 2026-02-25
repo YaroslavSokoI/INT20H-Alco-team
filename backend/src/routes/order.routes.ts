@@ -126,6 +126,11 @@ router.post('/import', requireAuth, csvUploadMiddleware, importOrders);
  *               properties:
  *                 id:
  *                   type: number
+ *                   description: Internal DB serial ID
+ *                 uuid:
+ *                   type: string
+ *                   format: uuid
+ *                   description: External unique identifier
  *                 subtotal:
  *                   type: number
  *                 taxAmount:
@@ -198,10 +203,48 @@ router.post('/', requireAuth, validateBody(createOrderSchema), createOrderHandle
  *                     properties:
  *                       id:
  *                         type: number
+ *                         description: Internal DB serial ID
+ *                       uuid:
+ *                         type: string
+ *                         format: uuid
+ *                         description: External unique identifier
+ *                       latitude:
+ *                         type: number
+ *                       longitude:
+ *                         type: number
+ *                       subtotal:
+ *                         type: number
+ *                       timestamp:
+ *                         type: string
+ *                         format: date-time
+ *                       compositeTaxRate:
+ *                         type: number
+ *                       taxAmount:
+ *                         type: number
  *                       totalAmount:
+ *                         type: number
+ *                       stateRate:
+ *                         type: number
+ *                       countyRate:
+ *                         type: number
+ *                       cityRate:
+ *                         type: number
+ *                       specialRates:
  *                         type: number
  *                       jurisdictions:
  *                         type: object
+ *                         properties:
+ *                           postcode:
+ *                             type: string
+ *                           city:
+ *                             type: string
+ *                           county:
+ *                             type: string
+ *                           state:
+ *                             type: string
+ *                       createdAt:
+ *                         type: string
+ *                         format: date-time
  *                 total:
  *                   type: number
  *                 page:

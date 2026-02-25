@@ -12,6 +12,7 @@ import type {
 function rowToOrder(row: OrderRow): Order {
   return {
     id: row.id,
+    uuid: row.uuid,
     latitude: typeof row.latitude === 'string' ? parseFloat(row.latitude) : row.latitude,
     longitude: typeof row.longitude === 'string' ? parseFloat(row.longitude) : row.longitude,
     subtotal: typeof row.subtotal === 'string' ? parseFloat(row.subtotal) : row.subtotal,

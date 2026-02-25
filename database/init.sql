@@ -4,6 +4,7 @@ CREATE DATABASE wellness_orders;
 
 CREATE TABLE orders (
     id SERIAL PRIMARY KEY,
+    uuid UUID NOT NULL DEFAULT gen_random_uuid () UNIQUE,
     latitude DECIMAL(10, 7) NOT NULL,
     longitude DECIMAL(10, 7) NOT NULL,
     subtotal DECIMAL(12, 4) NOT NULL,
