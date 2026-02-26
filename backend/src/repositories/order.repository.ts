@@ -127,10 +127,18 @@ export async function getOrderStats(): Promise<{
   totalSales: number; 
   totalTax: number; 
 }> {
-  const [stats] = await db('orders')
+  // Knex aggregate return types are driver-dependent (often strings), and the
+  // typings can be too generic. Normalize everything to numbers.
+  type RawStatsRow = {
+    totalOrders: string | number | null;
+    totalSales: string | number | null;
+    totalTax: string | number | null;
+  };
+
+  const [stats] = (await db('orders')
     .sum('total_amount as totalSales')
     .sum('tax_amount as totalTax')
-    .count('id as totalOrders');
+    .count('id as totalOrders')) as unknown as RawStatsRow[];
 
   return {
     totalOrders: Number(stats.totalOrders || 0),
