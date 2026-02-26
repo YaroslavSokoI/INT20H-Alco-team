@@ -1,5 +1,5 @@
 import { createColumnHelper } from "@tanstack/react-table";
-import type { OrderRow } from "@/features/orders/types.ts";
+import type { OrderRow } from "@/types/order.ts";
 import { editIcon, deleteIcon, expandIcon } from "@/assets/assets";
 import { formatCurrency, formatPercent } from "@/lib/formatters";
 

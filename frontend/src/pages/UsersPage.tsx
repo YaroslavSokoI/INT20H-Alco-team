@@ -4,11 +4,14 @@ import { useAuthStore } from "@/store/authStore";
 import UserModal from "./UserModal";
 import { createIcon } from "@/assets/assets.ts";
 import { Skeleton } from "@/components/ui/Skeleton";
+import type {User} from "@/types/user";
 
 export default function UsersPage() {
-    const { users, fetchUsers } = useAuthStore();
+    const { user, users, fetchUsers } = useAuthStore();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
+
+    const isAdmin = user?.role === 'admin';
 
     useEffect(() => {
         const loadUsers = async () => {
@@ -28,14 +31,16 @@ export default function UsersPage() {
                         Manage system users and their roles
                     </p>
                 </div>
-                <Button 
-                    onClick={() => setIsModalOpen(true)} 
-                    className="flex items-center gap-2 font-semibold shadow-sm"
-                    size="md"
-                >
-                    <img src={createIcon} alt="" className="size-3.5 brightness-0 invert" />
-                    Create User
-                </Button>
+                {isAdmin && (
+                    <Button 
+                        onClick={() => setIsModalOpen(true)} 
+                        className="flex items-center gap-2 font-semibold shadow-sm"
+                        size="md"
+                    >
+                        <img src={createIcon} alt="" className="size-3.5 brightness-0 invert" />
+                        Create User
+                    </Button>
+                )}
             </div>
 
             <div className="overflow-hidden rounded-xl border border-border bg-white">
@@ -58,7 +63,7 @@ export default function UsersPage() {
                                     </tr>
                                 ))
                             ) : (
-                                users.map((user) => (
+                                users.map((user: User) => (
                                     <tr key={user.id} className="border-t border-border hover:bg-black/[0.01] [&>td]:px-5 [&>td]:py-3">
                                         <td className="font-medium">{user.name}</td>
                                         <td>

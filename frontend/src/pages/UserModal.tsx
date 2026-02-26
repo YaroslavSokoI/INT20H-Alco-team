@@ -1,6 +1,7 @@
 import { type FormEvent, useState } from "react";
 import { Button } from "@/components/ui/Button";
-import { useAuthStore, type UserRole } from "@/store/authStore";
+import { useAuthStore } from "@/store/authStore";
+import type {UserRole} from "@/types/user";
 
 interface UserModalProps {
   isOpen: boolean;

@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { orders as mockOrders } from "@/features/orders/mock";
-import type { OrderRow } from "@/features/orders/types";
+import type { OrderRow } from "@/types/order";
 import { ordersApi } from "@/api/orders";
 
 interface OrderState {
