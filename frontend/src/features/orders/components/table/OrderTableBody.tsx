@@ -2,7 +2,7 @@ import { Skeleton } from "@/components/ui/Skeleton";
 import OrderCreateRow from "./OrderCreateRow";
 import OrderEditRow from "./OrderEditRow";
 import { flexRender, type Table } from "@tanstack/react-table";
-import type { OrderRow } from "../../types";
+import type { OrderRow } from "@/types/order.ts";
 import { memo } from "react";
 
 interface OrderTableBodyProps {

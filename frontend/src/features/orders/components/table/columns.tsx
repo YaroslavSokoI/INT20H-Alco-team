@@ -12,14 +12,21 @@ export const getOrderColumns = (
 ) => [
     columnHelper.accessor("uuid", {
         header: "Order UUID",
-        cell: info => <span className="font-semibold text-primary text-xs">{info.getValue().substring(0, 8)}...</span>,
+        cell: info => {
+            const val = info.getValue();
+            return <span className="font-semibold text-primary text-xs">{val ? `${val.substring(0, 8)}...` : 'N/A'}</span>;
+        },
     }),
     columnHelper.accessor("timestamp", {
         header: "Order Date",
-        cell: info => new Date(info.getValue()).toLocaleDateString(),
+        cell: info => {
+            const val = info.getValue();
+            return val ? new Date(val).toLocaleDateString() : 'N/A';
+        },
     }),
     columnHelper.accessor("jurisdictions.city", {
         header: "City",
+        cell: info => info.getValue() || 'N/A',
     }),
     columnHelper.accessor("subtotal", {
         header: "Subtotal",

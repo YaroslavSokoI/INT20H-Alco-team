@@ -19,20 +19,20 @@ const OrderDetailModal = memo(({ order, onClose }: OrderDetailModalProps) => {
     if (!order) return null;
 
     const details = [
-        { label: "Order UUID", value: order.uuid, icon: "🆔", highlight: true },
-        { label: "Order Date", value: new Date(order.timestamp).toLocaleString(), icon: "📅" },
-        { label: "City", value: order.jurisdictions.city, icon: "📍" },
-        { label: "County", value: order.jurisdictions.county, icon: "📍" },
-        { label: "State", value: order.jurisdictions.state, icon: "🇺🇸" },
-        { label: "Postcode", value: order.jurisdictions.postcode, icon: "📮" },
+        { label: "Order UUID", value: order.uuid || "N/A", icon: "🆔", highlight: true },
+        { label: "Order Date", value: order.timestamp ? new Date(order.timestamp).toLocaleString() : "N/A", icon: "📅" },
+        { label: "City", value: order.jurisdictions?.city || "N/A", icon: "📍" },
+        { label: "County", value: order.jurisdictions?.county || "N/A", icon: "📍" },
+        { label: "State", value: order.jurisdictions?.state || "N/A", icon: "🇺🇸" },
+        { label: "Postcode", value: order.jurisdictions?.postcode || "N/A", icon: "📮" },
         { label: "Subtotal", value: formatCurrency(order.subtotal), icon: "💰" },
-        { label: "Tax Rate", value: formatPercent(order.compositeTaxRate * 100), icon: "📊" },
+        { label: "Tax Rate", value: formatPercent((order.compositeTaxRate || 0) * 100), icon: "📊" },
         { label: "Tax Amount", value: formatCurrency(order.taxAmount), icon: "💸" },
         { label: "Total Amount", value: formatCurrency(order.totalAmount), highlight: true, icon: "🧾" },
-        { label: "State Rate", value: formatPercent(order.stateRate * 100), icon: "📈" },
-        { label: "County Rate", value: formatPercent(order.countyRate * 100), icon: "📉" },
-        { label: "City Rate", value: formatPercent(order.cityRate * 100), icon: "📉" },
-        { label: "Special Rates", value: formatPercent(order.specialRates * 100), icon: "📉" },
+        { label: "State Rate", value: formatPercent((order.stateRate || 0) * 100), icon: "📈" },
+        { label: "County Rate", value: formatPercent((order.countyRate || 0) * 100), icon: "📉" },
+        { label: "City Rate", value: formatPercent((order.cityRate || 0) * 100), icon: "📉" },
+        { label: "Special Rates", value: formatPercent((order.specialRates || 0) * 100), icon: "📉" },
     ];
 
     return (
