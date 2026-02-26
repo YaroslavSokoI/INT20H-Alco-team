@@ -1,5 +1,5 @@
 import type { Request, Response, NextFunction } from 'express';
-import { createUser, getUsers, deleteUser } from '../services/user.service';
+import { createUser, getUsers, deleteUser, updateSelf } from '../services/user.service';
 import { createError } from '../middleware/errorHandler';
 import type { JwtPayload } from '../models/auth';
 
@@ -24,6 +24,23 @@ export async function createUserHandler(
   try {
     const user = await createUser(req.body);
     res.status(201).json(user);
+  } catch (err) {
+    if (err instanceof Error && err.message === 'User with this login already exists') {
+      return next(createError(err.message, 409));
+    }
+    next(err);
+  }
+}
+
+export async function updateSelfHandler(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const currentUser = res.locals.user as JwtPayload;
+    const updated = await updateSelf(currentUser.id, req.body);
+    res.status(200).json(updated);
   } catch (err) {
     if (err instanceof Error && err.message === 'User with this login already exists') {
       return next(createError(err.message, 409));

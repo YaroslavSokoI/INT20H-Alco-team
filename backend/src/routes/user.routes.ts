@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { z } from 'zod';
-import { getUsersHandler, createUserHandler, deleteUserHandler } from '../controllers/user.controller';
+import { getUsersHandler, createUserHandler, deleteUserHandler, updateSelfHandler } from '../controllers/user.controller';
 import { requireAuth, requireRole } from '../middleware/auth.middleware';
 import { validateBody } from '../middleware/validate';
 
@@ -10,6 +10,13 @@ const createUserSchema = z.object({
   login: z.string().min(1),
   password: z.string().min(6),
   role: z.enum(['admin', 'manager']),
+});
+
+const updateSelfSchema = z.object({
+  login: z.string().min(1).optional(),
+  password: z.string().min(6).optional(),
+}).refine((data) => data.login !== undefined || data.password !== undefined, {
+  message: 'At least one field (login or password) must be provided',
 });
 
 /**
@@ -96,5 +103,40 @@ router.post('/', requireAuth, requireRole('admin'), validateBody(createUserSchem
  *         description: User not found
  */
 router.delete('/:id', requireAuth, requireRole('admin'), deleteUserHandler);
+
+/**
+ * @swagger
+ * /users/me:
+ *   patch:
+ *     summary: Update own login or password
+ *     description: Any authenticated user can update their own login and/or password.
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               login:
+ *                 type: string
+ *                 example: new_login
+ *               password:
+ *                 type: string
+ *                 minLength: 6
+ *                 example: newpass123
+ *     responses:
+ *       200:
+ *         description: Updated user (without password)
+ *       400:
+ *         description: No fields provided
+ *       401:
+ *         description: Unauthorized
+ *       409:
+ *         description: Login already taken
+ */
+router.patch('/me', requireAuth, validateBody(updateSelfSchema), updateSelfHandler);
 
 export default router;

@@ -20,3 +20,8 @@ export interface UserPublic {
   role: UserRole;
   created_at: Date;
 }
+
+export interface UpdateSelfDto {
+  login?: string;
+  password?: string;
+}

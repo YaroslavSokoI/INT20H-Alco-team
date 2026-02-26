@@ -1,6 +1,14 @@
 import { db } from './db';
 import type { User, UserPublic, CreateUserDto } from '../models/user';
 
+export async function updateById(id: number, fields: Partial<{ login: string; password: string }>): Promise<UserPublic> {
+  const [row] = await db('users')
+    .where({ id })
+    .update(fields)
+    .returning(['id', 'login', 'role', 'created_at']);
+  return row;
+}
+
 export async function findByLogin(login: string): Promise<User | undefined> {
   return db('users').where({ login }).first();
 }
