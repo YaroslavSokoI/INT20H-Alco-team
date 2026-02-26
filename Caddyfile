@@ -1,4 +1,4 @@
-:80 {
+alco-team.ddns.net {
     handle_path /api/* {
         rewrite * {path}
         reverse_proxy tax_backend:3000
