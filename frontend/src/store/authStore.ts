@@ -11,64 +11,39 @@ export interface User {
 
 interface AuthState {
   user: User | null;
-  users: User[];
   isAuthenticated: boolean;
-  login: (name: string, role: UserRole) => Promise<void>;
+  token: string | null;
+  login: (login: string, password: string) => Promise<void>;
   logout: () => void;
-  createUser: (userData: Omit<User, "id"> & { password?: string }) => Promise<void>;
-  fetchUsers: () => Promise<void>;
 }
 
-export const useAuthStore = create<AuthState>((set) => ({
-  user: { id: "1", name: "Admin User", role: "admin" }, // Mocked initial user for dev
-  users: [
-    { id: "1", name: "Admin User", role: "admin" },
-    { id: "2", name: "Manager One", role: "manager" },
-  ],
-  isAuthenticated: true,
+export const useAuthStore = create<AuthState>((set) => {
+  const token = localStorage.getItem('token');
+  
+  return {
+    user: token ? { id: "self", name: "admin", role: "admin" } : null,
+    isAuthenticated: !!token,
+    token,
 
-  login: async (name, role) => {
-    try {
-      // Приклад використання:
-      // const user = await authApi.login(name, role);
-      console.log("Auth API available:", !!authApi);
-      
-      set({ user: { id: "1", name, role }, isAuthenticated: true });
-    } catch (error) {
-      console.error("Login failed:", error);
-    }
-  },
+    login: async (loginName, password) => {
+      try {
+        const { token } = await authApi.login(loginName, password);
+        localStorage.setItem('token', token);
+        set({
+          token,
+          isAuthenticated: true,
+          // Тимчасово встановлюємо мінімального користувача для UI
+          user: { id: "self", name: loginName, role: "admin" },
+        });
+      } catch (error) {
+        console.error("Login failed:", error);
+        throw error;
+      }
+    },
 
-  logout: () => {
-    set({ user: null, isAuthenticated: false });
-    localStorage.removeItem('token');
-  },
-
-  createUser: async (userData) => {
-    try {
-      // const newUser = await authApi.createUser(userData);
-      // set((state) => ({ users: [...state.users, newUser] }));
-
-      // Mock implementation
-      const newUser: User = {
-        ...userData,
-        id: Math.random().toString(36).substr(2, 9),
-      };
-      set((state) => ({ users: [...state.users, newUser] }));
-    } catch (error) {
-      console.error("Failed to create user:", error);
-    }
-  },
-
-  fetchUsers: async () => {
-    try {
-      // const users = await authApi.getUsers();
-      // set({ users });
-
-      // Емуляція затримки для демонстрації скелетонів
-      await new Promise((resolve) => setTimeout(resolve, 600));
-    } catch (error) {
-      console.error("Failed to fetch users:", error);
-    }
-  },
-}));
+    logout: () => {
+      localStorage.removeItem('token');
+      set({ user: null, isAuthenticated: false, token: null });
+    },
+  };
+});
