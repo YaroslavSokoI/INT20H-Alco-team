@@ -14,11 +14,19 @@ export default function UserModal({ isOpen, onClose }: UserModalProps) {
   const [password, setPassword] = useState("");
   const [role, setRole] = useState<UserRole>("manager");
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   if (!isOpen) return null;
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    setError(null);
+
+    if (password.length < 6) {
+      setError("Пароль має бути не менше 6 символів");
+      return;
+    }
+
     setIsLoading(true);
     try {
       await createUser({ login, role, password });
@@ -26,8 +34,10 @@ export default function UserModal({ isOpen, onClose }: UserModalProps) {
       setLogin("");
       setPassword("");
       setRole("manager");
-    } catch (error) {
-      console.error("Failed to create user", error);
+    } catch (err: any) {
+      const message = err.response?.data?.error || err.response?.data?.message || "Не вдалося створити користувача";
+      setError(message);
+      console.error("Failed to create user", err);
     } finally {
       setIsLoading(false);
     }
@@ -38,6 +48,11 @@ export default function UserModal({ isOpen, onClose }: UserModalProps) {
       <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl">
         <h2 className="text-xl font-bold mb-4">Create New User</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
+          {error && (
+            <div className="p-3 text-sm text-danger bg-danger/10 rounded-lg">
+              {error}
+            </div>
+          )}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Login
