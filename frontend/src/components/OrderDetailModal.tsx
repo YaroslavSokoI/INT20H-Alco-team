@@ -3,7 +3,7 @@ import type { OrderRow } from "@/types/order";
 import { Button } from "./ui/Button";
 import { useKeydown } from "@/hooks/useKeydown";
 import { useClickOutside } from "@/hooks/useClickOutside";
-import { formatCurrency, formatPercent } from "@/lib/formatters";
+import {formatCurrency, formatDate, formatPercent} from "@/lib/formatters";
 
 interface OrderDetailModalProps {
     order: OrderRow | null;
@@ -20,7 +20,7 @@ const OrderDetailModal = memo(({ order, onClose }: OrderDetailModalProps) => {
 
     const details = [
         { label: "Order ID", value: String(order.id), highlight: true },
-        { label: "Order Date", value: order.timestamp ? new Date(order.timestamp).toLocaleString() : "N/A" },
+        { label: "Order Date", value: order.timestamp ? formatDate(order.timestamp) : "N/A" },
         { label: "City", value: order.jurisdictions?.city || "N/A" },
         { label: "County", value: order.jurisdictions?.county || "N/A" },
         { label: "State", value: order.jurisdictions?.state || "N/A" },
