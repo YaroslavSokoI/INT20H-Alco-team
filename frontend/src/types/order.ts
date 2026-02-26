@@ -1,3 +1,5 @@
+import React from "react";
+
 export type StatCardDTO = {
     title: string;
     value: string;

@@ -1,5 +1,5 @@
 import { useRef, memo } from "react";
-import type { OrderRow } from "../features/orders/types";
+import type { OrderRow } from "@/types/order";
 import { Button } from "./ui/Button";
 import { useKeydown } from "@/hooks/useKeydown";
 import { useClickOutside } from "@/hooks/useClickOutside";

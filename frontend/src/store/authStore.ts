@@ -1,20 +1,16 @@
 import { create } from "zustand";
 import { authApi } from "@/api/auth";
-
-export type UserRole = "admin" | "manager";
-
-export interface User {
-  id: string;
-  name: string;
-  role: UserRole;
-}
+import { User } from "@/types/user";
 
 interface AuthState {
   user: User | null;
+  users: User[];
   isAuthenticated: boolean;
   token: string | null;
   login: (login: string, password: string) => Promise<void>;
   logout: () => void;
+  fetchUsers: () => Promise<void>;
+  createUser: (userData: any) => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>((set) => {
@@ -22,6 +18,7 @@ export const useAuthStore = create<AuthState>((set) => {
   
   return {
     user: token ? { id: "self", name: "admin", role: "admin" } : null,
+    users: [],
     isAuthenticated: !!token,
     token,
 
@@ -43,7 +40,27 @@ export const useAuthStore = create<AuthState>((set) => {
 
     logout: () => {
       localStorage.removeItem('token');
-      set({ user: null, isAuthenticated: false, token: null });
+      set({ user: null, isAuthenticated: false, token: null, users: [] });
     },
+
+    fetchUsers: async () => {
+      // Тимчасово для тестування, якщо API ще не готове
+      const mockUsers: User[] = [
+        { id: "1", name: "Admin User", role: "admin" },
+        { id: "2", name: "Manager User", role: "manager" },
+      ];
+      set({ users: mockUsers });
+    },
+
+    createUser: async (userData) => {
+      // Тимчасово для тестування
+      console.log("Creating user:", userData);
+      const newUser: User = {
+        id: Math.random().toString(36).substr(2, 9),
+        name: userData.name,
+        role: userData.role,
+      };
+      set((state) => ({ users: [...state.users, newUser] }));
+    }
   };
 });

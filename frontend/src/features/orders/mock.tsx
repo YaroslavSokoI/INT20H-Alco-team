@@ -1,4 +1,4 @@
-import type { OrderRow, StatCardDTO } from "./types";
+import type { OrderRow, StatCardDTO } from "@/types/order";
 import {cart, percent, dollar, file} from "@/assets/assets.ts"
 import { formatDate } from "@/lib/formatters";
 

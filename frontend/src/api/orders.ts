@@ -1,5 +1,5 @@
 import apiClient from './client';
-import type { OrderRow } from '@/features/orders/types';
+import type { OrderRow } from '@/types/order';
 
 export interface PaginatedOrders {
   orders: OrderRow[];
