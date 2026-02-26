@@ -63,10 +63,10 @@ export const getOrderColumns = (
                 <div className={`flex items-center gap-3 ${isPending ? "justify-start -ml-16" : "justify-end"}`}>
                     {!isPending && (
                         <>
-                            <button onClick={() => onExpand(info.row.original)} className="text-xs font-semibold text-primary underline underline-offset-2 hover:opacity-70 transition-opacity cursor-pointer">
+                            <button onClick={() => onExpand(info.row.original)} className="text-xs font-semibold text-primary hover:opacity-70 transition-opacity cursor-pointer">
                                 expand
                             </button>
-                            <button onClick={() => onEdit(info.row.original)} className="text-xs font-semibold text-yellow-500 underline underline-offset-2 hover:opacity-70 transition-opacity cursor-pointer">
+                            <button onClick={() => onEdit(info.row.original)} className="text-xs font-semibold text-yellow-500 hover:opacity-70 transition-opacity cursor-pointer">
                                 edit
                             </button>
                         </>
@@ -74,15 +74,15 @@ export const getOrderColumns = (
                     {isPending ? (
                         <span className="flex items-center gap-3 w-full justify-start">
                             <span className="text-xs text-text-muted">Are you sure?</span>
-                            <button onClick={onDeleteConfirm} className="text-xs font-semibold text-red-500 underline underline-offset-2 hover:opacity-70 transition-opacity cursor-pointer">
+                            <button onClick={onDeleteConfirm} className="text-xs font-semibold text-red-500 hover:opacity-70 transition-opacity cursor-pointer">
                                 Yes
                             </button>
-                            <button onClick={onDeleteCancel} className="text-xs font-semibold text-text-muted underline underline-offset-2 hover:opacity-70 transition-opacity cursor-pointer">
+                            <button onClick={onDeleteCancel} className="text-xs font-semibold text-text-muted hover:opacity-70 transition-opacity cursor-pointer">
                                 No
                             </button>
                         </span>
                     ) : (
-                        <button onClick={() => onDelete(id)} className="text-xs font-semibold text-red-500 underline underline-offset-2 hover:opacity-70 transition-opacity cursor-pointer">
+                        <button onClick={() => onDelete(id)} className="text-xs font-semibold text-red-500 hover:opacity-70 transition-opacity cursor-pointer">
                             delete
                         </button>
                     )}

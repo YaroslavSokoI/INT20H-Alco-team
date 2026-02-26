@@ -15,6 +15,7 @@ import userIcon from './user.svg'
 import searchIcon from './search.svg'
 import refreshIcon from './refresh.svg'
 import createOrderIcon from './create-order.svg'
+import cardFilter from './cardFilter.svg'
 
 
-export { dashboard, logout, cart, percent, dollar, file, arrowRight, filterIcon, importIcon, createIcon, editIcon, deleteIcon, expandIcon, userIcon, searchIcon, refreshIcon, createOrderIcon };
+export { dashboard, logout, cart, percent, dollar, file, arrowRight, filterIcon, importIcon, createIcon, editIcon, deleteIcon, expandIcon, userIcon, searchIcon, refreshIcon, createOrderIcon, cardFilter };
