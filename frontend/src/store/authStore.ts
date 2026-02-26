@@ -14,11 +14,31 @@ interface AuthState {
   createUser: (userData: any) => Promise<void>;
 }
 
+const parseToken = (token: string): User | null => {
+  try {
+    const base64Url = token.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+      return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+    }).join(''));
+    const payload = JSON.parse(jsonPayload);
+    return {
+      id: payload.id.toString(),
+      login: payload.login,
+      role: payload.role
+    };
+  } catch (e) {
+    console.error("Failed to parse token", e);
+    return null;
+  }
+};
+
 export const useAuthStore = create<AuthState>((set) => {
   const token = localStorage.getItem('token');
+  const user = token ? parseToken(token) : null;
   
   return {
-    user: token ? { id: "self", login: "admin", role: "admin" } : null,
+    user,
     users: [],
     isAuthenticated: !!token,
     token,
@@ -27,11 +47,11 @@ export const useAuthStore = create<AuthState>((set) => {
       try {
         const { token } = await authApi.login(loginName, password);
         localStorage.setItem('token', token);
+        const user = parseToken(token);
         set({
           token,
           isAuthenticated: true,
-          // Тимчасово встановлюємо мінімального користувача для UI
-          user: { id: "self", login: loginName, role: "admin" },
+          user,
         });
       } catch (error) {
         console.error("Login failed:", error);
