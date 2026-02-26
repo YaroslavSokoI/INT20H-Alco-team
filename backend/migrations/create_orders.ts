@@ -25,13 +25,13 @@ export async function up(knex: Knex): Promise<void> {
   });
 
   await knex.raw(`
-    CREATE INDEX idx_orders_county ON orders ((jurisdictions->>'county'));
+    CREATE INDEX IF NOT EXISTS idx_orders_county ON orders ((jurisdictions->>'county'));
   `);
   await knex.raw(`
-    CREATE INDEX idx_orders_city ON orders ((jurisdictions->>'city'));
+    CREATE INDEX IF NOT EXISTS idx_orders_city ON orders ((jurisdictions->>'city'));
   `);
   await knex.raw(`
-    CREATE INDEX idx_orders_timestamp ON orders (timestamp);
+    CREATE INDEX IF NOT EXISTS idx_orders_timestamp ON orders (timestamp);
   `);
 }
 
