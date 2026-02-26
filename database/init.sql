@@ -1,10 +1,15 @@
-CREATE DATABASE wellness_orders;
-
-\c wellness_orders;
-
-CREATE TABLE orders (
+-- Users table
+CREATE TABLE IF NOT EXISTS users (
     id SERIAL PRIMARY KEY,
-    uuid UUID NOT NULL DEFAULT gen_random_uuid () UNIQUE,
+    login VARCHAR(100) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    role VARCHAR(10) NOT NULL CHECK (role IN ('admin', 'manager')),
+    created_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+-- Orders table
+CREATE TABLE IF NOT EXISTS orders (
+    id SERIAL PRIMARY KEY,
     latitude DECIMAL(10, 7) NOT NULL,
     longitude DECIMAL(10, 7) NOT NULL,
     subtotal DECIMAL(12, 4) NOT NULL,
@@ -20,8 +25,8 @@ CREATE TABLE orders (
     created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX idx_orders_state ON orders ((jurisdictions ->> 'state'));
+CREATE INDEX IF NOT EXISTS idx_orders_state ON orders ((jurisdictions ->> 'state'));
 
-CREATE INDEX idx_orders_city ON orders ((jurisdictions ->> 'city'));
+CREATE INDEX IF NOT EXISTS idx_orders_city ON orders ((jurisdictions ->> 'city'));
 
-CREATE INDEX idx_orders_timestamp ON orders (timestamp);
+CREATE INDEX IF NOT EXISTS idx_orders_timestamp ON orders (timestamp);
