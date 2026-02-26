@@ -1,6 +1,6 @@
 alco-team.ddns.net {
     handle {
-        reverse_proxy tax_frontend:5173
+        reverse_proxy tax_frontend:80
     }
     
     handle_path /api/* {
