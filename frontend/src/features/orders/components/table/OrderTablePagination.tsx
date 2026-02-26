@@ -51,7 +51,7 @@ const OrderTablePagination = memo(({
     const endRange = Math.min(currentPage * pageSize, totalOrders);
 
     const pageNumbers = useMemo(() => {
-        const pages = [];
+        const pages: (number | string)[] = [];
         const delta = 1; // Кількість сторінок навколо поточної
 
         for (let i = 1; i <= totalPages; i++) {

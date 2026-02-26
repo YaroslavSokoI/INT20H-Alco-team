@@ -4,6 +4,7 @@ import {
   insertOrder,
   insertOrdersBatch,
   findOrders,
+  getOrderStats as getStatsFromRepo,
 } from '../repositories/order.repository';
 import pLimit from 'p-limit';
 import type {
@@ -104,4 +105,8 @@ export async function importOrdersFromCsv(filePath: string): Promise<ImportResul
 
 export async function listOrders(query: OrderListQuery): Promise<PaginatedOrders> {
   return findOrders(query);
+}
+
+export async function getOrderStats() {
+  return getStatsFromRepo();
 }

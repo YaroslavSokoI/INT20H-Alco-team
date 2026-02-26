@@ -5,6 +5,7 @@ import {
   createOrderHandler,
   getOrders,
   csvUploadMiddleware,
+  getStatsHandler,
 } from '../controllers/order.controller';
 import { validateBody, validateQuery } from '../middleware/validate';
 import { requireAuth } from '../middleware/auth.middleware';
@@ -86,6 +87,34 @@ const listOrdersSchema = z.object({
  *         description: Unauthorized.
  */
 router.post('/import', requireAuth, csvUploadMiddleware, importOrders);
+
+/**
+ * @swagger
+ * /orders/stats:
+ *   get:
+ *     summary: Get aggregated order statistics
+ *     description: Returns total orders count, total sales and total collected tax.
+ *     tags: [Orders]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Aggregated stats.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 totalOrders:
+ *                   type: number
+ *                 totalSales:
+ *                   type: number
+ *                 totalTax:
+ *                   type: number
+ *       401:
+ *         description: Unauthorized.
+ */
+router.get('/stats', requireAuth, getStatsHandler);
 
 /**
  * @swagger

@@ -8,7 +8,7 @@ const columnHelper = createColumnHelper<OrderRow>();
 export const getOrderColumns = (
     onExpand: (order: OrderRow) => void,
     onEdit: (order: OrderRow) => void,
-    onDelete: (id: string) => void
+    onDelete: (id: number | string) => void
 ) => [
     columnHelper.accessor("uuid", {
         header: "Order UUID",

@@ -121,3 +121,20 @@ export async function findOrders(query: OrderListQuery): Promise<PaginatedOrders
     totalPages: Math.ceil(total / limit),
   };
 }
+
+export async function getOrderStats(): Promise<{ 
+  totalOrders: number; 
+  totalSales: number; 
+  totalTax: number; 
+}> {
+  const [stats] = await db('orders')
+    .sum('total_amount as totalSales')
+    .sum('tax_amount as totalTax')
+    .count('id as totalOrders');
+
+  return {
+    totalOrders: Number(stats.totalOrders || 0),
+    totalSales: Number(stats.totalSales || 0),
+    totalTax: Number(stats.totalTax || 0),
+  };
+}

@@ -2,12 +2,19 @@ import { create } from "zustand";
 import type { OrderRow } from "@/types/order";
 import { ordersApi } from "@/api/orders";
 
+interface OrderStatsState {
+    totalOrders: number;
+    totalSales: number;
+    totalTax: number;
+}
+
 interface OrderState {
     orders: OrderRow[];
     isLoading: boolean;
     currentPage: number;
     pageSize: number;
     totalOrders: number;
+    stats: OrderStatsState;
     searchQuery: string;
     filters: {
         dateRange?: { from: string; to: string };
@@ -30,6 +37,7 @@ export const useOrderStore = create<OrderState>((set, get) => ({
     currentPage: 1,
     pageSize: 10,
     totalOrders: 0,
+    stats: { totalOrders: 0, totalSales: 0, totalTax: 0 },
     searchQuery: "",
     filters: {},
     fetchOrders: async (page) => {
@@ -37,15 +45,13 @@ export const useOrderStore = create<OrderState>((set, get) => ({
         set({ isLoading: true });
         try {
             const response = await ordersApi.getOrders(targetPage, get().pageSize);
-            
-            // Note: Since backend filters might not be fully implemented yet in getOrders call,
-            // we keep a simple client-side search/filter logic if needed, 
-            // but ideally we should pass these to the API.
-            
+            const stats = await ordersApi.getStats();
+
             set({ 
                 orders: response.orders || (response as any).data || [], 
                 isLoading: false, 
-                totalOrders: response.total || 0,
+                totalOrders: response.total || stats.totalOrders || 0,
+                stats,
                 currentPage: targetPage
             });
         } catch (error) {
@@ -66,6 +72,8 @@ export const useOrderStore = create<OrderState>((set, get) => ({
         try {
             await ordersApi.createOrder(orderData);
             await get().fetchOrders();
+            const stats = await ordersApi.getStats();
+            set({ stats });
         } catch (error) {
             console.error("Failed to add order:", error);
         }
@@ -75,6 +83,8 @@ export const useOrderStore = create<OrderState>((set, get) => ({
             // Placeholder for real API call
             console.log("Updating order", id, orderData);
             await get().fetchOrders();
+            const stats = await ordersApi.getStats();
+            set({ stats });
         } catch (error) {
             console.error("Failed to update order:", error);
         }
@@ -84,6 +94,8 @@ export const useOrderStore = create<OrderState>((set, get) => ({
             // Placeholder for real API call
             console.log("Deleting order", id);
             await get().fetchOrders();
+            const stats = await ordersApi.getStats();
+            set({ stats });
         } catch (error) {
             console.error("Failed to delete order:", error);
         }
@@ -93,7 +105,8 @@ export const useOrderStore = create<OrderState>((set, get) => ({
         try {
             const result = await ordersApi.importOrders(file);
             await get().fetchOrders();
-            set({ isLoading: false });
+            const stats = await ordersApi.getStats();
+            set({ isLoading: false, stats });
             return result;
         } catch (error) {
             console.error("Failed to import orders:", error);

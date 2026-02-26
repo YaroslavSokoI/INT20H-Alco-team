@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/Button";
 import { expandIcon, filterIcon, importIcon, searchIcon } from "@/assets/assets.ts";
 
 import { useOrderStore } from "@/store/orderStore";
-import { useState, useCallback, memo, useRef } from "react";
+import { useState, useCallback, memo } from "react";
 
 interface OrderTableActionsProps {
     onImport: () => void;

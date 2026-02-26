@@ -1,12 +1,11 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { useOrderStore } from "@/store/orderStore";
 import { getOrderColumns } from "../components/table/columns";
-import { formatDate } from "@/lib/formatters";
 import { 
     getCoreRowModel, 
     useReactTable,
 } from "@tanstack/react-table";
-import type { OrderRow } from "../types";
+import type { OrderRow } from "@/types/order";
 
 export function useOrdersTable() {
     const { 
@@ -23,9 +22,12 @@ export function useOrdersTable() {
     const [isCreating, setIsCreating] = useState(false);
     const [editingId, setEditingId] = useState<number | null>(null);
     const [selectedOrder, setSelectedOrder] = useState<OrderRow | null>(null);
-    const [newOrder, setNewOrder] = useState({
+    const [newOrder, setNewOrder] = useState<any>({
         jurisdiction: "",
         subtotal: "",
+        taxRate: "0",
+        tax: "0.00",
+        total: "0.00",
         longitude: "0.00",
         latitude: "0.00"
     });
@@ -41,6 +43,9 @@ export function useOrdersTable() {
         setEditingOrder({
             ...order,
             subtotal: order.subtotal.toString(),
+            taxRate: order.compositeTaxRate.toString(),
+            tax: order.taxAmount.toString(),
+            total: order.totalAmount.toString(),
             longitude: order.longitude.toString(),
             latitude: order.latitude.toString()
         });
@@ -52,9 +57,12 @@ export function useOrdersTable() {
     }, []);
 
     const handleUpdate = useCallback(async () => {
-        if (!editingId) return;
+        if (editingId === null) return;
         await updateOrder(editingId.toString(), {
             subtotal: parseFloat(editingOrder.subtotal) || 0,
+            compositeTaxRate: parseFloat(editingOrder.taxRate) || 0,
+            taxAmount: parseFloat(editingOrder.tax) || 0,
+            totalAmount: parseFloat(editingOrder.total) || 0,
             longitude: parseFloat(editingOrder.longitude) || 0,
             latitude: parseFloat(editingOrder.latitude) || 0
         });
@@ -72,7 +80,7 @@ export function useOrdersTable() {
         setSelectedOrder(order);
     }, []);
 
-    const columns = useMemo(() => getOrderColumns(handleExpand, handleEditStart, handleDelete as any), [handleExpand, handleEditStart, handleDelete]);
+    const columns = useMemo(() => getOrderColumns(handleExpand, handleEditStart, handleDelete), [handleExpand, handleEditStart, handleDelete]);
 
     const table = useReactTable({
         data: orders,

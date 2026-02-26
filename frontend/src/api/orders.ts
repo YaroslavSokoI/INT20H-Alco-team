@@ -6,11 +6,22 @@ export interface PaginatedOrders {
   total: number;
 }
 
+export interface OrderStats {
+  totalOrders: number;
+  totalSales: number;
+  totalTax: number;
+}
+
 export const ordersApi = {
   getOrders: async (page: number, limit: number) => {
     const response = await apiClient.get<PaginatedOrders>(`/orders`, {
       params: { page, limit },
     });
+    return response.data;
+  },
+
+  getStats: async () => {
+    const response = await apiClient.get<OrderStats>('/orders/stats');
     return response.data;
   },
 

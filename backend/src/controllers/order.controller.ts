@@ -2,7 +2,7 @@ import type { Request, Response, NextFunction } from 'express';
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
-import { createOrder, importOrdersFromCsv, listOrders } from '../services/order.service';
+import { createOrder, importOrdersFromCsv, listOrders, getOrderStats } from '../services/order.service';
 import { createError } from '../middleware/errorHandler';
 
 const upload = multer({
@@ -94,6 +94,19 @@ export async function getOrders(
 
     const result = await listOrders(query);
     res.status(200).json(result);
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function getStatsHandler(
+  _req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const stats = await getOrderStats();
+    res.status(200).json(stats);
   } catch (err) {
     next(err);
   }

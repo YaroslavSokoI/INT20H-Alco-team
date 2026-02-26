@@ -5,36 +5,33 @@ import { cart, percent, dollar, file } from "@/assets/assets.ts";
 import { formatCurrency } from "@/lib/formatters";
 
 export default function StatsGrid() {
-    const { orders, totalOrders, isLoading } = useOrderStore();
-
-    const totalSales = orders.reduce((sum, o) => sum + o.totalAmount, 0);
-    const totalVAT = orders.reduce((sum, o) => sum + o.taxAmount, 0);
+    const { totalOrders, stats, isLoading } = useOrderStore();
 
     const statsData = [
         {
             title: "Total Orders",
-            value: totalOrders.toLocaleString(),
+            value: (stats.totalOrders || totalOrders).toLocaleString(),
             deltaText: "↑ +5.4%",
             deltaNote: "+5.41% from last period",
             icon: <img src={cart} alt="" className="size-4 opacity-70" />,
         },
         {
             title: "VAT Collected",
-            value: formatCurrency(totalVAT),
+            value: formatCurrency(stats.totalTax || 0),
             deltaText: "↑ +6.5%",
             deltaNote: "+6.51% from last period",
             icon: <img src={percent} alt="" className="size-4 opacity-70" />,
         },
         {
             title: "Total Sales",
-            value: formatCurrency(totalSales),
+            value: formatCurrency(stats.totalSales || 0),
             deltaText: "↑ +8.2%",
             deltaNote: "+8.23% from last period",
             icon: <img src={dollar} alt="" className="size-4 opacity-70" />,
         },
         {
             title: "Total Imports",
-            value: "1,240",
+            value: (stats.totalOrders || totalOrders).toLocaleString(),
             deltaText: "↑ +3.1%",
             deltaNote: "+3.12% from last period",
             icon: <img src={file} alt="" className="size-4 opacity-70" />,

@@ -12,7 +12,7 @@ interface OrderTableBodyProps {
     newOrder: any;
     setNewOrder: (order: any) => void;
     handleCreate: () => void;
-    editingId: string | null;
+    editingId: number | string | null | undefined;
     editingOrder: any;
     setEditingOrder: (order: any) => void;
     handleUpdate: () => void;
@@ -78,7 +78,7 @@ const OrderTableBody = memo(({
                     ))
                 ) : (
                     table.getRowModel().rows.map(row => {
-                        if (row.original.id === editingId) {
+                        if (row.original.id.toString() === editingId?.toString()) {
                             return (
                                 <OrderEditRow 
                                     key={row.id}
@@ -92,7 +92,7 @@ const OrderTableBody = memo(({
                         return (
                             <tr
                                 key={row.id}
-                                className="border-t border-border-light hover:bg-black/[0.01] [&>td]:px-5 [&>td]:py-2.5 whitespace-nowrap"
+                                className="border-t border-border-light hover:bg-black/1 [&>td]:px-5 [&>td]:py-2.5 whitespace-nowrap"
                             >
                                 {row.getVisibleCells().map(cell => (
                                     <td key={cell.id}>
