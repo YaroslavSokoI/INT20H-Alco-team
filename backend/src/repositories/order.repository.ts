@@ -146,27 +146,77 @@ export async function findOrders(query: OrderListQuery): Promise<PaginatedOrders
   };
 }
 
-export async function getOrderStats(): Promise<{ 
-  totalOrders: number; 
-  totalSales: number; 
-  totalTax: number; 
+export async function updateOrder(
+  id: number,
+  data: Partial<{
+    subtotal: number;
+    compositeTaxRate: number;
+    taxAmount: number;
+    totalAmount: number;
+    longitude: number;
+    latitude: number;
+  }>
+): Promise<Order | null> {
+  const updateData: Record<string, number> = {};
+  if (data.subtotal !== undefined) updateData.subtotal = data.subtotal;
+  if (data.compositeTaxRate !== undefined) updateData.composite_tax_rate = data.compositeTaxRate;
+  if (data.taxAmount !== undefined) updateData.tax_amount = data.taxAmount;
+  if (data.totalAmount !== undefined) updateData.total_amount = data.totalAmount;
+  if (data.longitude !== undefined) updateData.longitude = data.longitude;
+  if (data.latitude !== undefined) updateData.latitude = data.latitude;
+
+  const [row] = await db('orders').where({ id }).update(updateData).returning('*');
+  if (!row) return null;
+  return rowToOrder(row);
+}
+
+export async function deleteOrder(id: number): Promise<boolean> {
+  const count = await db('orders').where({ id }).delete();
+  return Number(count) > 0;
+}
+
+export async function getOrderStats(): Promise<{
+  totalOrders: number;
+  totalSales: number;
+  totalTax: number;
+  deltaOrders: number;
+  deltaSales: number;
+  deltaTax: number;
 }> {
-  // Knex aggregate return types are driver-dependent (often strings), and the
-  // typings can be too generic. Normalize everything to numbers.
   type RawStatsRow = {
     totalOrders: string | number | null;
     totalSales: string | number | null;
     totalTax: string | number | null;
   };
 
-  const [stats] = (await db('orders')
-    .sum('total_amount as totalSales')
-    .sum('tax_amount as totalTax')
-    .count('id as totalOrders')) as unknown as RawStatsRow[];
+  const now = new Date();
+  const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+  const sixtyDaysAgo = new Date(now.getTime() - 60 * 24 * 60 * 60 * 1000);
+
+  const [[allStats], [current], [previous]] = await Promise.all([
+    db('orders').sum('total_amount as totalSales').sum('tax_amount as totalTax').count('id as totalOrders') as unknown as Promise<RawStatsRow[]>,
+    db('orders').where('timestamp', '>=', thirtyDaysAgo).sum('total_amount as totalSales').sum('tax_amount as totalTax').count('id as totalOrders') as unknown as Promise<RawStatsRow[]>,
+    db('orders').where('timestamp', '>=', sixtyDaysAgo).where('timestamp', '<', thirtyDaysAgo).sum('total_amount as totalSales').sum('tax_amount as totalTax').count('id as totalOrders') as unknown as Promise<RawStatsRow[]>,
+  ]);
+
+  const delta = (curr: number, prev: number): number => {
+    if (prev === 0) return curr > 0 ? 100 : 0;
+    return Math.round(((curr - prev) / prev) * 1000) / 10;
+  };
+
+  const currOrders = Number(current.totalOrders || 0);
+  const prevOrders = Number(previous.totalOrders || 0);
+  const currSales = Number(current.totalSales || 0);
+  const prevSales = Number(previous.totalSales || 0);
+  const currTax = Number(current.totalTax || 0);
+  const prevTax = Number(previous.totalTax || 0);
 
   return {
-    totalOrders: Number(stats.totalOrders || 0),
-    totalSales: Number(stats.totalSales || 0),
-    totalTax: Number(stats.totalTax || 0),
+    totalOrders: Number(allStats.totalOrders || 0),
+    totalSales: Number(allStats.totalSales || 0),
+    totalTax: Number(allStats.totalTax || 0),
+    deltaOrders: delta(currOrders, prevOrders),
+    deltaSales: delta(currSales, prevSales),
+    deltaTax: delta(currTax, prevTax),
   };
 }

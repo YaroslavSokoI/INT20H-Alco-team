@@ -56,8 +56,14 @@ export default function ImportModal({ isOpen, onClose, onImport }: ImportModalPr
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-            <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl animate-in fade-in zoom-in duration-200">
+        <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+            onClick={onClose}
+        >
+            <div
+                className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl animate-in fade-in zoom-in duration-200"
+                onClick={(e) => e.stopPropagation()}
+            >
                 <div className="flex items-center justify-between mb-6">
                     <h2 className="text-xl font-bold">Import CSV File</h2>
                     <button onClick={onClose} className="text-text-muted hover:text-text">
@@ -65,46 +71,41 @@ export default function ImportModal({ isOpen, onClose, onImport }: ImportModalPr
                     </button>
                 </div>
 
-                <div 
-                    className={`relative border-2 border-dashed rounded-2xl p-10 flex flex-col items-center justify-center transition-all ${
-                        isDragging ? 'border-primary bg-primary/5' : 'border-border bg-surface/50'
+                <div
+                    className={`relative border-2 border-dashed rounded-2xl p-10 flex flex-col items-center justify-center transition-all cursor-pointer ${
+                        isDragging ? 'border-primary bg-primary/5' : 'border-border bg-surface/50 hover:border-primary/50 hover:bg-primary/5'
                     }`}
                     onDragOver={handleDragOver}
                     onDragLeave={handleDragLeave}
                     onDrop={handleDrop}
+                    onClick={() => fileInputRef.current?.click()}
                 >
-                    <input 
-                        type="file" 
-                        ref={fileInputRef} 
-                        onChange={handleFileSelect} 
-                        accept=".csv" 
-                        className="hidden" 
+                    <input
+                        type="file"
+                        ref={fileInputRef}
+                        onChange={handleFileSelect}
+                        accept=".csv"
+                        className="hidden"
                     />
-                    
+
                     {!file ? (
                         <>
                             <div className="size-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
                                 <img src={importIcon} alt="" className="size-8" />
                             </div>
                             <p className="text-sm font-medium text-text text-center">
-                                Drag and drop your CSV file here or{' '}
-                                <button 
-                                    className="text-primary hover:underline"
-                                    onClick={() => fileInputRef.current?.click()}
-                                >
-                                    browse
-                                </button>
+                                Drag and drop your CSV file here or click to browse
                             </p>
                             <p className="text-xs text-text-muted mt-2">Maximum file size: 10MB</p>
                         </>
                     ) : (
-                        <div className="flex flex-col items-center">
+                        <div className="flex flex-col items-center" onClick={(e) => e.stopPropagation()}>
                             <div className="size-16 rounded-full bg-success/10 flex items-center justify-center mb-4">
                                 <img src={fileIcon} alt="" className="size-8" />
                             </div>
-                            <p className="text-sm font-bold text-text truncate max-w-[250px]">{file.name}</p>
+                            <p className="text-sm font-bold text-text truncate max-w-62.5">{file.name}</p>
                             <p className="text-xs text-text-muted mt-1">{(file.size / 1024).toFixed(2)} KB</p>
-                            <button 
+                            <button
                                 className="text-xs text-danger mt-4 hover:underline"
                                 onClick={() => setFile(null)}
                             >
@@ -116,9 +117,9 @@ export default function ImportModal({ isOpen, onClose, onImport }: ImportModalPr
 
                 <div className="flex justify-end gap-3 mt-8">
                     <Button variant="outline" onClick={onClose}>Cancel</Button>
-                    <Button 
-                        disabled={!file} 
-                        isLoading={isLoading} 
+                    <Button
+                        disabled={!file}
+                        isLoading={isLoading}
                         onClick={handleSubmit}
                         className="px-8"
                     >

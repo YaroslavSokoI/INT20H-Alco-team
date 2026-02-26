@@ -2,7 +2,7 @@ import type { Request, Response, NextFunction } from 'express';
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
-import { createOrder, importOrdersFromCsv, listOrders, getOrderStats } from '../services/order.service';
+import { createOrder, importOrdersFromCsv, listOrders, getOrderStats, updateOrder, deleteOrder } from '../services/order.service';
 import { createError } from '../middleware/errorHandler';
 
 const upload = multer({
@@ -103,6 +103,38 @@ export async function getOrders(
 
     const result = await listOrders(query);
     res.status(200).json(result);
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function updateOrderHandler(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const id = parseInt(req.params.id, 10);
+    if (isNaN(id)) return next(createError('Invalid order ID', 400));
+    const order = await updateOrder(id, req.body);
+    if (!order) return next(createError('Order not found', 404));
+    res.json(order);
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function deleteOrderHandler(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const id = parseInt(req.params.id, 10);
+    if (isNaN(id)) return next(createError('Invalid order ID', 400));
+    const deleted = await deleteOrder(id);
+    if (!deleted) return next(createError('Order not found', 404));
+    res.status(204).send();
   } catch (err) {
     next(err);
   }

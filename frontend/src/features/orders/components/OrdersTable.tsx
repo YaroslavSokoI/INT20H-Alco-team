@@ -9,7 +9,7 @@ import { useOrderStore } from "@/store/orderStore";
 import { useState } from "react";
 
 export default function OrdersTable() {
-    const { importOrders } = useOrderStore();
+    const { importOrders, setPageSize } = useOrderStore();
     const [importResult, setImportResult] = useState<any>(null);
     const [isImportModalOpen, setIsImportModalOpen] = useState(false);
 
@@ -32,7 +32,7 @@ export default function OrdersTable() {
         handlePageChange,
         handleCreate,
         handleUpdate,
-        handleEditCancel
+        handleEditCancel,
     } = useOrdersTable();
 
     const handleImport = async (file: File) => {
@@ -50,9 +50,10 @@ export default function OrdersTable() {
                 <div className="text-lg font-bold">Orders</div>
             </div>
 
-            <OrderTableActions 
+            <OrderTableActions
                 onImport={() => setIsImportModalOpen(true)}
                 onCreate={() => setIsCreating(true)}
+                isCreating={isCreating}
             />
 
             <OrderTableBody 
@@ -62,6 +63,7 @@ export default function OrdersTable() {
                 newOrder={newOrder}
                 setNewOrder={setNewOrder}
                 handleCreate={handleCreate}
+                handleCreateCancel={() => setIsCreating(false)}
                 editingId={editingId}
                 editingOrder={editingOrder}
                 setEditingOrder={setEditingOrder}
@@ -69,12 +71,13 @@ export default function OrdersTable() {
                 handleEditCancel={handleEditCancel}
             />
 
-            <OrderTablePagination 
+            <OrderTablePagination
                 currentPage={currentPage}
                 pageSize={pageSize}
                 totalOrders={totalOrders}
                 totalPages={totalPages}
                 onPageChange={handlePageChange}
+                onPageSizeChange={setPageSize}
             />
 
             <OrderDetailModal 
@@ -87,11 +90,12 @@ export default function OrdersTable() {
                 onClose={() => setImportResult(null)} 
             />
 
-            <ImportModal 
-                isOpen={isImportModalOpen} 
-                onClose={() => setIsImportModalOpen(false)} 
-                onImport={handleImport} 
+            <ImportModal
+                isOpen={isImportModalOpen}
+                onClose={() => setIsImportModalOpen(false)}
+                onImport={handleImport}
             />
+
         </div>
     );
 }

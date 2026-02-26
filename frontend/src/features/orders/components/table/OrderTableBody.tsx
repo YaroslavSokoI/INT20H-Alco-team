@@ -12,6 +12,7 @@ interface OrderTableBodyProps {
     newOrder: any;
     setNewOrder: (order: any) => void;
     handleCreate: () => void;
+    handleCreateCancel: () => void;
     editingId: number | string | null | undefined;
     editingOrder: any;
     setEditingOrder: (order: any) => void;
@@ -26,6 +27,7 @@ const OrderTableBody = memo(({
     newOrder, 
     setNewOrder, 
     handleCreate,
+    handleCreateCancel,
     editingId,
     editingOrder,
     setEditingOrder,
@@ -54,10 +56,11 @@ const OrderTableBody = memo(({
 
                 <tbody className="relative">
                 {isCreating && (
-                    <OrderCreateRow 
-                        newOrder={newOrder} 
-                        setNewOrder={setNewOrder} 
-                        onSave={handleCreate} 
+                    <OrderCreateRow
+                        newOrder={newOrder}
+                        setNewOrder={setNewOrder}
+                        onSave={handleCreate}
+                        onCancel={handleCreateCancel}
                     />
                 )}
 

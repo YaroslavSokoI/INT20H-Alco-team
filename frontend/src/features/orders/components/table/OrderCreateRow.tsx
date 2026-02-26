@@ -1,119 +1,81 @@
-import { createIcon } from "@/assets/assets.ts";
-import { memo } from "react";
+import { memo, useState } from "react";
 
 interface OrderCreateRowProps {
     newOrder: any;
     setNewOrder: (order: any) => void;
     onSave: () => void;
+    onCancel: () => void;
 }
 
-const OrderCreateRow = memo(({ newOrder, setNewOrder, onSave }: OrderCreateRowProps) => {
+const inputClass = "w-full bg-transparent border-b border-border/50 outline-none pb-0.5 placeholder:text-text-muted/50 focus:border-primary/50 transition-colors";
+const emptyCell = <span className="text-text-muted/40">—</span>;
+
+const OrderCreateRow = memo(({ newOrder, setNewOrder, onSave, onCancel }: OrderCreateRowProps) => {
+    const [saving, setSaving] = useState(false);
+
+    const handleSave = async () => {
+        setSaving(true);
+        await onSave();
+        setSaving(false);
+    };
+
     return (
-        <tr className="border-t border-border-light bg-black/[0.02] [&>td]:px-5 [&>td]:py-2 text-text-muted">
+        <tr className="border-t border-border-light bg-black/2 [&>td]:px-5 [&>td]:py-2 text-text-muted">
+            <td>{emptyCell}</td>
             <td>
-                <input 
-                    className="w-full bg-transparent border-b border-border/50 outline-none pb-0.5 placeholder:text-text-muted/50" 
-                    placeholder="default=auto"
-                    disabled
+                <input
+                    type="date"
+                    className={inputClass}
+                    value={newOrder.timestamp}
+                    onChange={(e) => setNewOrder({ ...newOrder, timestamp: e.target.value })}
                 />
             </td>
+            <td>{emptyCell}</td>
             <td>
-                <input 
-                    className="w-full bg-transparent border-b border-border/50 outline-none pb-0.5 placeholder:text-text-muted/50" 
-                    placeholder="default=today"
-                    disabled
-                />
-            </td>
-            <td>
-                <input 
-                    className="w-full bg-transparent border-b border-border/50 outline-none pb-0.5 placeholder:text-text-muted/50" 
-                    placeholder="Jurisdiction"
-                    value={newOrder.jurisdiction}
-                    readOnly
-                    onChange={(e) => {
-                        const val = e.target.value;
-                        setNewOrder({...newOrder, jurisdiction: val});
-                    }}
-                />
-            </td>
-            <td>
-                <input 
-                    className="w-full bg-transparent border-b border-border/50 outline-none pb-0.5 placeholder:text-text-muted/50" 
+                <input
+                    type="number"
+                    className={inputClass}
                     placeholder="0.00"
                     value={newOrder.subtotal}
-                    onChange={(e) => {
-                        const subtotal = parseFloat(e.target.value) || 0;
-                        const taxRate = parseFloat(newOrder.taxRate) || 0;
-                        const tax = (subtotal * taxRate) / 100;
-                        const total = subtotal + tax;
-                        setNewOrder({
-                            ...newOrder, 
-                            subtotal: e.target.value,
-                            tax: tax.toFixed(2),
-                            total: total.toFixed(2)
-                        });
-                    }}
+                    onChange={(e) => setNewOrder({ ...newOrder, subtotal: e.target.value })}
                 />
             </td>
+            <td>{emptyCell}</td>
+            <td>{emptyCell}</td>
+            <td>{emptyCell}</td>
             <td>
-                <input 
-                    className="w-full bg-transparent border-b border-border/50 outline-none pb-0.5 placeholder:text-text-muted/50" 
-                    placeholder="0.00"
-                    value={newOrder.taxRate}
-                    onChange={(e) => {
-                        const taxRate = parseFloat(e.target.value) || 0;
-                        const subtotal = parseFloat(newOrder.subtotal) || 0;
-                        const tax = (subtotal * taxRate) / 100;
-                        const total = subtotal + tax;
-                        setNewOrder({
-                            ...newOrder, 
-                            taxRate: e.target.value,
-                            tax: tax.toFixed(2),
-                            total: total.toFixed(2)
-                        });
-                    }}
-                />
-            </td>
-            <td>
-                <input 
-                    className="w-full bg-transparent border-b border-border/50 outline-none pb-0.5 placeholder:text-text-muted/50" 
-                    placeholder="0.00"
-                    value={newOrder.tax}
-                    readOnly
-                />
-            </td>
-            <td>
-                <input 
-                    className="w-full bg-transparent border-b border-border/50 outline-none pb-0.5 placeholder:text-text-muted/50 font-medium" 
-                    placeholder="0.00"
-                    value={newOrder.total}
-                    readOnly
-                />
-            </td>
-            <td>
-                <input 
-                    className="w-full bg-transparent border-b border-border/50 outline-none pb-0.5 placeholder:text-text-muted/50" 
-                    placeholder="0.00"
+                <input
+                    type="number"
+                    className={inputClass}
+                    placeholder="0.00000"
                     value={newOrder.longitude}
-                    onChange={(e) => setNewOrder({...newOrder, longitude: e.target.value})}
+                    onChange={(e) => setNewOrder({ ...newOrder, longitude: e.target.value })}
                 />
             </td>
             <td>
-                <input 
-                    className="w-full bg-transparent border-b border-border/50 outline-none pb-0.5 placeholder:text-text-muted/50" 
-                    placeholder="0.00"
+                <input
+                    type="number"
+                    className={inputClass}
+                    placeholder="0.00000"
                     value={newOrder.latitude}
-                    onChange={(e) => setNewOrder({...newOrder, latitude: e.target.value})}
+                    onChange={(e) => setNewOrder({ ...newOrder, latitude: e.target.value })}
                 />
             </td>
             <td className="px-5">
-                <div className="flex justify-end">
-                    <button 
-                        className="size-8 flex items-center justify-center rounded-lg bg-success hover:bg-success/80 text-success transition-all border border-success/20 shadow-xs"
-                        onClick={onSave}
-                        title="Save order"
+                <div className="flex justify-end gap-3">
+                    <button
+                        className={`text-xs font-semibold underline underline-offset-2 transition-opacity cursor-pointer ${saving ? "text-text-muted pointer-events-none" : "text-primary hover:opacity-70"}`}
+                        onClick={handleSave}
+                        disabled={saving}
                     >
-                        <img src={createIcon} alt="Save" className="size-5" />
+                        {saving ? "creating..." : "create"}
+                    </button>
+                    <button
+                        className="text-xs font-semibold underline underline-offset-2 transition-all cursor-pointer text-red-500 hover:opacity-70"
+                        onClick={onCancel}
+                        disabled={saving}
+                    >
+                        cancel
                     </button>
                 </div>
             </td>

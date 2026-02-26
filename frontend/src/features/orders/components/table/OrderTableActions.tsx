@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/Button";
-import { expandIcon, filterIcon, importIcon, searchIcon, refreshIcon } from "@/assets/assets.ts";
+import { createOrderIcon, filterIcon, importIcon, searchIcon, refreshIcon } from "@/assets/assets.ts";
 
 import { useOrderStore } from "@/store/orderStore";
 import { useState, useCallback, memo } from "react";
@@ -7,6 +7,7 @@ import { useState, useCallback, memo } from "react";
 interface OrderTableActionsProps {
     onImport: () => void;
     onCreate: () => void;
+    isCreating?: boolean;
 }
 
 interface LocalFilters {
@@ -32,9 +33,8 @@ const EMPTY_FILTERS: LocalFilters = {
     totalMin: "", totalMax: "",
 };
 
-const labelClass = "text-[11px] font-black uppercase text-text-muted flex items-center gap-1.5";
+const labelClass = "text-[11px] font-black uppercase text-text-muted ml-2";
 const inputClass = "h-10 px-3 border border-border rounded-xl text-sm bg-white outline-none w-full focus:ring-2 focus:ring-primary/10 transition-all";
-const dot = <span className="size-1.5 rounded-full bg-primary/40" />;
 
 function RangeInput({
     label,
@@ -51,7 +51,7 @@ function RangeInput({
 }) {
     return (
         <div className="space-y-2">
-            <label className={labelClass}>{dot}{label}</label>
+            <label className={labelClass}>{label}</label>
             <div className="flex items-center gap-2">
                 <input
                     type={type}
@@ -73,7 +73,7 @@ function RangeInput({
     );
 }
 
-const OrderTableActions = memo(({ onImport, onCreate }: OrderTableActionsProps) => {
+const OrderTableActions = memo(({ onImport, onCreate, isCreating }: OrderTableActionsProps) => {
     const { searchQuery, setSearchQuery, setFilters, filters, fetchOrders, isLoading } = useOrderStore();
     const [showFilters, setShowFilters] = useState(false);
     const [local, setLocal] = useState<LocalFilters>({
@@ -148,20 +148,20 @@ const OrderTableActions = memo(({ onImport, onCreate }: OrderTableActionsProps) 
                 <div className="flex items-center gap-2">
                     <Button
                         variant="outline"
-                        size="md"
-                        className="shadow-xs"
+                        size="icon"
+                        className="h-9 w-9 shrink-0 items-center justify-center p-0 shadow-xs"
                         onClick={() => fetchOrders()}
                         disabled={isLoading}
                     >
-                        <img src={refreshIcon} alt="refresh" className={`size-3.5 ${isLoading ? "animate-spin" : ""}`} />
+                        <img src={refreshIcon} alt="refresh" className={`size-4 ${isLoading ? "animate-spin" : ""}`} />
                     </Button>
                     <Button
-                        variant={showFilters ? "primary" : "outline"}
+                        variant="outline"
                         size="md"
-                        className="gap-2 font-semibold shadow-xs relative"
+                        className={`gap-1.5 font-semibold shadow-xs relative${showFilters ? " bg-black/5" : ""}`}
                         onClick={() => setShowFilters(!showFilters)}
                     >
-                        <img src={filterIcon} alt="" className={`size-3.5 ${showFilters ? "brightness-0 invert" : ""}`} />
+                        <img src={filterIcon} alt="" className="size-4" />
                         Filter
                         {activeFilterCount > 0 && (
                             <span className="absolute -top-1.5 -right-1.5 size-4 rounded-full bg-primary text-white text-[10px] font-bold flex items-center justify-center">
@@ -172,14 +172,14 @@ const OrderTableActions = memo(({ onImport, onCreate }: OrderTableActionsProps) 
                     <Button 
                         variant="outline" 
                         size="md" 
-                        className="gap-2 font-semibold shadow-xs" 
+                        className="gap-1.5 font-semibold shadow-xs"
                         onClick={onImport}
                     >
-                        <img src={importIcon} alt="" className="size-3.5" />
+                        <img src={importIcon} alt="" className="size-4" />
                         Import
                     </Button>
-                    <Button size="md" className="gap-2 font-semibold shadow-sm" onClick={onCreate}>
-                        <img src={expandIcon} alt="" className="size-3.5 brightness-0 invert" />
+                    <Button variant="outline" size="md" className={`gap-1.5 font-semibold shadow-sm${isCreating ? " bg-black/5" : ""}`} onClick={onCreate}>
+                        <img src={createOrderIcon} alt="" className="size-4" />
                         Create
                     </Button>
                 </div>
@@ -199,7 +199,7 @@ const OrderTableActions = memo(({ onImport, onCreate }: OrderTableActionsProps) 
                     {/* Row 1: County, City, Date Range */}
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                         <div className="space-y-2">
-                            <label className={labelClass}>{dot}County</label>
+                            <label className={labelClass}>County</label>
                             <input
                                 type="text"
                                 placeholder="e.g. Kings"
@@ -210,7 +210,7 @@ const OrderTableActions = memo(({ onImport, onCreate }: OrderTableActionsProps) 
                         </div>
 
                         <div className="space-y-2">
-                            <label className={labelClass}>{dot}City</label>
+                            <label className={labelClass}>City</label>
                             <input
                                 type="text"
                                 placeholder="e.g. Brooklyn"
@@ -221,7 +221,7 @@ const OrderTableActions = memo(({ onImport, onCreate }: OrderTableActionsProps) 
                         </div>
 
                         <div className="space-y-2 lg:col-span-2">
-                            <label className={labelClass}>{dot}Date Range</label>
+                            <label className={labelClass}>Date Range</label>
                             <div className="flex items-center gap-2">
                                 <input
                                     type="date"

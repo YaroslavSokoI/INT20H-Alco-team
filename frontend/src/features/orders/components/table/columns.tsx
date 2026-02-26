@@ -1,27 +1,30 @@
 import { createColumnHelper } from "@tanstack/react-table";
 import type { OrderRow } from "@/types/order.ts";
-import { editIcon, deleteIcon, expandIcon } from "@/assets/assets";
-import { formatCurrency, formatPercent } from "@/lib/formatters";
+import { formatCurrency, formatPercent, formatDate } from "@/lib/formatters";
 
 const columnHelper = createColumnHelper<OrderRow>();
 
 export const getOrderColumns = (
     onExpand: (order: OrderRow) => void,
     onEdit: (order: OrderRow) => void,
-    onDelete: (id: number | string) => void
+    onDelete: (id: number | string) => void,
+    pendingDeleteId: number | string | null,
+    onDeleteConfirm: () => void,
+    onDeleteCancel: () => void,
 ) => [
     columnHelper.accessor("uuid", {
-        header: "Order UUID",
+        header: "Order ID",
         cell: info => {
             const val = info.getValue();
-            return <span className="font-semibold text-primary text-xs">{val ? `${val.substring(0, 8)}...` : 'N/A'}</span>;
+            const display = val ? `${val.substring(0, 8)}...` : `${info.row.original.id}`;
+            return <span className="font-semibold text-primary text-xs">{display}</span>;
         },
     }),
     columnHelper.accessor("timestamp", {
         header: "Order Date",
         cell: info => {
             const val = info.getValue();
-            return val ? new Date(val).toLocaleDateString() : 'N/A';
+            return val ? formatDate(val) : 'N/A';
         },
     }),
     columnHelper.accessor("jurisdictions.city", {
@@ -52,30 +55,39 @@ export const getOrderColumns = (
     }),
     columnHelper.display({
         id: "actions",
-        cell: info => (
-            <div className="flex items-center justify-end gap-2">
-                <button 
-                    onClick={() => onExpand(info.row.original)}
-                    className="size-8 flex items-center justify-center rounded-lg bg-primary hover:bg-primary/70 transition-all shadow-xs group"
-                    title="Expand"
-                >
-                    <img src={expandIcon} alt="Expand" className="size-5 group-hover:opacity-100 transition-opacity" />
-                </button>
-                <button 
-                    onClick={() => onEdit(info.row.original)}
-                    className="size-8 flex items-center justify-center rounded-lg bg-yellow-500 hover:bg-yellow-600 transition-all shadow-xs group" 
-                    title="Edit"
-                >
-                    <img src={editIcon} alt="Edit" className="size-5 group-hover:opacity-100 transition-opacity" />
-                </button>
-                <button 
-                    onClick={() => onDelete(info.row.original.id)}
-                    className="size-8 flex items-center justify-center rounded-lg bg-red-500 hover:bg-red-600 transition-all shadow-xs group" 
-                    title="Delete"
-                >
-                    <img src={deleteIcon} alt="Delete" className="size-5 group-hover:opacity-100 transition-all" />
-                </button>
-            </div>
-        ),
+        cell: info => {
+            const id = info.row.original.id;
+            const isPending = pendingDeleteId === id;
+
+            return (
+                <div className={`flex items-center gap-3 ${isPending ? "justify-start -ml-16" : "justify-end"}`}>
+                    {!isPending && (
+                        <>
+                            <button onClick={() => onExpand(info.row.original)} className="text-xs font-semibold text-primary underline underline-offset-2 hover:opacity-70 transition-opacity cursor-pointer">
+                                expand
+                            </button>
+                            <button onClick={() => onEdit(info.row.original)} className="text-xs font-semibold text-yellow-500 underline underline-offset-2 hover:opacity-70 transition-opacity cursor-pointer">
+                                edit
+                            </button>
+                        </>
+                    )}
+                    {isPending ? (
+                        <span className="flex items-center gap-3 w-full justify-start">
+                            <span className="text-xs text-text-muted">Are you sure?</span>
+                            <button onClick={onDeleteConfirm} className="text-xs font-semibold text-red-500 underline underline-offset-2 hover:opacity-70 transition-opacity cursor-pointer">
+                                Yes
+                            </button>
+                            <button onClick={onDeleteCancel} className="text-xs font-semibold text-text-muted underline underline-offset-2 hover:opacity-70 transition-opacity cursor-pointer">
+                                No
+                            </button>
+                        </span>
+                    ) : (
+                        <button onClick={() => onDelete(id)} className="text-xs font-semibold text-red-500 underline underline-offset-2 hover:opacity-70 transition-opacity cursor-pointer">
+                            delete
+                        </button>
+                    )}
+                </div>
+            );
+        },
     }),
 ];

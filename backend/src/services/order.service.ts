@@ -5,6 +5,8 @@ import {
   insertOrdersBatch,
   findOrders,
   getOrderStats as getStatsFromRepo,
+  updateOrder as updateOrderInRepo,
+  deleteOrder as deleteOrderFromRepo,
 } from '../repositories/order.repository';
 import pLimit from 'p-limit';
 import type {
@@ -105,6 +107,24 @@ export async function importOrdersFromCsv(filePath: string): Promise<ImportResul
 
 export async function listOrders(query: OrderListQuery): Promise<PaginatedOrders> {
   return findOrders(query);
+}
+
+export async function updateOrder(
+  id: number,
+  data: Partial<{
+    subtotal: number;
+    compositeTaxRate: number;
+    taxAmount: number;
+    totalAmount: number;
+    longitude: number;
+    latitude: number;
+  }>
+): Promise<Order | null> {
+  return updateOrderInRepo(id, data);
+}
+
+export async function deleteOrder(id: number): Promise<boolean> {
+  return deleteOrderFromRepo(id);
 }
 
 export async function getOrderStats() {

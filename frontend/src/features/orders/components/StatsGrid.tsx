@@ -4,6 +4,16 @@ import { Skeleton } from "@/components/ui/Skeleton";
 import { cart, percent, dollar, file } from "@/assets/assets.ts";
 import { formatCurrency } from "@/lib/formatters";
 
+function formatDelta(delta: number): string {
+    const sign = delta >= 0 ? "↑ +" : "↓ ";
+    return `${sign}${Math.abs(delta)}%`;
+}
+
+function formatDeltaNote(delta: number): string {
+    const sign = delta >= 0 ? "+" : "";
+    return `${sign}${delta}% vs last 30 days`;
+}
+
 export default function StatsGrid() {
     const { totalOrders, stats, isLoading } = useOrderStore();
 
@@ -11,36 +21,40 @@ export default function StatsGrid() {
         {
             title: "Total Orders",
             value: (stats.totalOrders || totalOrders).toLocaleString(),
-            deltaText: "↑ +5.4%",
-            deltaNote: "+5.41% from last period",
+            deltaText: formatDelta(stats.deltaOrders),
+            deltaNote: formatDeltaNote(stats.deltaOrders),
+            positive: stats.deltaOrders >= 0,
             icon: <img src={cart} alt="" className="size-4 opacity-70" />,
         },
         {
             title: "VAT Collected",
             value: formatCurrency(stats.totalTax || 0),
-            deltaText: "↑ +6.5%",
-            deltaNote: "+6.51% from last period",
+            deltaText: formatDelta(stats.deltaTax),
+            deltaNote: formatDeltaNote(stats.deltaTax),
+            positive: stats.deltaTax >= 0,
             icon: <img src={percent} alt="" className="size-4 opacity-70" />,
         },
         {
             title: "Total Sales",
             value: formatCurrency(stats.totalSales || 0),
-            deltaText: "↑ +8.2%",
-            deltaNote: "+8.23% from last period",
+            deltaText: formatDelta(stats.deltaSales),
+            deltaNote: formatDeltaNote(stats.deltaSales),
+            positive: stats.deltaSales >= 0,
             icon: <img src={dollar} alt="" className="size-4 opacity-70" />,
         },
         {
             title: "Total Imports",
             value: (stats.totalOrders || totalOrders).toLocaleString(),
-            deltaText: "↑ +3.1%",
-            deltaNote: "+3.12% from last period",
+            deltaText: formatDelta(stats.deltaOrders),
+            deltaNote: formatDeltaNote(stats.deltaOrders),
+            positive: stats.deltaOrders >= 0,
             icon: <img src={file} alt="" className="size-4 opacity-70" />,
         },
     ];
 
     return (
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
-            {isLoading 
+            {isLoading
                 ? Array.from({ length: 4 }).map((_, i) => (
                     <div key={i} className="rounded-xl border border-border bg-white p-3.5 shadow-sm space-y-3">
                         <div className="flex items-start justify-between">
@@ -61,6 +75,7 @@ export default function StatsGrid() {
                         value={s.value}
                         deltaText={s.deltaText}
                         deltaNote={s.deltaNote}
+                        positive={s.positive}
                         icon={s.icon}
                     />
                 ))

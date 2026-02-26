@@ -8,13 +8,14 @@ import {
 import type { OrderRow } from "@/types/order";
 
 export function useOrdersTable() {
-    const { 
-        orders, 
-        isLoading, 
-        fetchOrders, 
-        currentPage, 
-        totalOrders, 
+    const {
+        orders,
+        isLoading,
+        fetchOrders,
+        currentPage,
+        totalOrders,
         pageSize,
+        addOrder,
         updateOrder,
         deleteOrder
     } = useOrderStore();
@@ -22,14 +23,13 @@ export function useOrdersTable() {
     const [isCreating, setIsCreating] = useState(false);
     const [editingId, setEditingId] = useState<number | null>(null);
     const [selectedOrder, setSelectedOrder] = useState<OrderRow | null>(null);
+    const todayDate = () => new Date().toISOString().split("T")[0];
+
     const [newOrder, setNewOrder] = useState<any>({
-        jurisdiction: "",
         subtotal: "",
-        taxRate: "0",
-        tax: "0.00",
-        total: "0.00",
-        longitude: "0.00",
-        latitude: "0.00"
+        longitude: "",
+        latitude: "",
+        timestamp: todayDate(),
     });
 
     const [editingOrder, setEditingOrder] = useState<any>(null);
@@ -70,17 +70,27 @@ export function useOrdersTable() {
         setEditingOrder(null);
     }, [editingId, editingOrder, updateOrder]);
 
-    const handleDelete = useCallback(async (id: number | string) => {
-        if (confirm("Are you sure you want to delete this order?")) {
-            await deleteOrder(id.toString());
-        }
-    }, [deleteOrder]);
+    const [pendingDeleteId, setPendingDeleteId] = useState<number | string | null>(null);
+
+    const handleDelete = useCallback((id: number | string) => {
+        setPendingDeleteId(id);
+    }, []);
+
+    const handleDeleteConfirm = useCallback(async () => {
+        if (pendingDeleteId === null) return;
+        await deleteOrder(pendingDeleteId.toString());
+        setPendingDeleteId(null);
+    }, [pendingDeleteId, deleteOrder]);
+
+    const handleDeleteCancel = useCallback(() => {
+        setPendingDeleteId(null);
+    }, []);
 
     const handleExpand = useCallback((order: OrderRow) => {
         setSelectedOrder(order);
     }, []);
 
-    const columns = useMemo(() => getOrderColumns(handleExpand, handleEditStart, handleDelete), [handleExpand, handleEditStart, handleDelete]);
+    const columns = useMemo(() => getOrderColumns(handleExpand, handleEditStart, handleDelete, pendingDeleteId, handleDeleteConfirm, handleDeleteCancel), [handleExpand, handleEditStart, handleDelete, pendingDeleteId, handleDeleteConfirm, handleDeleteCancel]);
 
     const table = useReactTable({
         data: orders,
@@ -97,9 +107,23 @@ export function useOrdersTable() {
     }, [totalPages, fetchOrders]);
 
     const handleCreate = useCallback(async () => {
-        // ... implementation for addOrder (should be updated in store to real API)
+        const subtotal = parseFloat(newOrder.subtotal);
+        const longitude = parseFloat(newOrder.longitude);
+        const latitude = parseFloat(newOrder.latitude);
+        if (isNaN(subtotal) || isNaN(longitude) || isNaN(latitude)) return;
+        await addOrder({
+            subtotal,
+            longitude,
+            latitude,
+            timestamp: newOrder.timestamp ? new Date(newOrder.timestamp).toISOString() : new Date().toISOString(),
+            uuid: "", compositeTaxRate: 0, taxAmount: 0, totalAmount: 0,
+            stateRate: 0, countyRate: 0, cityRate: 0, specialRates: 0,
+            jurisdictions: { postcode: "", city: "", county: "", state: "" },
+            createdAt: "",
+        });
+        setNewOrder({ subtotal: "", longitude: "", latitude: "", timestamp: todayDate() });
         setIsCreating(false);
-    }, []);
+    }, [newOrder, addOrder]);
 
     return {
         table,
@@ -120,6 +144,6 @@ export function useOrdersTable() {
         handlePageChange,
         handleCreate,
         handleUpdate,
-        handleEditCancel
+        handleEditCancel,
     };
 }

@@ -6,6 +6,8 @@ import {
   getOrders,
   csvUploadMiddleware,
   getStatsHandler,
+  updateOrderHandler,
+  deleteOrderHandler,
 } from '../controllers/order.controller';
 import { validateBody, validateQuery } from '../middleware/validate';
 import { requireAuth } from '../middleware/auth.middleware';
@@ -296,5 +298,9 @@ router.post('/', requireAuth, validateBody(createOrderSchema), createOrderHandle
  *         description: Unauthorized.
  */
 router.get('/', requireAuth, validateQuery(listOrdersSchema), getOrders);
+
+router.patch('/:id', requireAuth, updateOrderHandler);
+
+router.delete('/:id', requireAuth, deleteOrderHandler);
 
 export default router;

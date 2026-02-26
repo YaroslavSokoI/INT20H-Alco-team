@@ -8,16 +8,23 @@ interface OrderTablePaginationProps {
     totalOrders: number;
     totalPages: number;
     onPageChange: (page: number) => void;
+    onPageSizeChange: (size: number) => void;
 }
 
-const OrderTablePagination = memo(({ 
-    currentPage, 
-    pageSize, 
-    totalOrders, 
-    totalPages, 
-    onPageChange 
+const OrderTablePagination = memo(({
+    currentPage,
+    pageSize,
+    totalOrders,
+    totalPages,
+    onPageChange,
+    onPageSizeChange,
 }: OrderTablePaginationProps) => {
     const [inputValue, setInputValue] = useState(currentPage.toString());
+    const [pageSizeValue, setPageSizeValue] = useState(pageSize.toString());
+
+    useEffect(() => {
+        setPageSizeValue(pageSize.toString());
+    }, [pageSize]);
 
     useEffect(() => {
         setInputValue(currentPage.toString());
@@ -74,9 +81,29 @@ const OrderTablePagination = memo(({
     }, [currentPage, totalPages]);
 
     return (
-        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border px-5 py-3 text-[11px] text-text-muted">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border px-5 py-3.5 text-xs text-text-muted">
             <div className="flex items-center gap-4">
-                <div>Rows per page: {pageSize}</div>
+                <div className="flex items-center gap-1.5">
+                    <span>Rows per page:</span>
+                    <input
+                        type="text"
+                        value={pageSizeValue}
+                        onChange={(e) => setPageSizeValue(e.target.value)}
+                        onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                                const n = parseInt(pageSizeValue);
+                                if (!isNaN(n) && n > 0) onPageSizeChange(n);
+                                else setPageSizeValue(pageSize.toString());
+                            }
+                        }}
+                        onBlur={() => {
+                            const n = parseInt(pageSizeValue);
+                            if (!isNaN(n) && n > 0) onPageSizeChange(n);
+                            else setPageSizeValue(pageSize.toString());
+                        }}
+                        className="w-12 h-8 text-center border border-border rounded-lg bg-white outline-none focus:ring-1 focus:ring-primary/20 transition-all font-medium text-text text-xs"
+                    />
+                </div>
                 <div className="flex items-center gap-1.5">
                     <span>Page</span>
                     <input
@@ -85,7 +112,7 @@ const OrderTablePagination = memo(({
                         onChange={handleInputChange}
                         onKeyDown={handleInputKeyDown}
                         onBlur={handleInputBlur}
-                        className="w-10 h-7 text-center border border-border rounded-lg bg-white outline-none focus:ring-1 focus:ring-primary/20 transition-all font-medium text-text"
+                        className="w-12 h-8 text-center border border-border rounded-lg bg-white outline-none focus:ring-1 focus:ring-primary/20 transition-all font-medium text-text text-xs"
                     />
                     <span>of {totalPages}</span>
                 </div>
@@ -97,11 +124,11 @@ const OrderTablePagination = memo(({
                     <Button 
                         variant="outline" 
                         size="icon" 
-                        className="size-7 bg-white hover:bg-black/5 border-border shadow-xs rotate-180"
+                        className="size-8 bg-white hover:bg-black/5 border-border shadow-xs rotate-180"
                         disabled={currentPage === 1}
                         onClick={() => onPageChange(currentPage - 1)}
                     >
-                        <img src={arrowRight} alt="previous page" className="size-3 opacity-60"/>
+                        <img src={arrowRight} alt="previous page" className="size-3.5 opacity-60"/>
                     </Button>
 
                     <div className="flex items-center gap-1 mx-1">
@@ -116,7 +143,7 @@ const OrderTablePagination = memo(({
                                     key={pageNumber}
                                     variant={currentPage === pageNumber ? "primary" : "outline"}
                                     size="icon"
-                                    className={cn("size-7 font-medium transition-all", currentPage === pageNumber && "text-white shadow-sm shadow-primary/20")}
+                                    className={cn("size-8 font-medium transition-all", currentPage === pageNumber && "text-white shadow-sm shadow-primary/20")}
                                     onClick={() => onPageChange(pageNumber)}
                                 >
                                     {pageNumber}
@@ -128,11 +155,11 @@ const OrderTablePagination = memo(({
                     <Button 
                         variant="outline" 
                         size="icon" 
-                        className="size-7 bg-white hover:bg-black/5 border-border shadow-xs"
+                        className="size-8 bg-white hover:bg-black/5 border-border shadow-xs"
                         disabled={currentPage === totalPages || totalPages === 0}
                         onClick={() => onPageChange(currentPage + 1)}
                     >
-                        <img src={arrowRight} alt="next page" className="size-3 opacity-60"/>
+                        <img src={arrowRight} alt="next page" className="size-3.5 opacity-60"/>
                     </Button>
                 </div>
             </div>

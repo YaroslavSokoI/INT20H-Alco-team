@@ -1,4 +1,3 @@
-import { createIcon } from "@/assets/assets.ts";
 import { memo } from "react";
 
 interface OrderEditRowProps {
@@ -10,7 +9,7 @@ interface OrderEditRowProps {
 
 const OrderEditRow = memo(({ order, setOrder, onSave, onCancel }: OrderEditRowProps) => {
     return (
-        <tr className="border-t border-border-light bg-primary/[0.02] [&>td]:px-5 [&>td]:py-2 text-text">
+        <tr className="border-t border-border-light bg-primary/2 [&>td]:px-5 [&>td]:py-2 text-text">
             <td>
                 <input 
                     className="w-full bg-transparent border-b border-border/50 outline-none pb-0.5 text-text-muted" 
@@ -106,20 +105,18 @@ const OrderEditRow = memo(({ order, setOrder, onSave, onCancel }: OrderEditRowPr
                 />
             </td>
             <td className="px-5">
-                <div className="flex justify-end gap-2">
-                    <button 
-                        className="size-8 flex items-center justify-center rounded-lg bg-success hover:bg-success/80 text-success transition-all border border-success/20 shadow-xs"
-                        onClick={onSave}
-                        title="Save changes"
-                    >
-                        <img src={createIcon} alt="Save" className="size-5" />
-                    </button>
-                    <button 
-                        className="size-8 flex items-center justify-center rounded-lg bg-red-500 hover:bg-red-600 text-white transition-all border border-red-500/20 shadow-xs"
+                <div className="flex justify-end gap-3">
+                    <button
+                        className="text-xs font-semibold underline underline-offset-2 transition-all cursor-pointer text-text-muted hover:opacity-70"
                         onClick={onCancel}
-                        title="Cancel"
                     >
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>
+                        Cancel
+                    </button>
+                    <button
+                        className="text-xs font-semibold underline underline-offset-2 transition-all cursor-pointer text-primary hover:opacity-70"
+                        onClick={onSave}
+                    >
+                        Save
                     </button>
                 </div>
             </td>

@@ -50,6 +50,9 @@ export interface OrderStats {
   totalOrders: number;
   totalSales: number;
   totalTax: number;
+  deltaOrders: number;
+  deltaSales: number;
+  deltaTax: number;
 }
 
 export const ordersApi = {
@@ -68,6 +71,15 @@ export const ordersApi = {
   createOrder: async (orderData: { latitude: number; longitude: number; subtotal: number; timestamp?: string }) => {
     const response = await apiClient.post<ApiOrder>('/orders', orderData);
     return response.data;
+  },
+
+  updateOrder: async (id: string, data: Partial<Pick<ApiOrder, 'subtotal' | 'compositeTaxRate' | 'taxAmount' | 'totalAmount' | 'longitude' | 'latitude'>>) => {
+    const response = await apiClient.patch<ApiOrder>(`/orders/${id}`, data);
+    return response.data;
+  },
+
+  deleteOrder: async (id: string) => {
+    await apiClient.delete(`/orders/${id}`);
   },
 
   importOrders: async (file: File) => {

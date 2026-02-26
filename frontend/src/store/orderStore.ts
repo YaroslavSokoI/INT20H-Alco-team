@@ -20,6 +20,7 @@ interface OrderState {
     filters: OrderFilters;
     fetchOrders: (page?: number) => Promise<void>;
     setCurrentPage: (page: number) => void;
+    setPageSize: (size: number) => void;
     setSearchQuery: (query: string) => void;
     setFilters: (filters: OrderFilters) => void;
     addOrder: (order: Omit<OrderRow, "id">) => Promise<void>;
@@ -34,7 +35,7 @@ export const useOrderStore = create<OrderState>((set, get) => ({
     currentPage: 1,
     pageSize: 10,
     totalOrders: 0,
-    stats: { totalOrders: 0, totalSales: 0, totalTax: 0 },
+    stats: { totalOrders: 0, totalSales: 0, totalTax: 0, deltaOrders: 0, deltaSales: 0, deltaTax: 0 },
     searchQuery: "",
     filters: {},
     fetchOrders: async (page) => {
@@ -90,6 +91,10 @@ export const useOrderStore = create<OrderState>((set, get) => ({
         set({ currentPage: page });
         get().fetchOrders(page);
     },
+    setPageSize: (size: number) => {
+        set({ pageSize: size, currentPage: 1 });
+        get().fetchOrders(1);
+    },
     setSearchQuery: (query: string) => {
         set({ searchQuery: query, currentPage: 1 });
         get().fetchOrders(1);
@@ -113,7 +118,7 @@ export const useOrderStore = create<OrderState>((set, get) => ({
     },
     updateOrder: async (id, orderData) => {
         try {
-            console.log("Updating order", id, orderData);
+            await ordersApi.updateOrder(id, orderData);
             await get().fetchOrders();
         } catch (error) {
             console.error("Failed to update order:", error);
@@ -121,7 +126,7 @@ export const useOrderStore = create<OrderState>((set, get) => ({
     },
     deleteOrder: async (id) => {
         try {
-            console.log("Deleting order", id);
+            await ordersApi.deleteOrder(id);
             await get().fetchOrders();
         } catch (error) {
             console.error("Failed to delete order:", error);
