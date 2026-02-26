@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS orders (
     created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX IF NOT EXISTS idx_orders_state ON orders ((jurisdictions ->> 'state'));
+CREATE INDEX IF NOT EXISTS idx_orders_county ON orders ((jurisdictions ->> 'county'));
 
 CREATE INDEX IF NOT EXISTS idx_orders_city ON orders ((jurisdictions ->> 'city'));
 

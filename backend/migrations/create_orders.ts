@@ -25,7 +25,7 @@ export async function up(knex: Knex): Promise<void> {
   });
 
   await knex.raw(`
-    CREATE INDEX idx_orders_state ON orders ((jurisdictions->>'state'));
+    CREATE INDEX idx_orders_county ON orders ((jurisdictions->>'county'));
   `);
   await knex.raw(`
     CREATE INDEX idx_orders_city ON orders ((jurisdictions->>'city'));

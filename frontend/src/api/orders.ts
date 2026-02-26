@@ -1,9 +1,49 @@
 import apiClient from './client';
-import type { OrderRow } from '@/types/order';
+
+export interface ApiOrder {
+  id: number;
+  uuid: string;
+  latitude: number;
+  longitude: number;
+  subtotal: number;
+  timestamp: string;
+  compositeTaxRate: number;
+  taxAmount: number;
+  totalAmount: number;
+  stateRate: number;
+  countyRate: number;
+  cityRate: number;
+  specialRates: number;
+  jurisdictions: {
+    postcode: string;
+    city: string;
+    county: string;
+    state: string;
+  } | string;
+  createdAt: string;
+}
 
 export interface PaginatedOrders {
-  orders: OrderRow[];
+  data: ApiOrder[];
   total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
+export interface OrderFilters {
+  county?: string;
+  city?: string;
+  dateFrom?: string;
+  dateTo?: string;
+  subtotalMin?: number;
+  subtotalMax?: number;
+  taxRateMin?: number;
+  taxRateMax?: number;
+  taxMin?: number;
+  taxMax?: number;
+  totalMin?: number;
+  totalMax?: number;
 }
 
 export interface OrderStats {
@@ -13,9 +53,9 @@ export interface OrderStats {
 }
 
 export const ordersApi = {
-  getOrders: async (page: number, limit: number) => {
+  getOrders: async (page: number, limit: number, filters?: OrderFilters) => {
     const response = await apiClient.get<PaginatedOrders>(`/orders`, {
-      params: { page, limit },
+      params: { page, limit, ...filters },
     });
     return response.data;
   },
@@ -25,10 +65,11 @@ export const ordersApi = {
     return response.data;
   },
 
-  createOrder: async (orderData: Omit<OrderRow, 'id'>) => {
-    const response = await apiClient.post<OrderRow>('/orders', orderData);
+  createOrder: async (orderData: { latitude: number; longitude: number; subtotal: number; timestamp?: string }) => {
+    const response = await apiClient.post<ApiOrder>('/orders', orderData);
     return response.data;
   },
+
   importOrders: async (file: File) => {
     const formData = new FormData();
     formData.append('file', file);

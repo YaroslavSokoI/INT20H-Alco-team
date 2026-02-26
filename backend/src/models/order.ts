@@ -65,10 +65,18 @@ declare module 'knex/types/tables' {
 export interface OrderListQuery {
   page?: number;
   limit?: number;
-  state?: string;
+  county?: string;
   city?: string;
   dateFrom?: string;
   dateTo?: string;
+  subtotalMin?: number;
+  subtotalMax?: number;
+  taxRateMin?: number;
+  taxRateMax?: number;
+  taxMin?: number;
+  taxMax?: number;
+  totalMin?: number;
+  totalMax?: number;
 }
 
 export interface PaginatedOrders {

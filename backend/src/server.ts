@@ -1,3 +1,4 @@
+import path from 'path';
 import app from './app';
 import { config } from './config';
 import { db } from './repositories/db';
@@ -8,6 +9,12 @@ import bcrypt from 'bcryptjs';
 async function start(): Promise<void> {
   await db.raw('SELECT 1');
   console.log('[DB] Connected to PostgreSQL');
+
+  await db.migrate.latest({
+    directory: path.join(__dirname, '../migrations'),
+    loadExtensions: ['.js'],
+  });
+  console.log('[DB] Migrations applied');
 
   const userCount = await countAll();
   if (userCount === 0) {

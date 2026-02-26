@@ -30,7 +30,7 @@ services:
     image: mediagis/nominatim:4.4
     container_name: tax_nominatim
     environment:
-      PBF_PATH: /nominatim/data/new-york-latest.osm.pbf
+      PBF_PATH: /nominatim/data/new-york-260225.osm.pbf
       REPLICATION_URL: ""
       NOMINATIM_PASSWORD: nominatim
     volumes:

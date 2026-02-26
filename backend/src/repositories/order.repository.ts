@@ -89,8 +89,8 @@ export async function findOrders(query: OrderListQuery): Promise<PaginatedOrders
 
   let baseQuery = db('orders');
 
-  if (query.state) {
-    baseQuery = baseQuery.whereRaw(`jurisdictions->>'state' = ?`, [query.state]);
+  if (query.county) {
+    baseQuery = baseQuery.whereRaw(`jurisdictions->>'county' = ?`, [query.county]);
   }
   if (query.city) {
     baseQuery = baseQuery.whereRaw(`jurisdictions->>'city' = ?`, [query.city]);
@@ -100,6 +100,30 @@ export async function findOrders(query: OrderListQuery): Promise<PaginatedOrders
   }
   if (query.dateTo) {
     baseQuery = baseQuery.where('timestamp', '<=', new Date(query.dateTo));
+  }
+  if (query.subtotalMin !== undefined) {
+    baseQuery = baseQuery.where('subtotal', '>=', query.subtotalMin);
+  }
+  if (query.subtotalMax !== undefined) {
+    baseQuery = baseQuery.where('subtotal', '<=', query.subtotalMax);
+  }
+  if (query.taxRateMin !== undefined) {
+    baseQuery = baseQuery.where('composite_tax_rate', '>=', query.taxRateMin);
+  }
+  if (query.taxRateMax !== undefined) {
+    baseQuery = baseQuery.where('composite_tax_rate', '<=', query.taxRateMax);
+  }
+  if (query.taxMin !== undefined) {
+    baseQuery = baseQuery.where('tax_amount', '>=', query.taxMin);
+  }
+  if (query.taxMax !== undefined) {
+    baseQuery = baseQuery.where('tax_amount', '<=', query.taxMax);
+  }
+  if (query.totalMin !== undefined) {
+    baseQuery = baseQuery.where('total_amount', '>=', query.totalMin);
+  }
+  if (query.totalMax !== undefined) {
+    baseQuery = baseQuery.where('total_amount', '<=', query.totalMax);
   }
 
   const countResult = await baseQuery.clone().count('id as count');

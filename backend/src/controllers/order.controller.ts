@@ -83,13 +83,22 @@ export async function getOrders(
   next: NextFunction
 ): Promise<void> {
   try {
+    const toNum = (v: unknown) => (v ? Number(v) : undefined);
     const query = {
-      page: req.query.page ? Number(req.query.page) : undefined,
-      limit: req.query.limit ? Number(req.query.limit) : undefined,
-      state: req.query.state as string | undefined,
+      page: toNum(req.query.page),
+      limit: toNum(req.query.limit),
+      county: req.query.county as string | undefined,
       city: req.query.city as string | undefined,
       dateFrom: req.query.dateFrom as string | undefined,
       dateTo: req.query.dateTo as string | undefined,
+      subtotalMin: toNum(req.query.subtotalMin),
+      subtotalMax: toNum(req.query.subtotalMax),
+      taxRateMin: toNum(req.query.taxRateMin),
+      taxRateMax: toNum(req.query.taxRateMax),
+      taxMin: toNum(req.query.taxMin),
+      taxMax: toNum(req.query.taxMax),
+      totalMin: toNum(req.query.totalMin),
+      totalMax: toNum(req.query.totalMax),
     };
 
     const result = await listOrders(query);

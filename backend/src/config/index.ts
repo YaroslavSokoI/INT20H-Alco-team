@@ -21,7 +21,7 @@ export const config = {
   auth: {
     jwtSecret: process.env.JWT_SECRET || 'dev_secret_change_in_prod',
     adminLogin: process.env.ADMIN_LOGIN || 'admin',
-    adminPassword: process.env.ADMIN_PASSWORD || 'changeme',
+    adminPassword: process.env.ADMIN_PASSWORD || 'admin',
   },
 
   redis: {

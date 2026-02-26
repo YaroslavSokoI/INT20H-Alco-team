@@ -19,13 +19,23 @@ const createOrderSchema = z.object({
   timestamp: z.string().datetime().optional(),
 });
 
+const numericParam = z.string().regex(/^\d+(\.\d+)?$/).optional();
+
 const listOrdersSchema = z.object({
   page: z.string().regex(/^\d+$/).optional(),
   limit: z.string().regex(/^\d+$/).optional(),
-  state: z.string().optional(),
+  county: z.string().optional(),
   city: z.string().optional(),
   dateFrom: z.string().datetime().optional(),
   dateTo: z.string().datetime().optional(),
+  subtotalMin: numericParam,
+  subtotalMax: numericParam,
+  taxRateMin: numericParam,
+  taxRateMax: numericParam,
+  taxMin: numericParam,
+  taxMax: numericParam,
+  totalMin: numericParam,
+  totalMax: numericParam,
 });
 
 /**
