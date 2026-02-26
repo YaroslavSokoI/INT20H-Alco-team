@@ -16,8 +16,6 @@ interface NominatimResponse {
   address: NominatimAddress;
 }
 
-const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
 export async function reverseGeocode(lat: number, lon: number): Promise<Jurisdiction> {
   const cacheKey = `geocode:${lat}:${lon}`;
   const redis = getRedis();
@@ -31,17 +29,12 @@ export async function reverseGeocode(lat: number, lon: number): Promise<Jurisdic
     console.error('[Redis] Cache read error for reverseGeocode:', err);
   }
 
-  await delay(1000);
-
   const response = await axios.get<NominatimResponse>(config.nominatim.baseUrl, {
     params: {
       lat,
       lon,
       format: 'json',
       addressdetails: 1,
-    },
-    headers: {
-      'User-Agent': config.nominatim.userAgent,
     },
     timeout: 10000,
   });

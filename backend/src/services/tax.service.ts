@@ -1,6 +1,10 @@
+import booleanPointInPolygon from '@turf/boolean-point-in-polygon';
+import { point } from '@turf/helpers';
+import type { Feature, Polygon, MultiPolygon, FeatureCollection } from 'geojson';
 import { reverseGeocode } from '../clients/nominatim.client';
-import { getTaxRateByZip } from '../clients/tax.client';
+import { getTaxRate } from '../clients/tax.client';
 import type { TaxBreakdown, Jurisdiction } from '../models/order';
+import nyBoundaryJson from '../data/ny-boundary.json';
 
 export interface TaxCalculationResult {
   jurisdiction: Jurisdiction;
@@ -11,25 +15,32 @@ export interface TaxCalculationResult {
 
 import Decimal from 'decimal.js';
 
+type NyBoundaryGeoJson = Feature<Polygon | MultiPolygon> | FeatureCollection<Polygon | MultiPolygon>;
+const raw = nyBoundaryJson as unknown as NyBoundaryGeoJson;
+const nyBoundary = raw.type === 'FeatureCollection' ? raw.features[0] : raw;
+
+export function isWithinNY(lat: number, lon: number): boolean {
+  return booleanPointInPolygon(point([lon, lat]), nyBoundary);
+}
+
 export async function calculateTax(
   lat: number,
   lon: number,
   subtotal: number
 ): Promise<TaxCalculationResult> {
-  const jurisdiction = await reverseGeocode(lat, lon);
-
-  if (!jurisdiction.postcode) {
-    throw new Error(`Could not determine postcode for coordinates (${lat}, ${lon})`);
-  }
-
-  const stateUpper = jurisdiction.state?.toUpperCase();
-  if (stateUpper !== 'NEW YORK' && stateUpper !== 'NY') {
+  if (!booleanPointInPolygon(point([lon, lat]), nyBoundary)) {
     throw new Error(
-      `Coordinates (${lat}, ${lon}) resolve to ${jurisdiction.state || 'an unknown state'}, but must be within New York State.`
+      `Coordinates (${lat}, ${lon}) are outside New York State.`
     );
   }
 
-  const tax = await getTaxRateByZip(jurisdiction.postcode);
+  const jurisdiction = await reverseGeocode(lat, lon);
+
+  if (!jurisdiction.state) {
+    jurisdiction.state = 'New York';
+  }
+
+  const tax = await getTaxRate(jurisdiction);
 
   const sub = new Decimal(subtotal);
   const rate = new Decimal(tax.compositeRate);

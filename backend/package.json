@@ -12,6 +12,8 @@
     "migrate:make": "knex --knexfile knexfile.ts migrate:make"
   },
   "dependencies": {
+    "@turf/boolean-point-in-polygon": "^7.3.4",
+    "@turf/helpers": "^7.3.4",
     "axios": "^1.6.7",
     "cors": "^2.8.5",
     "csv-parse": "^5.5.3",

@@ -1,5 +1,4 @@
-import { calculateTax } from './tax.service';
-import { isWithinNYState } from '../utils/geo';
+import { calculateTax, isWithinNY } from './tax.service';
 import { parseCsvStream } from '../utils/csv.parser';
 import {
   insertOrder,
@@ -15,12 +14,6 @@ import type {
 } from '../models/order';
 
 export async function createOrder(dto: CreateOrderDto): Promise<Order> {
-  if (!isWithinNYState(dto.latitude, dto.longitude)) {
-    throw new Error(
-      `Coordinates (${dto.latitude}, ${dto.longitude}) are outside New York State`
-    );
-  }
-
   const { jurisdiction, tax, taxAmount, totalAmount } = await calculateTax(
     dto.latitude,
     dto.longitude,
@@ -36,18 +29,18 @@ export interface ImportResult {
   errors: Array<{ row: number; reason: string }>;
 }
 
+const BATCH_SIZE = 500;
+const NOMINATIM_CONCURRENCY = 10;
+
 export async function importOrdersFromCsv(filePath: string): Promise<ImportResult> {
   const errors: ImportResult['errors'] = [];
   let imported = 0;
-  let skipped = 0;
 
-  const BATCH_SIZE = 100;
+  const limit = pLimit(NOMINATIM_CONCURRENCY);
   let validBatch: Array<{ index: number; dto: CreateOrderDto }> = [];
 
   const processBatch = async (batch: typeof validBatch) => {
     if (batch.length === 0) return;
-
-    const limit = pLimit(1);
 
     const results = await Promise.allSettled(
       batch.map(({ index, dto }) =>
@@ -79,15 +72,15 @@ export async function importOrdersFromCsv(filePath: string): Promise<ImportResul
 
   try {
     for await (const row of parseCsvStream(filePath)) {
-      if (!isWithinNYState(row.dto.latitude, row.dto.longitude)) {
+      if (!isWithinNY(row.dto.latitude, row.dto.longitude)) {
         errors.push({
           row: row.index,
-          reason: `Coordinates (${row.dto.latitude}, ${row.dto.longitude}) are outside New York State`,
+          reason: `Coordinates (${row.dto.latitude}, ${row.dto.longitude}) are outside New York State.`,
         });
-        skipped++;
-      } else {
-        validBatch.push(row);
+        continue;
       }
+
+      validBatch.push(row);
 
       if (validBatch.length >= BATCH_SIZE) {
         await processBatch(validBatch);

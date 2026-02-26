@@ -14,14 +14,8 @@ export const config = {
     password: process.env.DB_PASSWORD || 'password',
   },
 
-  taxApi: {
-    apiKey: process.env.TAXJAR_API_KEY || '',
-    baseUrl: 'https://api.taxjar.com',
-  },
-
   nominatim: {
-    baseUrl: 'https://nominatim.openstreetmap.org/reverse',
-    userAgent: process.env.NOMINATIM_USER_AGENT || 'InstantWellnessApp/1.0',
+    baseUrl: process.env.NOMINATIM_URL || 'http://nominatim:8080/reverse',
   },
 
   auth: {
@@ -34,10 +28,4 @@ export const config = {
     url: process.env.REDIS_URL || 'redis://localhost:6379',
   },
 
-  nyBounds: {
-    minLat: 40.477399,
-    maxLat: 45.015851,
-    minLon: -79.762152,
-    maxLon: -71.856214,
-  },
 } as const;

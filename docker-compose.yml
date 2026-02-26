@@ -28,6 +28,21 @@ services:
     volumes:
       - redis_data:/data
 
+  nominatim:
+    image: mediagis/nominatim:4.4
+    container_name: tax_nominatim
+    environment:
+      PBF_PATH: /nominatim/data/new-york-260224.osm.pbf
+      REPLICATION_URL: ""
+      NOMINATIM_PASSWORD: nominatim
+    volumes:
+      - ./nominatim-data:/nominatim/data
+      - nominatim_data:/var/lib/postgresql/14/main
+    networks:
+      - backend_network
+    shm_size: 1g
+    restart: unless-stopped
+
   backend:
     build:
       context: ./backend
@@ -36,6 +51,7 @@ services:
     depends_on:
       - db
       - redis
+      - nominatim
     networks:
       - backend_network
       - proxy_network
@@ -79,3 +95,4 @@ volumes:
   redis_data:
   caddy_data:
   caddy_config:
+  nominatim_data:
