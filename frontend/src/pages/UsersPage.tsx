@@ -48,7 +48,7 @@ export default function UsersPage() {
                     <table className="w-full text-sm">
                         <thead className="bg-black/2 text-text-muted">
                             <tr className="[&>th]:px-5 [&>th]:py-3 [&>th]:text-left [&>th]:font-semibold">
-                                <th>Name</th>
+                                <th>Login</th>
                                 <th>Role</th>
                                 <th>ID</th>
                             </tr>
@@ -63,17 +63,17 @@ export default function UsersPage() {
                                     </tr>
                                 ))
                             ) : (
-                                users.map((user: User) => (
-                                    <tr key={user.id} className="border-t border-border hover:bg-black/[0.01] [&>td]:px-5 [&>td]:py-3">
-                                        <td className="font-medium">{user.name}</td>
+                                users.map((u: User) => (
+                                    <tr key={u.id} className="border-t border-border hover:bg-black/[0.01] [&>td]:px-5 [&>td]:py-3">
+                                        <td className="font-medium">{u.login}</td>
                                         <td>
                                             <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
-                                                user.role === 'admin' ? 'bg-primary/10 text-primary' : 'bg-success/10 text-success'
+                                                u.role === 'admin' ? 'bg-primary/10 text-primary' : 'bg-success/10 text-success'
                                             }`}>
-                                                {user.role}
+                                                {u.role}
                                             </span>
                                         </td>
-                                        <td className="text-text-muted">{user.id}</td>
+                                        <td className="text-text-muted">{u.id}</td>
                                     </tr>
                                 ))
                             )}

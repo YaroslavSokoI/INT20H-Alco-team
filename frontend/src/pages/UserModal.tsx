@@ -10,7 +10,7 @@ interface UserModalProps {
 
 export default function UserModal({ isOpen, onClose }: UserModalProps) {
   const { createUser } = useAuthStore();
-  const [name, setName] = useState("");
+  const [login, setLogin] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState<UserRole>("manager");
   const [isLoading, setIsLoading] = useState(false);
@@ -21,9 +21,9 @@ export default function UserModal({ isOpen, onClose }: UserModalProps) {
     e.preventDefault();
     setIsLoading(true);
     try {
-      await createUser({ name, role, password });
+      await createUser({ login, role, password });
       onClose();
-      setName("");
+      setLogin("");
       setPassword("");
       setRole("manager");
     } catch (error) {
@@ -40,15 +40,15 @@ export default function UserModal({ isOpen, onClose }: UserModalProps) {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Username
+              Login
             </label>
             <input
               type="text"
               required
               className="w-full rounded-lg border border-border px-3 py-2 outline-none focus:ring-2 focus:ring-primary/20"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Enter username"
+              value={login}
+              onChange={(e) => setLogin(e.target.value)}
+              placeholder="Enter login"
             />
           </div>
           <div>

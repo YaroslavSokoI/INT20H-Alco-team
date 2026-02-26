@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { authApi } from "@/api/auth";
+import apiClient from "@/api/client";
 import type {User} from "@/types/user";
 
 interface AuthState {
@@ -17,7 +18,7 @@ export const useAuthStore = create<AuthState>((set) => {
   const token = localStorage.getItem('token');
   
   return {
-    user: token ? { id: "self", name: "admin", role: "admin" } : null,
+    user: token ? { id: "self", login: "admin", role: "admin" } : null,
     users: [],
     isAuthenticated: !!token,
     token,
@@ -30,7 +31,7 @@ export const useAuthStore = create<AuthState>((set) => {
           token,
           isAuthenticated: true,
           // Тимчасово встановлюємо мінімального користувача для UI
-          user: { id: "self", name: loginName, role: "admin" },
+          user: { id: "self", login: loginName, role: "admin" },
         });
       } catch (error) {
         console.error("Login failed:", error);
@@ -44,23 +45,22 @@ export const useAuthStore = create<AuthState>((set) => {
     },
 
     fetchUsers: async () => {
-      // Тимчасово для тестування, якщо API ще не готове
-      const mockUsers: User[] = [
-        { id: "1", name: "Admin User", role: "admin" },
-        { id: "2", name: "Manager User", role: "manager" },
-      ];
-      set({ users: mockUsers });
+      try {
+        const response = await apiClient.get<User[]>('/users');
+        set({ users: response.data });
+      } catch (error) {
+        console.error("Failed to fetch users:", error);
+      }
     },
 
     createUser: async (userData) => {
-      // Тимчасово для тестування
-      console.log("Creating user:", userData);
-      const newUser: User = {
-        id: Math.random().toString(36).substr(2, 9),
-        name: userData.name,
-        role: userData.role,
-      };
-      set((state) => ({ users: [...state.users, newUser] }));
+      try {
+        const newUser = await authApi.register(userData);
+        set((state) => ({ users: [...state.users, newUser] }));
+      } catch (error) {
+        console.error("Failed to create user:", error);
+        throw error;
+      }
     }
   };
 });
