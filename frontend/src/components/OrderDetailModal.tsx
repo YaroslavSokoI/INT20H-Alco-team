@@ -19,15 +19,20 @@ const OrderDetailModal = memo(({ order, onClose }: OrderDetailModalProps) => {
     if (!order) return null;
 
     const details = [
-        { label: "Order ID", value: order.id, icon: "🆔" },
-        { label: "Order Date", value: order.date, icon: "📅" },
-        { label: "Jurisdiction", value: order.jurisdiction, icon: "📍" },
+        { label: "Order UUID", value: order.uuid, icon: "🆔", highlight: true },
+        { label: "Order Date", value: new Date(order.timestamp).toLocaleString(), icon: "📅" },
+        { label: "City", value: order.jurisdictions.city, icon: "📍" },
+        { label: "County", value: order.jurisdictions.county, icon: "📍" },
+        { label: "State", value: order.jurisdictions.state, icon: "🇺🇸" },
+        { label: "Postcode", value: order.jurisdictions.postcode, icon: "📮" },
         { label: "Subtotal", value: formatCurrency(order.subtotal), icon: "💰" },
-        { label: "Tax Rate", value: formatPercent(order.taxRate), icon: "📊" },
-        { label: "Tax", value: formatCurrency(order.tax), icon: "💸" },
-        { label: "Total", value: formatCurrency(order.total), highlight: true, icon: "🧾" },
-        { label: "Longitude", value: order.longitude, icon: "🌐" },
-        { label: "Latitude", value: order.latitude, icon: "🌐" },
+        { label: "Tax Rate", value: formatPercent(order.compositeTaxRate * 100), icon: "📊" },
+        { label: "Tax Amount", value: formatCurrency(order.taxAmount), icon: "💸" },
+        { label: "Total Amount", value: formatCurrency(order.totalAmount), highlight: true, icon: "🧾" },
+        { label: "State Rate", value: formatPercent(order.stateRate * 100), icon: "📈" },
+        { label: "County Rate", value: formatPercent(order.countyRate * 100), icon: "📉" },
+        { label: "City Rate", value: formatPercent(order.cityRate * 100), icon: "📉" },
+        { label: "Special Rates", value: formatPercent(order.specialRates * 100), icon: "📉" },
     ];
 
     return (

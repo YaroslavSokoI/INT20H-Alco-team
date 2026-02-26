@@ -10,29 +10,30 @@ export const getOrderColumns = (
     onEdit: (order: OrderRow) => void,
     onDelete: (id: string) => void
 ) => [
-    columnHelper.accessor("id", {
-        header: "Order ID",
-        cell: info => <span className="font-semibold text-primary">{info.getValue()}</span>,
+    columnHelper.accessor("uuid", {
+        header: "Order UUID",
+        cell: info => <span className="font-semibold text-primary text-xs">{info.getValue().substring(0, 8)}...</span>,
     }),
-    columnHelper.accessor("date", {
+    columnHelper.accessor("timestamp", {
         header: "Order Date",
+        cell: info => new Date(info.getValue()).toLocaleDateString(),
     }),
-    columnHelper.accessor("jurisdiction", {
-        header: "Jurisdiction",
+    columnHelper.accessor("jurisdictions.city", {
+        header: "City",
     }),
     columnHelper.accessor("subtotal", {
         header: "Subtotal",
         cell: info => formatCurrency(info.getValue()),
     }),
-    columnHelper.accessor("taxRate", {
+    columnHelper.accessor("compositeTaxRate", {
         header: "Tax Rate",
-        cell: info => formatPercent(info.getValue()),
+        cell: info => formatPercent(info.getValue() * 100),
     }),
-    columnHelper.accessor("tax", {
+    columnHelper.accessor("taxAmount", {
         header: "Tax",
         cell: info => formatCurrency(info.getValue()),
     }),
-    columnHelper.accessor("total", {
+    columnHelper.accessor("totalAmount", {
         header: "Total",
         cell: info => <span className="font-medium">{formatCurrency(info.getValue())}</span>,
     }),

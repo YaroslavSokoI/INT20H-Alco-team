@@ -5,13 +5,12 @@ import { useOrderStore } from "@/store/orderStore";
 import { useState, useCallback, memo, useRef } from "react";
 
 interface OrderTableActionsProps {
-    onImport: (file: File) => void;
+    onImport: () => void;
     onCreate: () => void;
 }
 
 const OrderTableActions = memo(({ onImport, onCreate }: OrderTableActionsProps) => {
     const { searchQuery, setSearchQuery, setFilters } = useOrderStore();
-    const fileInputRef = useRef<HTMLInputElement>(null);
     const [showFilters, setShowFilters] = useState(false);
     const [localFilters, setLocalFilters] = useState({
         minTotal: "",
@@ -42,24 +41,8 @@ const OrderTableActions = memo(({ onImport, onCreate }: OrderTableActionsProps) 
         setSearchQuery(e.target.value);
     }, [setSearchQuery]);
 
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (file) {
-            onImport(file);
-            // Скидаємо значення інпуту, щоб можна було вибрати той самий файл повторно
-            e.target.value = "";
-        }
-    };
-
     return (
         <div className="border-t border-border px-5 py-2.5 space-y-3">
-            <input 
-                type="file" 
-                ref={fileInputRef} 
-                onChange={handleFileChange} 
-                accept=".csv" 
-                className="hidden" 
-            />
             <div className="flex items-center justify-between gap-3">
                 <div className="w-full h-9 px-3 flex items-center gap-2 border border-border text-sm rounded-xl text-text-muted focus-within:ring-2 focus-within:ring-primary/10 transition-all bg-surface/50">
                     <img src={searchIcon} alt="search icon" className="size-4 opacity-40"/>
@@ -85,7 +68,7 @@ const OrderTableActions = memo(({ onImport, onCreate }: OrderTableActionsProps) 
                         variant="outline" 
                         size="md" 
                         className="gap-2 font-semibold shadow-xs" 
-                        onClick={() => fileInputRef.current?.click()}
+                        onClick={onImport}
                     >
                         <img src={importIcon} alt="" className="size-3.5" />
                         Import

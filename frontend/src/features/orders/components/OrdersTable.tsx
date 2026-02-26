@@ -3,6 +3,7 @@ import OrderTableBody from "./table/OrderTableBody";
 import OrderTablePagination from "./table/OrderTablePagination";
 import OrderDetailModal from "@/components/OrderDetailModal";
 import ImportResultModal from "@/components/ImportResultModal";
+import ImportModal from "./table/ImportModal";
 import { useOrdersTable } from "../hooks/useOrdersTable";
 import { useOrderStore } from "@/store/orderStore";
 import { useState } from "react";
@@ -10,6 +11,7 @@ import { useState } from "react";
 export default function OrdersTable() {
     const { importOrders } = useOrderStore();
     const [importResult, setImportResult] = useState<any>(null);
+    const [isImportModalOpen, setIsImportModalOpen] = useState(false);
 
     const {
         table,
@@ -49,7 +51,7 @@ export default function OrdersTable() {
             </div>
 
             <OrderTableActions 
-                onImport={handleImport}
+                onImport={() => setIsImportModalOpen(true)}
                 onCreate={() => setIsCreating(true)}
             />
 
@@ -83,6 +85,12 @@ export default function OrdersTable() {
             <ImportResultModal 
                 result={importResult} 
                 onClose={() => setImportResult(null)} 
+            />
+
+            <ImportModal 
+                isOpen={isImportModalOpen} 
+                onClose={() => setIsImportModalOpen(false)} 
+                onImport={handleImport} 
             />
         </div>
     );

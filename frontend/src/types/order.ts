@@ -9,13 +9,24 @@ export type StatCardDTO = {
 };
 
 export type OrderRow = {
-    id: string;
-    date: string;
-    jurisdiction: string;
-    subtotal: number;
-    taxRate: number;
-    tax: number;
-    total: number;
-    longitude: number;
+    id: number;
+    uuid: string;
     latitude: number;
+    longitude: number;
+    subtotal: number;
+    timestamp: string;
+    compositeTaxRate: number;
+    taxAmount: number;
+    totalAmount: number;
+    stateRate: number;
+    countyRate: number;
+    cityRate: number;
+    specialRates: number;
+    jurisdictions: {
+        postcode: string;
+        city: string;
+        county: string;
+        state: string;
+    };
+    createdAt: string;
 };
