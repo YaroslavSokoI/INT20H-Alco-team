@@ -13,6 +13,7 @@ import editIcon from './editIcon.svg'
 import expandIcon from './expandIcon.svg'
 import userIcon from './user.svg'
 import searchIcon from './search.svg'
+import refreshIcon from './refresh.svg'
 
 
-export { dashboard, logout, cart, percent, dollar, file, arrowRight, filterIcon, importIcon, createIcon, editIcon, deleteIcon, expandIcon, userIcon, searchIcon };
+export { dashboard, logout, cart, percent, dollar, file, arrowRight, filterIcon, importIcon, createIcon, editIcon, deleteIcon, expandIcon, userIcon, searchIcon, refreshIcon };

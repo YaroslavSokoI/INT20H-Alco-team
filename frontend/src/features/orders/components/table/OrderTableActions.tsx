@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/Button";
-import { expandIcon, filterIcon, importIcon, searchIcon } from "@/assets/assets.ts";
+import { expandIcon, filterIcon, importIcon, searchIcon, refreshIcon } from "@/assets/assets.ts";
 
 import { useOrderStore } from "@/store/orderStore";
 import { useState, useCallback, memo } from "react";
@@ -74,7 +74,7 @@ function RangeInput({
 }
 
 const OrderTableActions = memo(({ onImport, onCreate }: OrderTableActionsProps) => {
-    const { searchQuery, setSearchQuery, setFilters, filters } = useOrderStore();
+    const { searchQuery, setSearchQuery, setFilters, filters, fetchOrders, isLoading } = useOrderStore();
     const [showFilters, setShowFilters] = useState(false);
     const [local, setLocal] = useState<LocalFilters>({
         county: filters.county ?? "",
@@ -146,6 +146,15 @@ const OrderTableActions = memo(({ onImport, onCreate }: OrderTableActionsProps) 
                 </div>
 
                 <div className="flex items-center gap-2">
+                    <Button
+                        variant="outline"
+                        size="md"
+                        className="shadow-xs"
+                        onClick={() => fetchOrders()}
+                        disabled={isLoading}
+                    >
+                        <img src={refreshIcon} alt="refresh" className={`size-3.5 ${isLoading ? "animate-spin" : ""}`} />
+                    </Button>
                     <Button
                         variant={showFilters ? "primary" : "outline"}
                         size="md"
