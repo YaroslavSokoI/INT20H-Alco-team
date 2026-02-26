@@ -21,6 +21,7 @@ interface OrderState {
     addOrder: (order: Omit<OrderRow, "id">) => Promise<void>;
     updateOrder: (id: string, order: Partial<OrderRow>) => Promise<void>;
     deleteOrder: (id: string) => Promise<void>;
+    importOrders: (file: File) => Promise<any>;
 }
 
 export const useOrderStore = create<OrderState>((set, get) => ({
@@ -126,6 +127,19 @@ export const useOrderStore = create<OrderState>((set, get) => ({
             }
         } catch (error) {
             console.error("Failed to delete order:", error);
+        }
+    },
+    importOrders: async (file) => {
+        set({ isLoading: true });
+        try {
+            const result = await ordersApi.importOrders(file);
+            await get().fetchOrders();
+            set({ isLoading: false });
+            return result;
+        } catch (error) {
+            console.error("Failed to import orders:", error);
+            set({ isLoading: false });
+            throw error;
         }
     },
 }));

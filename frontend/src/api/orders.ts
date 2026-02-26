@@ -18,4 +18,14 @@ export const ordersApi = {
     const response = await apiClient.post<OrderRow>('/orders', orderData);
     return response.data;
   },
+  importOrders: async (file: File) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    const response = await apiClient.post('/orders/import', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  },
 };

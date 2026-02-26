@@ -2,9 +2,15 @@ import OrderTableActions from "./table/OrderTableActions";
 import OrderTableBody from "./table/OrderTableBody";
 import OrderTablePagination from "./table/OrderTablePagination";
 import OrderDetailModal from "@/components/OrderDetailModal";
+import ImportResultModal from "@/components/ImportResultModal";
 import { useOrdersTable } from "../hooks/useOrdersTable";
+import { useOrderStore } from "@/store/orderStore";
+import { useState } from "react";
 
 export default function OrdersTable() {
+    const { importOrders } = useOrderStore();
+    const [importResult, setImportResult] = useState<any>(null);
+
     const {
         table,
         isLoading,
@@ -27,6 +33,15 @@ export default function OrdersTable() {
         handleEditCancel
     } = useOrdersTable();
 
+    const handleImport = async (file: File) => {
+        try {
+            const result = await importOrders(file);
+            setImportResult(result);
+        } catch (error) {
+            console.error("Import failed", error);
+        }
+    };
+
     return (
         <div className="overflow-hidden rounded-xl border border-border bg-white">
             <div className="px-5 py-3">
@@ -34,7 +49,7 @@ export default function OrdersTable() {
             </div>
 
             <OrderTableActions 
-                onImport={() => console.log("Import")}
+                onImport={handleImport}
                 onCreate={() => setIsCreating(true)}
             />
 
@@ -63,6 +78,11 @@ export default function OrdersTable() {
             <OrderDetailModal 
                 order={selectedOrder} 
                 onClose={() => setSelectedOrder(null)} 
+            />
+
+            <ImportResultModal 
+                result={importResult} 
+                onClose={() => setImportResult(null)} 
             />
         </div>
     );
