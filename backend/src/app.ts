@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import orderRoutes from './routes/order.routes';
 import authRoutes from './routes/auth.routes';
+import userRoutes from './routes/user.routes';
 import { errorHandler, notFound } from './middleware/errorHandler';
 import { setupSwagger } from './swagger';
 
@@ -16,6 +17,7 @@ app.get('/health', (_req, res) => {
 
 app.use('/auth', authRoutes);
 app.use('/orders', orderRoutes);
+app.use('/users', userRoutes);
 
 setupSwagger(app);
 

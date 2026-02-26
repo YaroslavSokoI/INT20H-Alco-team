@@ -2,10 +2,23 @@ import app from './app';
 import { config } from './config';
 import { db } from './repositories/db';
 import { connectRedis, disconnectRedis } from './clients/redis.client';
+import { countAll } from './repositories/user.repository';
+import bcrypt from 'bcryptjs';
 
 async function start(): Promise<void> {
   await db.raw('SELECT 1');
   console.log('[DB] Connected to PostgreSQL');
+
+  const userCount = await countAll();
+  if (userCount === 0) {
+    const hash = await bcrypt.hash(config.auth.adminPassword, 10);
+    await db('users').insert({
+      login: config.auth.adminLogin,
+      password: hash,
+      role: 'admin',
+    });
+    console.log(`[Seed] Created default admin: ${config.auth.adminLogin}`);
+  }
 
   await connectRedis();
 

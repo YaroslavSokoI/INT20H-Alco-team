@@ -8,7 +8,7 @@ export async function loginHandler(
   next: NextFunction
 ): Promise<void> {
   try {
-    const result = login(req.body);
+    const result = await login(req.body);
     res.status(200).json(result);
   } catch (err) {
     if (err instanceof Error && err.message === 'Invalid credentials') {

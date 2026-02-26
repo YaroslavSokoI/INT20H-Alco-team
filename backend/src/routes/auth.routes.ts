@@ -12,46 +12,79 @@ const loginSchema = z.object({
 
 /**
  * @swagger
+ * tags:
+ *   name: Auth
+ *   description: Authentication endpoints
+ *
+ * components:
+ *   schemas:
+ *     LoginRequest:
+ *       type: object
+ *       required:
+ *         - login
+ *         - password
+ *       properties:
+ *         login:
+ *           type: string
+ *           example: admin
+ *         password:
+ *           type: string
+ *           format: password
+ *           example: changeme
+ *
+ *     LoginResponse:
+ *       type: object
+ *       properties:
+ *         token:
+ *           type: string
+ *           description: JWT token valid for 24 hours
+ *           example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+ *
+ *     ErrorResponse:
+ *       type: object
+ *       properties:
+ *         error:
+ *           type: string
+ *           example: "Invalid credentials"
+ */
+
+/**
+ * @swagger
  * /auth/login:
  *   post:
- *     summary: User login
- *     description: Authenticates a user and returns a JWT token.
+ *     summary: Login
+ *     description: Authenticate with login and password, receive a JWT token (24h).
  *     tags: [Auth]
+ *     security: []
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             required:
- *               - login
- *               - password
- *             properties:
- *               login:
- *                 type: string
- *               password:
- *                 type: string
+ *             $ref: '#/components/schemas/LoginRequest'
  *     responses:
  *       200:
- *         description: Successfully authenticated.
+ *         description: Authenticated successfully
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 token:
- *                   type: string
- *                   example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+ *               $ref: '#/components/schemas/LoginResponse'
+ *       400:
+ *         description: Validation error — missing or empty fields
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example:
+ *               error: "Validation failed"
  *       401:
- *         description: Unauthorized - Invalid credentials.
+ *         description: Invalid login or password
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 error:
- *                   type: string
- *                   example: "Invalid credentials"
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example:
+ *               error: "Invalid credentials"
  */
 router.post('/login', validateBody(loginSchema), loginHandler);
 
