@@ -3,7 +3,7 @@ import type { OrderRow } from "@/types/order";
 import { Button } from "./ui/Button";
 import { useKeydown } from "@/hooks/useKeydown";
 import { useClickOutside } from "@/hooks/useClickOutside";
-import { formatCurrency, formatPercent, formatDate } from "@/lib/formatters";
+import { formatCurrency, formatPercent } from "@/lib/formatters";
 
 interface OrderDetailModalProps {
     order: OrderRow | null;
@@ -19,20 +19,20 @@ const OrderDetailModal = memo(({ order, onClose }: OrderDetailModalProps) => {
     if (!order) return null;
 
     const details = [
-        { label: "Order UUID", value: order.uuid || "N/A", icon: "🆔", highlight: true },
-        { label: "Order Date", value: order.timestamp ? formatDate(order.timestamp) : "N/A", icon: "📅" },
-        { label: "City", value: order.jurisdictions?.city || "N/A", icon: "📍" },
-        { label: "County", value: order.jurisdictions?.county || "N/A", icon: "📍" },
-        { label: "State", value: order.jurisdictions?.state || "N/A", icon: "🇺🇸" },
-        { label: "Postcode", value: order.jurisdictions?.postcode || "N/A", icon: "📮" },
-        { label: "Subtotal", value: formatCurrency(order.subtotal), icon: "💰" },
-        { label: "Tax Rate", value: formatPercent((order.compositeTaxRate || 0) * 100), icon: "📊" },
-        { label: "Tax Amount", value: formatCurrency(order.taxAmount), icon: "💸" },
-        { label: "Total Amount", value: formatCurrency(order.totalAmount), highlight: true, icon: "🧾" },
-        { label: "State Rate", value: formatPercent((order.stateRate || 0) * 100), icon: "📈" },
-        { label: "County Rate", value: formatPercent((order.countyRate || 0) * 100), icon: "📉" },
-        { label: "City Rate", value: formatPercent((order.cityRate || 0) * 100), icon: "📉" },
-        { label: "Special Rates", value: formatPercent((order.specialRates || 0) * 100), icon: "📉" },
+        { label: "Order ID", value: String(order.id), highlight: true },
+        { label: "Order Date", value: order.timestamp ? new Date(order.timestamp).toLocaleString() : "N/A" },
+        { label: "City", value: order.jurisdictions?.city || "N/A" },
+        { label: "County", value: order.jurisdictions?.county || "N/A" },
+        { label: "State", value: order.jurisdictions?.state || "N/A" },
+        { label: "Postcode", value: order.jurisdictions?.postcode || "N/A" },
+        { label: "Subtotal", value: formatCurrency(order.subtotal) },
+        { label: "Tax Rate", value: formatPercent((order.compositeTaxRate || 0) * 100) },
+        { label: "Tax Amount", value: formatCurrency(order.taxAmount) },
+        { label: "Total Amount", value: formatCurrency(order.totalAmount), highlight: true },
+        { label: "State Rate", value: formatPercent((order.stateRate || 0) * 100) },
+        { label: "County Rate", value: formatPercent((order.countyRate || 0) * 100) },
+        { label: "City Rate", value: formatPercent((order.cityRate || 0) * 100) },
+        { label: "Special Rates", value: formatPercent((order.specialRates || 0) * 100) },
     ];
 
     return (
@@ -67,7 +67,6 @@ const OrderDetailModal = memo(({ order, onClose }: OrderDetailModalProps) => {
                             }`}
                         >
                             <div className="flex items-center gap-2 mb-1.5">
-                                <span className="text-xs opacity-70">{item.icon}</span>
                                 <div className="text-[10px] font-bold text-text-muted uppercase tracking-widest">
                                     {item.label}
                                 </div>
