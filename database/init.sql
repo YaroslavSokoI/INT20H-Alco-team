@@ -1,4 +1,3 @@
--- Users table
 CREATE TABLE IF NOT EXISTS users (
     id SERIAL PRIMARY KEY,
     login VARCHAR(100) NOT NULL UNIQUE,
@@ -7,7 +6,6 @@ CREATE TABLE IF NOT EXISTS users (
     created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
--- Orders table
 CREATE TABLE IF NOT EXISTS orders (
     id SERIAL PRIMARY KEY,
     latitude DECIMAL(10, 7) NOT NULL,
