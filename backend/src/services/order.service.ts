@@ -50,7 +50,7 @@ export async function importOrdersFromCsv(filePath: string): Promise<ImportResul
         limit(() =>
           calculateTax(dto.latitude, dto.longitude, dto.subtotal)
             .then(({ jurisdiction, tax, taxAmount, totalAmount }) => ({
-              dto, tax, jurisdiction, taxAmount, totalAmount,
+              index, dto, tax, jurisdiction, taxAmount, totalAmount,
             }))
             .catch((err: unknown) => {
               errors.push({
@@ -68,13 +68,29 @@ export async function importOrdersFromCsv(filePath: string): Promise<ImportResul
       .filter((v): v is NonNullable<typeof v> => v !== null);
 
     if (toInsert.length > 0) {
-      await insertOrdersBatch(toInsert);
-      imported += toInsert.length;
+      try {
+        await insertOrdersBatch(toInsert.map(({ dto, tax, jurisdiction, taxAmount, totalAmount }) => ({
+          dto, tax, jurisdiction, taxAmount, totalAmount,
+        })));
+        imported += toInsert.length;
+      } catch (err) {
+        toInsert.forEach(({ index }) => {
+          errors.push({
+            row: index,
+            reason: `Insert failed: ${err instanceof Error ? err.message : String(err)}`,
+          });
+        });
+      }
     }
   };
 
   try {
     for await (const row of parseCsvStream(filePath)) {
+      if (row.error || !row.dto) {
+        errors.push({ row: row.index, reason: row.error ?? 'Invalid row' });
+        continue;
+      }
+
       if (!isWithinNY(row.dto.latitude, row.dto.longitude)) {
         errors.push({
           row: row.index,
@@ -83,7 +99,7 @@ export async function importOrdersFromCsv(filePath: string): Promise<ImportResul
         continue;
       }
 
-      validBatch.push(row);
+      validBatch.push({ index: row.index, dto: row.dto });
 
       if (validBatch.length >= BATCH_SIZE) {
         await processBatch(validBatch);

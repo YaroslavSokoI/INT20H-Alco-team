@@ -40,7 +40,10 @@ export default function OrdersTable() {
             const result = await importOrders(file);
             setImportResult(result);
         } catch (error) {
-            console.error("Import failed", error);
+            const message =
+                (error as any)?.response?.data?.error ||
+                (error instanceof Error ? error.message : 'Import failed');
+            setImportResult({ imported: 0, skipped: 0, errors: [{ row: 0, reason: message }] });
         }
     };
 

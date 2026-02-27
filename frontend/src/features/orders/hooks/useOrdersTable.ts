@@ -4,6 +4,7 @@ import { getOrderColumns } from "../components/table/columns";
 import {
     getCoreRowModel,
     useReactTable,
+    type VisibilityState,
 } from "@tanstack/react-table";
 import type { OrderRow } from "@/types/order";
 
@@ -76,6 +77,49 @@ export function useOrdersTable() {
 
     const [pendingDeleteId, setPendingDeleteId] = useState<number | string | null>(null);
 
+    const [taxExpanded, setTaxExpanded] = useState(false);
+
+    const jurisdictionDetailCols = ['state', 'city', 'county', 'specialDistrict', 'postcode', 'latitude', 'longitude', 'collapseJurisdiction'];
+    const taxDetailCols = ['stateRate', 'countyRate', 'cityRate', 'specialRates'];
+
+    const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({
+        jurisdictionSummary: true,
+        state: false,
+        city: false,
+        county: false,
+        specialDistrict: false,
+        postcode: false,
+        latitude: false,
+        longitude: false,
+        collapseJurisdiction: false,
+        stateRate: false,
+        countyRate: false,
+        cityRate: false,
+        specialRates: false,
+    });
+
+    const toggleJurisdiction = useCallback(() => {
+        setColumnVisibility(v => {
+            const next = !v['state'];
+            return {
+                ...v,
+                jurisdictionSummary: !next,
+                ...Object.fromEntries(jurisdictionDetailCols.map(c => [c, next])),
+            };
+        });
+    }, []);
+
+    const toggleTax = useCallback(() => {
+        setTaxExpanded(prev => {
+            const next = !prev;
+            setColumnVisibility(v => ({
+                ...v,
+                ...Object.fromEntries(taxDetailCols.map(c => [c, next])),
+            }));
+            return next;
+        });
+    }, []);
+
     const handleDelete = useCallback((id: number | string) => {
         setPendingDeleteId(id);
     }, []);
@@ -94,11 +138,17 @@ export function useOrdersTable() {
         setSelectedOrder(order);
     }, []);
 
-    const columns = useMemo(() => getOrderColumns(handleExpand, handleEditStart, handleDelete, pendingDeleteId, handleDeleteConfirm, handleDeleteCancel), [handleExpand, handleEditStart, handleDelete, pendingDeleteId, handleDeleteConfirm, handleDeleteCancel]);
+    const columns = useMemo(() => getOrderColumns(
+        handleExpand, handleEditStart, handleDelete, pendingDeleteId, handleDeleteConfirm, handleDeleteCancel,
+        toggleJurisdiction,
+        taxExpanded, toggleTax,
+    ), [handleExpand, handleEditStart, handleDelete, pendingDeleteId, handleDeleteConfirm, handleDeleteCancel, toggleJurisdiction, taxExpanded, toggleTax]);
 
     const table = useReactTable({
         data: orders,
         columns,
+        state: { columnVisibility },
+        onColumnVisibilityChange: setColumnVisibility,
         getCoreRowModel: getCoreRowModel(),
     });
 

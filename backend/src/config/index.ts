@@ -14,10 +14,6 @@ export const config = {
     password: process.env.DB_PASSWORD || 'password',
   },
 
-  nominatim: {
-    baseUrl: process.env.NOMINATIM_URL || 'http://nominatim:8080/reverse',
-  },
-
   auth: {
     jwtSecret: process.env.JWT_SECRET || 'dev_secret_change_in_prod',
     adminLogin: process.env.ADMIN_LOGIN || 'admin',

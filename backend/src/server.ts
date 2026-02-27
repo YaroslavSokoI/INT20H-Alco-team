@@ -4,6 +4,7 @@ import { config } from './config';
 import { db } from './repositories/db';
 import { connectRedis, disconnectRedis } from './clients/redis.client';
 import { countAll } from './repositories/user.repository';
+import { initGeocoder } from './clients/local-geocoder.client';
 import bcrypt from 'bcryptjs';
 
 async function start(): Promise<void> {
@@ -28,6 +29,7 @@ async function start(): Promise<void> {
   }
 
   await connectRedis();
+  await initGeocoder();
 
   const server = app.listen(config.port, () => {
     console.log(`[Server] Running on http://localhost:${config.port} (${config.nodeEnv})`);

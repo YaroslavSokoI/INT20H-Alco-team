@@ -8,6 +8,7 @@ import type {
   PaginatedOrders,
   OrderRow,
 } from '../models/order';
+import { parseSearch } from '../utils/search.parser';
 
 function rowToOrder(row: OrderRow): Order {
   return {
@@ -24,7 +25,10 @@ function rowToOrder(row: OrderRow): Order {
     countyRate: typeof row.county_rate === 'string' ? parseFloat(row.county_rate) : row.county_rate,
     cityRate: typeof row.city_rate === 'string' ? parseFloat(row.city_rate) : row.city_rate,
     specialRates: typeof row.special_rates === 'string' ? parseFloat(row.special_rates) : row.special_rates,
-    jurisdictions: typeof row.jurisdictions === 'string' ? JSON.parse(row.jurisdictions) : row.jurisdictions,
+    city: row.city,
+    county: row.county,
+    state: row.state,
+    postcode: row.postcode,
     createdAt: row.created_at,
   };
 }
@@ -53,7 +57,10 @@ export async function insertOrder(data: InsertOrderData): Promise<Order> {
       county_rate: tax.countyRate,
       city_rate: tax.cityRate,
       special_rates: tax.specialRates,
-      jurisdictions: JSON.stringify(jurisdiction),
+      city: jurisdiction.city,
+      county: jurisdiction.county,
+      state: jurisdiction.state,
+      postcode: jurisdiction.postcode,
     })
     .returning('*');
 
@@ -75,7 +82,10 @@ export async function insertOrdersBatch(items: InsertOrderData[]): Promise<Order
     county_rate: tax.countyRate,
     city_rate: tax.cityRate,
     special_rates: tax.specialRates,
-    jurisdictions: JSON.stringify(jurisdiction),
+    city: jurisdiction.city,
+    county: jurisdiction.county,
+    state: jurisdiction.state,
+    postcode: jurisdiction.postcode,
   }));
 
   const inserted = await db('orders').insert(rows).returning('*');
@@ -90,10 +100,10 @@ export async function findOrders(query: OrderListQuery): Promise<PaginatedOrders
   let baseQuery = db('orders');
 
   if (query.county) {
-    baseQuery = baseQuery.whereRaw(`jurisdictions->>'county' = ?`, [query.county]);
+    baseQuery = baseQuery.where('county', query.county);
   }
   if (query.city) {
-    baseQuery = baseQuery.whereRaw(`jurisdictions->>'city' = ?`, [query.city]);
+    baseQuery = baseQuery.where('city', query.city);
   }
   if (query.dateFrom) {
     baseQuery = baseQuery.where('timestamp', '>=', new Date(query.dateFrom));
@@ -124,6 +134,33 @@ export async function findOrders(query: OrderListQuery): Promise<PaginatedOrders
   }
   if (query.totalMax !== undefined) {
     baseQuery = baseQuery.where('total_amount', '<=', query.totalMax);
+  }
+
+  if (query.search) {
+    const { defaultTerms, structured } = parseSearch(query.search);
+    const DEFAULT_FIELDS = [
+      `CAST(id AS TEXT)`,
+      `uuid::text`,
+      `city`,
+      `county`,
+      `state`,
+      `postcode`,
+      `CAST(timestamp AS TEXT)`,
+    ];
+
+    for (const term of defaultTerms) {
+      baseQuery = baseQuery.where(function () {
+        DEFAULT_FIELDS.forEach(f => this.orWhereRaw(`${f} ILIKE ?`, [`%${term}%`]));
+      });
+    }
+
+    for (const { field, term, exact } of structured) {
+      if (exact) {
+        baseQuery = baseQuery.whereRaw(`${field} = ?`, [term]);
+      } else {
+        baseQuery = baseQuery.whereRaw(`${field} ILIKE ?`, [`%${term}%`]);
+      }
+    }
   }
 
   const countResult = await baseQuery.clone().count('id as count');

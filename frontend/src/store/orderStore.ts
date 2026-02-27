@@ -3,10 +3,7 @@ import type { OrderRow } from "@/types/order";
 import { ordersApi, type ApiOrder, type OrderFilters, type OrderStats } from "@/api/orders";
 
 function mapApiOrder(order: ApiOrder): OrderRow {
-    const jurisdictions = typeof order.jurisdictions === "string"
-        ? JSON.parse(order.jurisdictions)
-        : order.jurisdictions;
-    return { ...order, jurisdictions };
+    return { ...order };
 }
 
 interface OrderState {
@@ -57,6 +54,7 @@ export const useOrderStore = create<OrderState>((set, get) => ({
             if (filters.taxMax !== undefined) apiFilters.taxMax = filters.taxMax;
             if (filters.totalMin !== undefined) apiFilters.totalMin = filters.totalMin;
             if (filters.totalMax !== undefined) apiFilters.totalMax = filters.totalMax;
+            if (searchQuery.trim()) apiFilters.search = searchQuery.trim();
 
             const [result, stats] = await Promise.all([
                 ordersApi.getOrders(targetPage, pageSize, apiFilters),
@@ -64,15 +62,6 @@ export const useOrderStore = create<OrderState>((set, get) => ({
             ]);
 
             let orders = result.data.map(mapApiOrder);
-
-            if (searchQuery.trim()) {
-                const terms = searchQuery.toLowerCase().split(/\s+/).filter(Boolean);
-                orders = orders.filter(o => {
-                    const j = o.jurisdictions;
-                    const text = `${o.id} ${o.uuid} ${o.timestamp} ${j.state} ${j.county} ${j.city}`.toLowerCase();
-                    return terms.every(t => text.includes(t));
-                });
-            }
 
             set({
                 orders,

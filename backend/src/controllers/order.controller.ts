@@ -99,6 +99,7 @@ export async function getOrders(
       taxMax: toNum(req.query.taxMax),
       totalMin: toNum(req.query.totalMin),
       totalMax: toNum(req.query.totalMax),
+      search: req.query.search as string | undefined,
     };
 
     const result = await listOrders(query);

@@ -22,11 +22,9 @@ export type OrderRow = {
     countyRate: number;
     cityRate: number;
     specialRates: number;
-    jurisdictions: {
-        postcode: string;
-        city: string;
-        county: string;
-        state: string;
-    };
+    city: string;
+    county: string;
+    state: string;
+    postcode: string;
     createdAt: string;
 };

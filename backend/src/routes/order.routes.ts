@@ -38,6 +38,7 @@ const listOrdersSchema = z.object({
   taxMax: numericParam,
   totalMin: numericParam,
   totalMax: numericParam,
+  search: z.string().optional(),
 });
 
 /**

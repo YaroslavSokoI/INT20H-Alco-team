@@ -9,7 +9,8 @@
     "start": "node dist/server.js",
     "migrate": "knex --knexfile knexfile.ts migrate:latest",
     "migrate:rollback": "knex --knexfile knexfile.ts migrate:rollback",
-    "migrate:make": "knex --knexfile knexfile.ts migrate:make"
+    "migrate:make": "knex --knexfile knexfile.ts migrate:make",
+    "geocoder:download": "node scripts/download-geocoder.mjs"
   },
   "dependencies": {
     "@turf/boolean-point-in-polygon": "^7.3.4",

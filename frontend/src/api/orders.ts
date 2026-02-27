@@ -14,12 +14,10 @@ export interface ApiOrder {
   countyRate: number;
   cityRate: number;
   specialRates: number;
-  jurisdictions: {
-    postcode: string;
-    city: string;
-    county: string;
-    state: string;
-  } | string;
+  city: string;
+  county: string;
+  state: string;
+  postcode: string;
   createdAt: string;
 }
 
@@ -44,6 +42,7 @@ export interface OrderFilters {
   taxMax?: number;
   totalMin?: number;
   totalMax?: number;
+  search?: string;
 }
 
 export interface OrderStats {

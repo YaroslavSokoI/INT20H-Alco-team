@@ -27,7 +27,10 @@ export interface Order {
   countyRate: number;
   cityRate: number;
   specialRates: number;
-  jurisdictions: Jurisdiction;
+  city: string;
+  county: string;
+  state: string;
+  postcode: string;
   createdAt: Date;
 }
 
@@ -52,7 +55,10 @@ export interface OrderRow {
   county_rate: number;
   city_rate: number;
   special_rates: number;
-  jurisdictions: Jurisdiction | string;
+  city: string;
+  county: string;
+  state: string;
+  postcode: string;
   created_at: Date;
 }
 
@@ -77,6 +83,7 @@ export interface OrderListQuery {
   taxMax?: number;
   totalMin?: number;
   totalMax?: number;
+  search?: string;
 }
 
 export interface PaginatedOrders {

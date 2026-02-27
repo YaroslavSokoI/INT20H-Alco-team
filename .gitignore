@@ -28,3 +28,4 @@ dist-ssr
 
 /test-data
 nominatim-data/
+geocoder-data/
