@@ -65,7 +65,6 @@ export const useOrderStore = create<OrderState>((set, get) => ({
 
             let orders = result.data.map(mapApiOrder);
 
-            // Client-side search (backend doesn't support full-text search)
             if (searchQuery.trim()) {
                 const terms = searchQuery.toLowerCase().split(/\s+/).filter(Boolean);
                 orders = orders.filter(o => {

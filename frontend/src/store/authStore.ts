@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { persist } from "zustand/middleware";
 import { authApi } from "@/api/auth";
 import apiClient from "@/api/client";
 import type { User } from "@/types/user";
@@ -35,75 +36,78 @@ const parseToken = (token: string): User | null => {
   }
 };
 
-export const useAuthStore = create<AuthState>((set) => {
-  const token = localStorage.getItem('token');
-  const user = token ? parseToken(token) : null;
+export const useAuthStore = create<AuthState>()(
+  persist(
+    (set) => ({
+      user: null,
+      users: [],
+      isAuthenticated: false,
+      token: null,
 
-  return {
-    user,
-    users: [],
-    isAuthenticated: !!token,
-    token,
+      login: async (loginName, password) => {
+        try {
+          const { token } = await authApi.login(loginName, password);
+          localStorage.setItem('token', token);
+          const user = parseToken(token);
+          set({
+            token,
+            isAuthenticated: true,
+            user,
+          });
+        } catch (error) {
+          console.error("Login failed:", error);
+          throw error;
+        }
+      },
 
-    login: async (loginName, password) => {
-      try {
-        const { token } = await authApi.login(loginName, password);
-        localStorage.setItem('token', token);
-        const user = parseToken(token);
-        set({
-          token,
-          isAuthenticated: true,
-          user,
-        });
-      } catch (error) {
-        console.error("Login failed:", error);
-        throw error;
-      }
-    },
+      logout: () => {
+        localStorage.removeItem('token');
+        set({ user: null, isAuthenticated: false, token: null, users: [] });
+      },
 
-    logout: () => {
-      localStorage.removeItem('token');
-      set({ user: null, isAuthenticated: false, token: null, users: [] });
-    },
+      fetchUsers: async () => {
+        try {
+          const response = await apiClient.get<User[]>('/users');
+          set({ users: response.data });
+        } catch (error) {
+          console.error("Failed to fetch users:", error);
+        }
+      },
 
-    fetchUsers: async () => {
-      try {
-        const response = await apiClient.get<User[]>('/users');
-        set({ users: response.data });
-      } catch (error) {
-        console.error("Failed to fetch users:", error);
+      createUser: async (userData) => {
+        try {
+          const newUser = await authApi.register(userData);
+          set((state) => ({ users: [...state.users, newUser] }));
+        } catch (error) {
+          console.error("Failed to create user:", error);
+          throw error;
+        }
+      },
+      updateSelf: async (userData: { login?: string; password?: string }) => {
+        try {
+          const updatedUser = await authApi.updateSelf(userData);
+          set((state) => ({
+            user: state.user ? { ...state.user, login: updatedUser.login || state.user.login } : null,
+            users: state.users.map(u => u.id === updatedUser.id ? { ...u, login: updatedUser.login || u.login } : u)
+          }));
+        } catch (error) {
+          console.error("Failed to update self:", error);
+          throw error;
+        }
+      },
+      deleteUser: async (id: string | number) => {
+        try {
+          await authApi.deleteUser(id);
+          set((state) => ({ users: state.users.filter(u => String(u.id) !== String(id)) }));
+        } catch (error) {
+          console.error("Failed to delete user:", error);
+          throw error;
+        }
       }
-    },
-
-    createUser: async (userData) => {
-      try {
-        const newUser = await authApi.register(userData);
-        set((state) => ({ users: [...state.users, newUser] }));
-      } catch (error) {
-        console.error("Failed to create user:", error);
-        throw error;
-      }
-    },
-    updateSelf: async (userData: { login?: string; password?: string }) => {
-      try {
-        const updatedUser = await authApi.updateSelf(userData);
-        set((state) => ({
-          user: state.user ? { ...state.user, login: updatedUser.login || state.user.login } : null,
-          users: state.users.map(u => u.id === updatedUser.id ? { ...u, login: updatedUser.login || u.login } : u)
-        }));
-      } catch (error) {
-        console.error("Failed to update self:", error);
-        throw error;
-      }
-    },
-    deleteUser: async (id: string | number) => {
-      try {
-        await authApi.deleteUser(id);
-        set((state) => ({ users: state.users.filter(u => String(u.id) !== String(id)) }));
-      } catch (error) {
-        console.error("Failed to delete user:", error);
-        throw error;
-      }
+    }),
+    {
+      name: "auth-storage",
+      partialize: (state) => ({ token: state.token, user: state.user, isAuthenticated: state.isAuthenticated }),
     }
-  };
-});
+  )
+);
