@@ -85,7 +85,7 @@ export default function UsersPage() {
                                         <td className="text-text-muted">{u.id}</td>
                                         <td className="w-24 px-5">
                                             <div className="flex justify-end gap-2">
-                                                {String(user?.id) === String(u.id) || isAdmin && (
+                                                {(String(user?.id) === String(u.id) || isAdmin) && (
                                                     <button onClick={() => setEditUser(u)} className="text-xs font-semibold text-yellow-500 hover:opacity-70 transition-opacity cursor-pointer">
                                                         edit
                                                     </button>
