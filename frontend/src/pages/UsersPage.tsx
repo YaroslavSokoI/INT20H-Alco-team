@@ -4,7 +4,7 @@ import { useAuthStore } from "@/store/authStore";
 import UserModal from "./UserModal";
 import UserEditModal from "./UserEditModal";
 import UserDeleteModal from "./UserDeleteModal";
-import { createIcon, editIcon, deleteIcon } from "@/assets/assets.ts";
+import { createIcon } from "@/assets/assets.ts";
 import { Skeleton } from "@/components/ui/Skeleton";
 import type { User } from "@/types/user";
 
@@ -85,15 +85,15 @@ export default function UsersPage() {
                                         <td className="text-text-muted">{u.id}</td>
                                         <td className="w-24 px-5">
                                             <div className="flex justify-end gap-2">
-                                                {String(user?.id) === String(u.id) && (
-                                                    <Button variant="ghost" size="icon" className="size-8 hover:bg-black/5" onClick={() => setEditUser(u)}>
-                                                        <img src={editIcon} alt="Edit" className="size-4 opacity-50" />
-                                                    </Button>
+                                                {String(user?.id) === String(u.id) || isAdmin && (
+                                                    <button onClick={() => setEditUser(u)} className="text-xs font-semibold text-yellow-500 hover:opacity-70 transition-opacity cursor-pointer">
+                                                        edit
+                                                    </button>
                                                 )}
                                                 {isAdmin && String(user?.id) !== String(u.id) && (
-                                                    <Button variant="ghost" size="icon" className="size-8 hover:bg-red-50" onClick={() => setDeleteUserId(u.id)}>
-                                                        <img src={deleteIcon} alt="Delete" className="size-4 text-red-500" />
-                                                    </Button>
+                                                    <button onClick={() => setDeleteUserId(u.id)} className="text-xs font-semibold text-red-500 hover:opacity-70 transition-opacity cursor-pointer">
+                                                        delete
+                                                    </button>
                                                 )}
                                             </div>
                                         </td>
