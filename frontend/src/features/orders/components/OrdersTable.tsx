@@ -1,8 +1,8 @@
 import OrderTableActions from "./table/OrderTableActions";
 import OrderTableBody from "./table/OrderTableBody";
 import OrderTablePagination from "./table/OrderTablePagination";
-import OrderDetailModal from "@/components/OrderDetailModal";
-import ImportResultModal from "@/components/ImportResultModal";
+import OrderDetailModal from "@/features/orders/components/modal/OrderDetailModal";
+import ImportResultModal from "@/features/orders/components/modal/ImportResultModal";
 import ImportModal from "./table/ImportModal";
 import { useOrdersTable } from "../hooks/useOrdersTable";
 import { useOrderStore } from "@/store/orderStore";

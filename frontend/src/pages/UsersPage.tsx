@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/Button";
 import { useAuthStore } from "@/store/authStore";
-import UserModal from "./UserModal";
-import UserEditModal from "./UserEditModal";
-import UserDeleteModal from "./UserDeleteModal";
+import UserModal from "@/features/users/components/UserModal";
+import UserEditModal from "@/features/users/components/UserEditModal";
+import UserDeleteModal from "@/features/users/components/UserDeleteModal";
 import { createIcon } from "@/assets/assets.ts";
 import { Skeleton } from "@/components/ui/Skeleton";
 import type { User } from "@/types/user";

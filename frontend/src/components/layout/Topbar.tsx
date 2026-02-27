@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useAuthStore } from "@/store/authStore";
 import logoutIcon from "@/assets/logout.svg";
 import { Button } from "@/components/ui/Button.tsx";
-import LogoutConfirmModal from "@/components/LogoutConfirmModal";
+import LogoutConfirmModal from "@/features/auth/components/LogoutConfirmModal.tsx";
 
 const Topbar = () => {
     const { user, logout } = useAuthStore();

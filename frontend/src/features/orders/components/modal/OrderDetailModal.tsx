@@ -1,6 +1,6 @@
 import { useRef, memo } from "react";
 import type { OrderRow } from "@/types/order";
-import { Button } from "./ui/Button";
+import { Button } from "@/components/ui/Button";
 import { useKeydown } from "@/hooks/useKeydown";
 import { useClickOutside } from "@/hooks/useClickOutside";
 import {formatCurrency, formatDate, formatPercent} from "@/lib/formatters";
