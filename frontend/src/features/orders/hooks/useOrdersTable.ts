@@ -1,8 +1,8 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { useOrderStore } from "@/store/orderStore";
 import { getOrderColumns } from "../components/table/columns";
-import { 
-    getCoreRowModel, 
+import {
+    getCoreRowModel,
     useReactTable,
 } from "@tanstack/react-table";
 import type { OrderRow } from "@/types/order";
@@ -23,7 +23,11 @@ export function useOrdersTable() {
     const [isCreating, setIsCreating] = useState(false);
     const [editingId, setEditingId] = useState<number | null>(null);
     const [selectedOrder, setSelectedOrder] = useState<OrderRow | null>(null);
-    const todayDate = () => new Date().toISOString().split("T")[0];
+    const todayDate = () => {
+        const now = new Date();
+        now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+        return now.toISOString().slice(0, 19);
+    };
 
     const [newOrder, setNewOrder] = useState<any>({
         subtotal: "",
@@ -115,11 +119,7 @@ export function useOrdersTable() {
             subtotal,
             longitude,
             latitude,
-            timestamp: newOrder.timestamp ? new Date(newOrder.timestamp).toISOString() : new Date().toISOString(),
-            uuid: "", compositeTaxRate: 0, taxAmount: 0, totalAmount: 0,
-            stateRate: 0, countyRate: 0, cityRate: 0, specialRates: 0,
-            jurisdictions: { postcode: "", city: "", county: "", state: "" },
-            createdAt: "",
+            timestamp: newOrder.timestamp ? new Date(newOrder.timestamp).toISOString() : new Date().toISOString()
         });
         setNewOrder({ subtotal: "", longitude: "", latitude: "", timestamp: todayDate() });
         setIsCreating(false);

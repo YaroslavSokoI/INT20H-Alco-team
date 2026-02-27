@@ -13,4 +13,11 @@ export const authApi = {
     const response = await apiClient.post('/users', userData);
     return response.data;
   },
+  updateSelf: async (userData: { login?: string; password?: string }): Promise<any> => {
+    const response = await apiClient.patch('/users/me', userData);
+    return response.data;
+  },
+  deleteUser: async (id: string | number): Promise<void> => {
+    await apiClient.delete(`/users/${id}`);
+  },
 };

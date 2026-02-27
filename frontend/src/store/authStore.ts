@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { authApi } from "@/api/auth";
 import apiClient from "@/api/client";
-import type {User} from "@/types/user";
+import type { User } from "@/types/user";
 
 interface AuthState {
   user: User | null;
@@ -12,13 +12,15 @@ interface AuthState {
   logout: () => void;
   fetchUsers: () => Promise<void>;
   createUser: (userData: any) => Promise<void>;
+  updateSelf: (userData: { login?: string; password?: string }) => Promise<void>;
+  deleteUser: (id: string | number) => Promise<void>;
 }
 
 const parseToken = (token: string): User | null => {
   try {
     const base64Url = token.split('.')[1];
     const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-    const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+    const jsonPayload = decodeURIComponent(atob(base64).split('').map(function (c) {
       return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
     }).join(''));
     const payload = JSON.parse(jsonPayload);
@@ -36,7 +38,7 @@ const parseToken = (token: string): User | null => {
 export const useAuthStore = create<AuthState>((set) => {
   const token = localStorage.getItem('token');
   const user = token ? parseToken(token) : null;
-  
+
   return {
     user,
     users: [],
@@ -79,6 +81,27 @@ export const useAuthStore = create<AuthState>((set) => {
         set((state) => ({ users: [...state.users, newUser] }));
       } catch (error) {
         console.error("Failed to create user:", error);
+        throw error;
+      }
+    },
+    updateSelf: async (userData: { login?: string; password?: string }) => {
+      try {
+        const updatedUser = await authApi.updateSelf(userData);
+        set((state) => ({
+          user: state.user ? { ...state.user, login: updatedUser.login || state.user.login } : null,
+          users: state.users.map(u => u.id === updatedUser.id ? { ...u, login: updatedUser.login || u.login } : u)
+        }));
+      } catch (error) {
+        console.error("Failed to update self:", error);
+        throw error;
+      }
+    },
+    deleteUser: async (id: string | number) => {
+      try {
+        await authApi.deleteUser(id);
+        set((state) => ({ users: state.users.filter(u => String(u.id) !== String(id)) }));
+      } catch (error) {
+        console.error("Failed to delete user:", error);
         throw error;
       }
     }

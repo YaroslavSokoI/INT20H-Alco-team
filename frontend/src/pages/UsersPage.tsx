@@ -2,13 +2,17 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/Button";
 import { useAuthStore } from "@/store/authStore";
 import UserModal from "./UserModal";
-import { createIcon } from "@/assets/assets.ts";
+import UserEditModal from "./UserEditModal";
+import UserDeleteModal from "./UserDeleteModal";
+import { createIcon, editIcon, deleteIcon } from "@/assets/assets.ts";
 import { Skeleton } from "@/components/ui/Skeleton";
-import type {User} from "@/types/user";
+import type { User } from "@/types/user";
 
 export default function UsersPage() {
     const { user, users, fetchUsers } = useAuthStore();
-    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+    const [editUser, setEditUser] = useState<User | null>(null);
+    const [deleteUserId, setDeleteUserId] = useState<string | number | null>(null);
     const [isLoading, setIsLoading] = useState(true);
 
     const isAdmin = user?.role === 'admin';
@@ -32,8 +36,8 @@ export default function UsersPage() {
                     </p>
                 </div>
                 {isAdmin && (
-                    <Button 
-                        onClick={() => setIsModalOpen(true)} 
+                    <Button
+                        onClick={() => setIsCreateModalOpen(true)}
                         className="flex items-center gap-2 font-semibold shadow-sm"
                         size="md"
                     >
@@ -51,6 +55,7 @@ export default function UsersPage() {
                                 <th>Login</th>
                                 <th>Role</th>
                                 <th>ID</th>
+                                <th className="text-right w-24"></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -60,6 +65,11 @@ export default function UsersPage() {
                                         <td><Skeleton className="h-4 w-32" /></td>
                                         <td><Skeleton className="h-5 w-16 rounded-full" /></td>
                                         <td><Skeleton className="h-4 w-24" /></td>
+                                        <td className="w-24 px-5">
+                                            <div className="flex justify-end gap-2">
+                                                <Skeleton className="size-8 rounded-lg" />
+                                            </div>
+                                        </td>
                                     </tr>
                                 ))
                             ) : (
@@ -67,13 +77,26 @@ export default function UsersPage() {
                                     <tr key={u.id} className="border-t border-border hover:bg-black/[0.01] [&>td]:px-5 [&>td]:py-3">
                                         <td className="font-medium">{u.login}</td>
                                         <td>
-                                            <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
-                                                u.role === 'admin' ? 'bg-primary/10 text-primary' : 'bg-success/10 text-success'
-                                            }`}>
+                                            <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${u.role === 'admin' ? 'bg-primary/10 text-primary' : 'bg-success/10 text-success'
+                                                }`}>
                                                 {u.role}
                                             </span>
                                         </td>
                                         <td className="text-text-muted">{u.id}</td>
+                                        <td className="w-24 px-5">
+                                            <div className="flex justify-end gap-2">
+                                                {String(user?.id) === String(u.id) && (
+                                                    <Button variant="ghost" size="icon" className="size-8 hover:bg-black/5" onClick={() => setEditUser(u)}>
+                                                        <img src={editIcon} alt="Edit" className="size-4 opacity-50" />
+                                                    </Button>
+                                                )}
+                                                {isAdmin && String(user?.id) !== String(u.id) && (
+                                                    <Button variant="ghost" size="icon" className="size-8 hover:bg-red-50" onClick={() => setDeleteUserId(u.id)}>
+                                                        <img src={deleteIcon} alt="Delete" className="size-4 text-red-500" />
+                                                    </Button>
+                                                )}
+                                            </div>
+                                        </td>
                                     </tr>
                                 ))
                             )}
@@ -81,8 +104,9 @@ export default function UsersPage() {
                     </table>
                 </div>
             </div>
-
-            <UserModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+            <UserModal isOpen={isCreateModalOpen} onClose={() => setIsCreateModalOpen(false)} />
+            <UserEditModal isOpen={!!editUser} user={editUser} onClose={() => setEditUser(null)} />
+            <UserDeleteModal userId={deleteUserId} onClose={() => setDeleteUserId(null)} />
         </div>
     );
 }

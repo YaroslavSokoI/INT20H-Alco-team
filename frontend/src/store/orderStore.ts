@@ -23,7 +23,7 @@ interface OrderState {
     setPageSize: (size: number) => void;
     setSearchQuery: (query: string) => void;
     setFilters: (filters: OrderFilters) => void;
-    addOrder: (order: Omit<OrderRow, "id">) => Promise<void>;
+    addOrder: (order: { latitude: number; longitude: number; subtotal: number; timestamp?: string }) => Promise<void>;
     updateOrder: (id: string, order: Partial<OrderRow>) => Promise<void>;
     deleteOrder: (id: string) => Promise<void>;
     importOrders: (file: File) => Promise<unknown>;

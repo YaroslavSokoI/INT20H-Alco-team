@@ -24,7 +24,8 @@ const OrderCreateRow = memo(({ newOrder, setNewOrder, onSave, onCancel }: OrderC
             <td>{emptyCell}</td>
             <td>
                 <input
-                    type="date"
+                    type="datetime-local"
+                    step="1"
                     className={inputClass}
                     value={newOrder.timestamp}
                     onChange={(e) => setNewOrder({ ...newOrder, timestamp: e.target.value })}
@@ -64,14 +65,14 @@ const OrderCreateRow = memo(({ newOrder, setNewOrder, onSave, onCancel }: OrderC
             <td className="px-5">
                 <div className="flex justify-end gap-3">
                     <button
-                        className={`text-xs font-semibold underline underline-offset-2 transition-opacity cursor-pointer ${saving ? "text-text-muted pointer-events-none" : "text-primary hover:opacity-70"}`}
+                        className={`text-xs font-semibold transition-opacity cursor-pointer ${saving ? "text-text-muted pointer-events-none" : "text-primary hover:opacity-70"}`}
                         onClick={handleSave}
                         disabled={saving}
                     >
                         {saving ? "creating..." : "create"}
                     </button>
                     <button
-                        className="text-xs font-semibold underline underline-offset-2 transition-all cursor-pointer text-red-500 hover:opacity-70"
+                        className="text-xs font-semibold transition-all cursor-pointer text-red-500 hover:opacity-70"
                         onClick={onCancel}
                         disabled={saving}
                     >

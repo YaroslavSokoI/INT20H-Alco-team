@@ -30,7 +30,7 @@ const Topbar = () => {
 
                     <Button
                         variant="ghost"
-                        size="sm"
+                        size="md"
                         className="flex items-center gap-2 text-text-muted hover:text-danger transition-colors"
                         onClick={() => setShowLogoutModal(true)}
                     >
