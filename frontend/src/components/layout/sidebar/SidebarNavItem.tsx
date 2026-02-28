@@ -12,22 +12,29 @@ type Props = {
 };
 
 export default function SidebarNavItem({
-                                           to,
-                                           onClick,
-                                           icon,
-                                           label,
-                                           variant = "default",
-                                           collapsed = false,
-                                       }: Props) {
+    to,
+    onClick,
+    icon,
+    label,
+    variant = "default",
+    collapsed = false,
+}: Props) {
     const base =
-        "flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition w-full text-left overflow-hidden";
+        "flex items-center rounded-xl py-3 text-sm font-medium transition-all duration-500 w-full text-left overflow-hidden";
 
     const danger = "text-danger hover:bg-danger/10";
 
     const content = (
         <>
             <span className="grid size-5 shrink-0 place-items-center">{icon}</span>
-            {!collapsed && <span className="whitespace-nowrap">{label}</span>}
+            <span
+                className={cn(
+                    "whitespace-nowrap overflow-hidden transition-all duration-500",
+                    collapsed ? "opacity-0 max-w-0 ml-0" : "opacity-100 max-w-[200px] ml-3"
+                )}
+            >
+                {label}
+            </span>
         </>
     );
 
@@ -41,7 +48,7 @@ export default function SidebarNavItem({
                         base,
                         variant === "danger" ? danger : "text-black/70 ",
                         isActive && variant !== "danger" && "bg-gradient-primary text-white shadow-sm",
-                        collapsed && "px-3 justify-center"
+                        collapsed ? "px-[22px]" : "px-4"
                     )
                 }
             >
@@ -56,7 +63,11 @@ export default function SidebarNavItem({
             variant="ghost"
             onClick={onClick}
             title={collapsed ? label : undefined}
-            className={cn(base, variant === "danger" ? danger : "text-black/70", "justify-start", collapsed && "px-3 justify-center")}
+            className={cn(
+                base,
+                variant === "danger" ? danger : "text-black/70",
+                collapsed ? "px-[22px]" : "px-4"
+            )}
         >
             {content}
         </Button>

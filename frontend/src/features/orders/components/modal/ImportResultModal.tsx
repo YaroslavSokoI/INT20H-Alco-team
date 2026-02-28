@@ -23,7 +23,7 @@ export default function ImportResultModal({ result, onClose }: ImportResultModal
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
       <div className="w-full max-w-lg rounded-xl bg-white p-6 shadow-xl animate-in fade-in zoom-in duration-200">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-bold">Результати імпорту</h2>
+          <h2 className="text-xl font-bold">Import Results</h2>
           <button onClick={onClose} className="text-text-muted hover:text-text">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>
           </button>
@@ -32,27 +32,27 @@ export default function ImportResultModal({ result, onClose }: ImportResultModal
         <div className="grid grid-cols-3 gap-4 mb-6">
           <div className="bg-success/10 p-3 rounded-lg text-center">
             <div className="text-2xl font-bold text-success">{result.imported}</div>
-            <div className="text-xs text-success/80 font-medium uppercase tracking-wider">Успішно</div>
+            <div className="text-xs text-success/80 font-medium uppercase tracking-wider">Successful</div>
           </div>
           <div className="bg-warning/10 p-3 rounded-lg text-center">
             <div className="text-2xl font-bold text-warning">{result.skipped}</div>
-            <div className="text-xs text-warning/80 font-medium uppercase tracking-wider">Пропущено</div>
+            <div className="text-xs text-warning/80 font-medium uppercase tracking-wider">Skipped</div>
           </div>
           <div className="bg-danger/10 p-3 rounded-lg text-center">
             <div className="text-2xl font-bold text-danger">{totalErrors}</div>
-            <div className="text-xs text-danger/80 font-medium uppercase tracking-wider">Помилки</div>
+            <div className="text-xs text-danger/80 font-medium uppercase tracking-wider">Errors</div>
           </div>
         </div>
 
         {totalErrors > 0 && (
           <div className="space-y-2 mb-6">
-            <h3 className="text-sm font-semibold text-text-muted">Деталі помилок:</h3>
+            <h3 className="text-sm font-semibold text-text-muted">Error Details:</h3>
             <div className="max-h-48 overflow-y-auto rounded-lg border border-border">
               <table className="w-full text-xs">
                 <thead className="bg-surface sticky top-0">
                   <tr className="border-b border-border">
-                    <th className="px-3 py-2 text-left font-bold">Рядок</th>
-                    <th className="px-3 py-2 text-left font-bold">Причина</th>
+                    <th className="px-3 py-2 text-left font-bold">Row</th>
+                    <th className="px-3 py-2 text-left font-bold">Reason</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -70,7 +70,7 @@ export default function ImportResultModal({ result, onClose }: ImportResultModal
 
         <div className="flex justify-end">
           <Button onClick={onClose} size="md" className="px-8 font-bold">
-            Зрозуміло
+            Got it
           </Button>
         </div>
       </div>

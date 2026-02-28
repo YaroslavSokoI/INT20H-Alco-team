@@ -16,7 +16,7 @@ export default function LoginPage() {
     try {
       await login(loginField, password);
     } catch (err) {
-      setError("Невірний логін або пароль");
+      setError("Invalid login or password");
       console.error("Login failed", err);
     } finally {
       setIsLoading(false);
@@ -31,10 +31,10 @@ export default function LoginPage() {
             A
           </div>
           <h2 className="mt-6 text-3xl font-bold tracking-tight text-text">
-            Ласкаво просимо
+            Welcome
           </h2>
           <p className="mt-2 text-sm text-text-muted">
-            Увійдіть, використовуючи логін і пароль
+            Sign in with your login and password
           </p>
         </div>
 
@@ -42,7 +42,7 @@ export default function LoginPage() {
           <div className="space-y-4">
             <div>
               <label htmlFor="login" className="block text-sm font-medium text-text-muted">
-                Логін
+                Login
               </label>
               <input
                 id="login"
@@ -50,7 +50,7 @@ export default function LoginPage() {
                 type="text"
                 required
                 className="mt-1 block w-full rounded-lg border border-border px-3 py-2 outline-none focus:ring-2 focus:ring-primary/20 transition-all"
-                placeholder="Введіть логін"
+                placeholder="Enter login"
                 value={loginField}
                 onChange={(e) => setLoginField(e.target.value)}
               />
@@ -58,7 +58,7 @@ export default function LoginPage() {
 
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-text-muted">
-                Пароль
+                Password
               </label>
               <input
                 id="password"
@@ -66,7 +66,7 @@ export default function LoginPage() {
                 type="password"
                 required
                 className="mt-1 block w-full rounded-lg border border-border px-3 py-2 outline-none focus:ring-2 focus:ring-primary/20 transition-all"
-                placeholder="Введіть пароль"
+                placeholder="Enter password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
@@ -78,7 +78,7 @@ export default function LoginPage() {
           </div>
 
           <Button type="submit" className="w-full py-2.5" isLoading={isLoading}>
-            Увійти
+            Sign In
           </Button>
         </form>
       </div>

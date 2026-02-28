@@ -59,13 +59,13 @@ const OrderTablePagination = memo(({
 
     const pageNumbers = useMemo(() => {
         const pages: (number | string)[] = [];
-        const delta = 1; // Кількість сторінок навколо поточної
+        const delta = 1; // Pages around the current page
 
         for (let i = 1; i <= totalPages; i++) {
             if (
-                i === 1 || // Перша сторінка
-                i === totalPages || // Остання сторінка
-                (i >= currentPage - delta && i <= currentPage + delta) // Навколо поточної
+                i === 1 || // First page
+                i === totalPages || // Last page
+                (i >= currentPage - delta && i <= currentPage + delta) // Around current page
             ) {
                 pages.push(i);
             } else if (
@@ -76,7 +76,7 @@ const OrderTablePagination = memo(({
             }
         }
 
-        // Видаляємо дублікати "..."
+        // Remove duplicate "..."
         return pages.filter((item, index) => pages.indexOf(item) === index);
     }, [currentPage, totalPages]);
 

@@ -4,7 +4,7 @@ import { useAuthStore } from "@/store/authStore";
 import UserModal from "@/features/users/components/UserModal";
 import UserEditModal from "@/features/users/components/UserEditModal";
 import UserDeleteModal from "@/features/users/components/UserDeleteModal";
-import { createIcon } from "@/assets/assets.ts";
+import { createIcon, searchIcon } from "@/assets/assets.ts";
 import { Skeleton } from "@/components/ui/Skeleton";
 import type { User } from "@/types/user";
 
@@ -14,8 +14,15 @@ export default function UsersPage() {
     const [editUser, setEditUser] = useState<User | null>(null);
     const [deleteUserId, setDeleteUserId] = useState<string | number | null>(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [searchQuery, setSearchQuery] = useState("");
 
     const isAdmin = user?.role === 'admin';
+
+    const filteredUsers = users.filter((u: User) => {
+        if (!searchQuery.trim()) return true;
+        const q = searchQuery.toLowerCase();
+        return String(u.id).toLowerCase().includes(q) || u.login.toLowerCase().includes(q);
+    });
 
     useEffect(() => {
         const loadUsers = async () => {
@@ -41,13 +48,51 @@ export default function UsersPage() {
                         className="flex items-center gap-2 font-semibold shadow-sm"
                         size="md"
                     >
-                        <img src={createIcon} alt="" className="size-3.5 brightness-0 invert" />
+                        <img src={createIcon} alt="" className="size-4.5 brightness-0 invert" />
                         Create User
                     </Button>
                 )}
             </div>
 
+            {user && (
+                <div className="rounded-xl border border-border bg-white p-5 flex flex-col sm:flex-row sm:items-center shadow-sm gap-6 w-fit sm:pr-10">
+                    <div className="flex items-center gap-4">
+                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary font-bold text-xl uppercase">
+                            {user.login.charAt(0).toUpperCase()}
+                        </div>
+                        <div>
+                            <div className="flex items-center gap-2 mb-1">
+                                <h2 className="text-lg font-semibold leading-none">{user.login}</h2>
+                                <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium leading-none ${user.role === 'admin' ? 'bg-primary/10 text-primary' : 'bg-success/10 text-success'}`}>
+                                    {user.role}
+                                </span>
+                            </div>
+                            <p className="text-sm text-text-muted leading-none">ID: {user.id}</p>
+                        </div>
+                    </div>
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setEditUser(user)}
+                        className="text-xs font-semibold shrink-0"
+                    >
+                        Edit Profile
+                    </Button>
+                </div>
+            )}
+
             <div className="overflow-hidden rounded-xl border border-border bg-white">
+                <div className="border-b border-border px-5 py-2.5">
+                    <div className="w-full h-9 px-3 flex items-center gap-2 border border-border text-sm rounded-xl text-text-muted focus-within:ring-2 focus-within:ring-primary/10 transition-all bg-surface/50">
+                        <img src={searchIcon} alt="search icon" className="size-4 opacity-40" />
+                        <input
+                            placeholder="Search by ID or name..."
+                            className="outline-none w-full bg-transparent"
+                            value={searchQuery}
+                            onChange={e => setSearchQuery(e.target.value)}
+                        />
+                    </div>
+                </div>
                 <div className="overflow-x-auto">
                     <table className="w-full text-sm">
                         <thead className="bg-black/2 text-text-muted">
@@ -73,9 +118,16 @@ export default function UsersPage() {
                                     </tr>
                                 ))
                             ) : (
-                                users.map((u: User) => (
-                                    <tr key={u.id} className="border-t border-border hover:bg-black/[0.01] [&>td]:px-5 [&>td]:py-3">
-                                        <td className="font-medium">{u.login}</td>
+                                filteredUsers.map((u: User) => (
+                                    <tr key={u.id} className="border-t border-border hover:bg-black/1 [&>td]:px-5 [&>td]:py-3">
+                                        <td className="font-medium">
+                                            <span className="flex items-center gap-2">
+                                                {u.login}
+                                                {String(user?.id) === String(u.id) && (
+                                                    <span className="inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] font-bold bg-primary/10 text-primary leading-none">me</span>
+                                                )}
+                                            </span>
+                                        </td>
                                         <td>
                                             <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${u.role === 'admin' ? 'bg-primary/10 text-primary' : 'bg-success/10 text-success'
                                                 }`}>

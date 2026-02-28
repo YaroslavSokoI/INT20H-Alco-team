@@ -13,7 +13,8 @@ interface AuthState {
   logout: () => void;
   fetchUsers: () => Promise<void>;
   createUser: (userData: any) => Promise<void>;
-  updateSelf: (userData: { login?: string; password?: string }) => Promise<void>;
+  updateSelf: (userData: { login?: string; password?: string; currentPassword?: string }) => Promise<void>;
+  updateUser: (id: string | number, userData: { login?: string; password?: string; currentPassword?: string }) => Promise<void>;
   deleteUser: (id: string | number) => Promise<void>;
 }
 
@@ -83,7 +84,7 @@ export const useAuthStore = create<AuthState>()(
           throw error;
         }
       },
-      updateSelf: async (userData: { login?: string; password?: string }) => {
+      updateSelf: async (userData: { login?: string; password?: string; currentPassword?: string }) => {
         try {
           const updatedUser = await authApi.updateSelf(userData);
           set((state) => ({
@@ -92,6 +93,17 @@ export const useAuthStore = create<AuthState>()(
           }));
         } catch (error) {
           console.error("Failed to update self:", error);
+          throw error;
+        }
+      },
+      updateUser: async (id: string | number, userData: { login?: string; password?: string; currentPassword?: string }) => {
+        try {
+          const updatedUser = await authApi.updateUser(id, userData);
+          set((state) => ({
+            users: state.users.map(u => String(u.id) === String(id) ? { ...u, login: updatedUser.login || u.login } : u)
+          }));
+        } catch (error) {
+          console.error("Failed to update user:", error);
           throw error;
         }
       },

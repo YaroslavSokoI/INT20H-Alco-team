@@ -7,6 +7,7 @@ import file from './file.svg';
 import arrowRight from './arrow-right.svg';
 import filterIcon from './filter.svg';
 import importIcon from './import.svg';
+import exportIcon from './export.svg';
 import createIcon from './create-user.svg';
 import deleteIcon from './deleteIcon.svg'
 import editIcon from './editIcon.svg'
@@ -18,4 +19,4 @@ import createOrderIcon from './create-order.svg'
 import cardFilter from './cardFilter.svg'
 
 
-export { dashboard, logout, cart, percent, dollar, file, arrowRight, filterIcon, importIcon, createIcon, editIcon, deleteIcon, expandIcon, userIcon, searchIcon, refreshIcon, createOrderIcon, cardFilter };
+export { dashboard, logout, cart, percent, dollar, file, arrowRight, filterIcon, importIcon, exportIcon, createIcon, editIcon, deleteIcon, expandIcon, userIcon, searchIcon, refreshIcon, createOrderIcon, cardFilter };

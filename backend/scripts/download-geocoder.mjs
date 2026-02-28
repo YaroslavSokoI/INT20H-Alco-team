@@ -1,9 +1,3 @@
-/**
- * Заздалегідь скачує GeoNames дані для local-reverse-geocoder.
- * Запусти один раз: npm run geocoder:download
- * Дані збережуться в backend/geocoder-data/ і будуть скопійовані в Docker image.
- */
-
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { createRequire } from 'module';

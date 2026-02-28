@@ -24,156 +24,173 @@ export const getOrderColumns = (
     onDeleteConfirm: () => void,
     onDeleteCancel: () => void,
     onToggleJurisdiction: () => void,
-    taxExpanded: boolean,
     onToggleTax: () => void,
+    taxExpanded: boolean,
 ) => [
-    columnHelper.accessor("id", {
-        header: "Order ID",
-        cell: info => <span className="font-semibold text-primary text-xs">{info.getValue()}</span>,
-    }),
-    columnHelper.accessor("timestamp", {
-        header: "Order Date",
-        cell: info => {
-            const val = info.getValue();
-            return val ? formatDate(val) : 'N/A';
-        },
-    }),
+        columnHelper.accessor("id", {
+            header: "ID",
+            cell: info => <span className="font-semibold text-primary text-xs">{info.getValue()}</span>,
+        }),
+        columnHelper.accessor("timestamp", {
+            header: "Order Date",
+            cell: info => {
+                const val = info.getValue();
+                return val ? formatDate(val) : 'N/A';
+            },
+        }),
 
-    // ── Jurisdiction collapsed ─────────────────────────────────────────────
-    columnHelper.display({
-        id: 'jurisdictionSummary',
-        size: 160,
-        header: () => (
-            <button
-                onClick={(e) => { e.stopPropagation(); onToggleJurisdiction(); }}
-                className="flex items-center gap-1 font-semibold text-inherit hover:text-primary transition-colors"
-            >
-                Jurisdiction <ChevronRight />
-            </button>
-        ),
-        cell: info => {
-            const { city, county, state } = info.row.original;
-            const place = city || county || '';
-            return [place, state].filter(Boolean).join(', ') || 'N/A';
-        },
-    }),
+        // ── Jurisdiction collapsed ─────────────────────────────────────────────
+        columnHelper.display({
+            id: 'jurisdictionSummary',
+            size: 160,
+            enableSorting: true,
+            header: () => (
+                <button
+                    onClick={(e) => { e.stopPropagation(); onToggleJurisdiction(); }}
+                    className="flex items-center gap-1 font-semibold text-inherit hover:text-primary transition-colors"
+                >
+                    Jurisdiction <ChevronRight />
+                </button>
+            ),
+            cell: info => {
+                const { city, county, state } = info.row.original;
+                const place = city || county || '';
+                return [place, state].filter(Boolean).join(', ') || 'N/A';
+            },
+        }),
 
-    // ── Jurisdiction expanded ──────────────────────────────────────────────
-    columnHelper.accessor("state", {
-        header: "State",
-        cell: info => info.getValue() || '-',
-    }),
-    columnHelper.accessor("city", {
-        header: "City",
-        cell: info => info.getValue() || '-',
-    }),
-    columnHelper.accessor("county", {
-        header: "County",
-        cell: info => info.getValue() || '-',
-    }),
-    columnHelper.display({
-        id: 'specialDistrict',
-        header: 'Special District',
-        cell: info => info.row.original.specialRates > 0 ? 'MCTD' : '-',
-    }),
-    columnHelper.accessor("postcode", {
-        header: "Postcode",
-        cell: info => info.getValue() || '-',
-    }),
-    columnHelper.accessor("latitude", { header: "Latitude" }),
-    columnHelper.accessor("longitude", { header: "Longitude" }),
-    columnHelper.display({
-        id: 'collapseJurisdiction',
-        header: () => (
-            <button
-                onClick={(e) => { e.stopPropagation(); onToggleJurisdiction(); }}
-                className="flex items-center font-semibold text-text-muted hover:text-primary transition-colors"
-                title="Collapse"
-            >
-                <ChevronLeft />
-            </button>
-        ),
-        cell: () => null,
-    }),
+        // ── Jurisdiction expanded ──────────────────────────────────────────────
+        columnHelper.accessor("state", {
+            header: "State",
+            cell: info => info.getValue() || '-',
+        }),
+        columnHelper.accessor("city", {
+            header: "City",
+            cell: info => info.getValue() || '-',
+        }),
+        columnHelper.accessor("county", {
+            header: "County",
+            cell: info => info.getValue() || '-',
+        }),
+        columnHelper.accessor("specialRates", {
+            id: 'specialDistrict',
+            header: 'Special District',
+            cell: info => info.getValue() > 0 ? 'MCTD' : '-',
+        }),
+        columnHelper.accessor("postcode", {
+            header: "Postcode",
+            cell: info => info.getValue() || '-',
+        }),
+        columnHelper.accessor("latitude", { header: "Latitude" }),
+        columnHelper.accessor("longitude", { header: "Longitude" }),
+        columnHelper.display({
+            id: 'collapseJurisdiction',
+            size: 110,
+            header: () => (
+                <button
+                    onClick={(e) => { e.stopPropagation(); onToggleJurisdiction(); }}
+                    className="flex items-center gap-1 font-semibold text-text-muted hover:text-primary transition-colors"
+                    title="Collapse"
+                >
+                    <ChevronLeft /> Jurisdictions
+                </button>
+            ),
+            cell: () => null,
+        }),
 
-    // ── Always visible ─────────────────────────────────────────────────────
-    columnHelper.accessor("subtotal", {
-        header: "Subtotal",
-        cell: info => formatCurrency(info.getValue()),
-    }),
+        // ── Always visible ─────────────────────────────────────────────────────
+        columnHelper.accessor("subtotal", {
+            header: "Subtotal",
+            cell: info => formatCurrency(info.getValue()),
+        }),
 
-    // ── Tax Rate (with expand toggle) ──────────────────────────────────────
-    columnHelper.accessor("compositeTaxRate", {
-        header: () => (
-            <button
-                onClick={(e) => { e.stopPropagation(); onToggleTax(); }}
-                className="flex items-center gap-1 font-semibold text-inherit hover:text-primary transition-colors"
-            >
-                Tax Rate {taxExpanded ? <ChevronLeft /> : <ChevronRight />}
-            </button>
-        ),
-        cell: info => formatPercent(info.getValue() * 100),
-    }),
+        // ── Tax Rate (with expand toggle) ──────────────────────────────────────
+        columnHelper.accessor("compositeTaxRate", {
+            header: () => taxExpanded ? (
+                <span className="font-semibold">Tax Rate</span>
+            ) : (
+                <button
+                    onClick={(e) => { e.stopPropagation(); onToggleTax(); }}
+                    className="flex items-center gap-1 font-semibold text-inherit hover:text-primary transition-colors"
+                >
+                    Tax Rate <ChevronRight />
+                </button>
+            ),
+            cell: info => formatPercent(info.getValue() * 100),
+        }),
 
-    // ── Tax breakdown expanded ─────────────────────────────────────────────
-    columnHelper.accessor("stateRate", {
-        header: "State Rate",
-        cell: info => formatPercent(info.getValue() * 100),
-    }),
-    columnHelper.accessor("countyRate", {
-        header: "County Rate",
-        cell: info => formatPercent(info.getValue() * 100),
-    }),
-    columnHelper.accessor("cityRate", {
-        header: "City Rate",
-        cell: info => formatPercent(info.getValue() * 100),
-    }),
-    columnHelper.accessor("specialRates", {
-        header: "Special Rates",
-        cell: info => formatPercent(info.getValue() * 100),
-    }),
+        // ── Tax breakdown expanded ─────────────────────────────────────────────
+        columnHelper.accessor("stateRate", {
+            header: "State Rate",
+            cell: info => formatPercent(info.getValue() * 100),
+        }),
+        columnHelper.accessor("countyRate", {
+            header: "County Rate",
+            cell: info => formatPercent(info.getValue() * 100),
+        }),
+        columnHelper.accessor("cityRate", {
+            header: "City Rate",
+            cell: info => formatPercent(info.getValue() * 100),
+        }),
+        columnHelper.accessor("specialRates", {
+            header: "Special Rates",
+            cell: info => formatPercent(info.getValue() * 100),
+        }),
+        columnHelper.display({
+            id: 'collapseTax',
+            size: 70,
+            header: () => (
+                <button
+                    onClick={(e) => { e.stopPropagation(); onToggleTax(); }}
+                    className="flex items-center gap-1 font-semibold text-text-muted hover:text-primary transition-colors"
+                    title="Collapse"
+                >
+                    <ChevronLeft /> Taxes
+                </button>
+            ),
+            cell: () => null,
+        }),
+        // ── Always visible ─────────────────────────────────────────────────────
+        columnHelper.accessor("taxAmount", {
+            header: "Tax",
+            cell: info => formatCurrency(info.getValue()),
+        }),
+        columnHelper.accessor("totalAmount", {
+            header: "Total",
+            cell: info => <span className="font-medium">{formatCurrency(info.getValue())}</span>,
+        }),
 
-    // ── Always visible ─────────────────────────────────────────────────────
-    columnHelper.accessor("taxAmount", {
-        header: "Tax",
-        cell: info => formatCurrency(info.getValue()),
-    }),
-    columnHelper.accessor("totalAmount", {
-        header: "Total",
-        cell: info => <span className="font-medium">{formatCurrency(info.getValue())}</span>,
-    }),
+        columnHelper.display({
+            id: "actions",
+            cell: info => {
+                const id = info.row.original.id;
+                const isPending = pendingDeleteId === id;
 
-    columnHelper.display({
-        id: "actions",
-        cell: info => {
-            const id = info.row.original.id;
-            const isPending = pendingDeleteId === id;
-
-            return (
-                <div className={`flex items-center gap-3 ${isPending ? "justify-start -ml-16" : "justify-end"}`}>
-                    {!isPending && (
-                        <>
-                            <button onClick={() => onExpand(info.row.original)} className="text-xs font-semibold text-primary hover:opacity-70 transition-opacity cursor-pointer">
-                                expand
+                return (
+                    <div className={`flex items-center gap-3 ${isPending ? "justify-start -ml-16" : "justify-end"}`}>
+                        {!isPending && (
+                            <>
+                                <button onClick={() => onExpand(info.row.original)} className="text-xs font-semibold text-primary hover:opacity-70 transition-opacity cursor-pointer">
+                                    expand
+                                </button>
+                                <button onClick={() => onEdit(info.row.original)} className="text-xs font-semibold text-yellow-500 hover:opacity-70 transition-opacity cursor-pointer">
+                                    edit
+                                </button>
+                            </>
+                        )}
+                        {isPending ? (
+                            <span className="flex items-center gap-3 w-full justify-start">
+                                <span className="text-xs text-text-muted">Are you sure?</span>
+                                <button onClick={onDeleteConfirm} className="text-xs font-semibold text-red-500 hover:opacity-70 transition-opacity cursor-pointer">Yes</button>
+                                <button onClick={onDeleteCancel} className="text-xs font-semibold text-text-muted hover:opacity-70 transition-opacity cursor-pointer">No</button>
+                            </span>
+                        ) : (
+                            <button onClick={() => onDelete(id)} className="text-xs font-semibold text-red-500 hover:opacity-70 transition-opacity cursor-pointer">
+                                delete
                             </button>
-                            <button onClick={() => onEdit(info.row.original)} className="text-xs font-semibold text-yellow-500 hover:opacity-70 transition-opacity cursor-pointer">
-                                edit
-                            </button>
-                        </>
-                    )}
-                    {isPending ? (
-                        <span className="flex items-center gap-3 w-full justify-start">
-                            <span className="text-xs text-text-muted">Are you sure?</span>
-                            <button onClick={onDeleteConfirm} className="text-xs font-semibold text-red-500 hover:opacity-70 transition-opacity cursor-pointer">Yes</button>
-                            <button onClick={onDeleteCancel} className="text-xs font-semibold text-text-muted hover:opacity-70 transition-opacity cursor-pointer">No</button>
-                        </span>
-                    ) : (
-                        <button onClick={() => onDelete(id)} className="text-xs font-semibold text-red-500 hover:opacity-70 transition-opacity cursor-pointer">
-                            delete
-                        </button>
-                    )}
-                </div>
-            );
-        },
-    }),
-];
+                        )}
+                    </div>
+                );
+            },
+        }),
+    ];

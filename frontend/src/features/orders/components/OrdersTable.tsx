@@ -33,6 +33,8 @@ export default function OrdersTable() {
         handleCreate,
         handleUpdate,
         handleEditCancel,
+        jurisdictionExpanded,
+        taxExpanded,
     } = useOrdersTable();
 
     const handleImport = async (file: File) => {
@@ -59,7 +61,7 @@ export default function OrdersTable() {
                 isCreating={isCreating}
             />
 
-            <OrderTableBody 
+            <OrderTableBody
                 table={table}
                 isLoading={isLoading}
                 isCreating={isCreating}
@@ -72,6 +74,8 @@ export default function OrdersTable() {
                 setEditingOrder={setEditingOrder}
                 handleUpdate={handleUpdate}
                 handleEditCancel={handleEditCancel}
+                jurisdictionExpanded={jurisdictionExpanded}
+                taxExpanded={taxExpanded}
             />
 
             <OrderTablePagination

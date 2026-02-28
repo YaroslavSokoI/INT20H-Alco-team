@@ -39,6 +39,8 @@ const listOrdersSchema = z.object({
   totalMin: numericParam,
   totalMax: numericParam,
   search: z.string().optional(),
+  sortBy: z.string().optional(),
+  sortOrder: z.enum(['asc', 'desc']).optional(),
 });
 
 /**

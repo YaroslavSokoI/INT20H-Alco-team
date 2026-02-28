@@ -84,6 +84,8 @@ export interface OrderListQuery {
   totalMin?: number;
   totalMax?: number;
   search?: string;
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
 }
 
 export interface PaginatedOrders {

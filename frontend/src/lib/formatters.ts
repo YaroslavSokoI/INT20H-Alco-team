@@ -1,5 +1,5 @@
 /**
- * Форматування числа як валюти (USD)
+ * Format a number as currency (USD)
  */
 export const formatCurrency = (amount: number): string => {
     return new Intl.NumberFormat('en-US', {
@@ -9,14 +9,15 @@ export const formatCurrency = (amount: number): string => {
 };
 
 /**
- * Форматування відсотків
+ * Format a number as a percentage
  */
 export const formatPercent = (rate: number): string => {
-    return `${rate.toFixed(2)}%`;
+    const fixed = parseFloat(rate.toFixed(4));
+    return `${fixed}%`;
 };
 
 /**
- * Форматування дати у формат DD.MM.YYYY
+ * Format a date as DD.MM.YYYY
  */
 export const formatDate = (date: Date | string): string => {
     const d = typeof date === 'string' ? new Date(date) : date;

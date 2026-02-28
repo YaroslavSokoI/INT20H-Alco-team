@@ -3,6 +3,8 @@ import type { Jurisdiction } from '../models/order';
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const geocoder = require('local-reverse-geocoder');
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const zipcodes = require('zipcodes');
 
 const DUMP_DIR =
   process.env.GEOCODER_DUMP_DIR || path.join(process.cwd(), 'geocoder-data');
@@ -37,10 +39,16 @@ export async function initGeocoder(): Promise<void> {
   console.log('[Geocoder] Ready');
 }
 
+interface GeoAdminCode {
+  name: string;
+  asciiName: string;
+  geoNameId: string;
+}
+
 interface GeoResult {
   name: string;
-  adminName1: string;
-  adminName2: string;
+  admin1Code: string | GeoAdminCode;
+  admin2Code: string | GeoAdminCode;
 }
 
 export async function localReverseGeocode(
@@ -60,21 +68,26 @@ export async function localReverseGeocode(
         }
 
         const result = results?.[0]?.[0];
+        const zipInfo = zipcodes.lookupByCoords(lat, lon);
+        const postcode = zipInfo?.zip ?? '';
+
         if (!result) {
-          resolve({ city: '', county: '', state: 'New York', postcode: '' });
+          resolve({ city: '', county: '', state: 'New York', postcode });
           return;
         }
 
-        // GeoNames повертає "Albany County", але наш CSV має просто "Albany"
-        const county = (result.adminName2 || '')
-          .replace(/\s+County$/i, '')
-          .trim();
+        const adminName1 = typeof result.admin1Code === 'object' ? result.admin1Code.name : '';
+        const adminName2 = typeof result.admin2Code === 'object' ? result.admin2Code.name : '';
+
+        const NYC_BOROUGHS = new Set(['Richmond County', 'Kings County', 'Queens County', 'Bronx County', 'New York County']);
+        const rawCounty = adminName2.trim();
+        const county = NYC_BOROUGHS.has(rawCounty) ? 'New York City' : rawCounty;
 
         resolve({
           city: result.name || '',
           county,
-          state: result.adminName1 || 'New York',
-          postcode: '',
+          state: adminName1 || 'New York',
+          postcode,
         });
       },
     );

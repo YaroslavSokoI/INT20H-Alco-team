@@ -18,7 +18,7 @@ const Topbar = () => {
                 <div className="flex items-center gap-6">
                     <div className="flex gap-2.5">
                         <div className="size-9 flex items-center justify-center bg-gradient-primary text-lg leading-none text-white rounded-full">
-                            {user.login[0]}
+                            {user.login[0].toUpperCase()}
                         </div>
                         <div className="flex flex-col justify-center gap-0">
                             <h3 className="font-semibold text-sm">{user.login}</h3>
@@ -34,7 +34,7 @@ const Topbar = () => {
                         className="flex items-center gap-2 text-text-muted hover:text-danger transition-colors"
                         onClick={() => setShowLogoutModal(true)}
                     >
-                        <img src={logoutIcon} alt="" className="size-4" />
+                        <img src={logoutIcon} alt="" className="size-5" />
                         <span className="font-medium">Log out</span>
                     </Button>
                 </div>

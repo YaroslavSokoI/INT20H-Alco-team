@@ -94,7 +94,7 @@ export async function insertOrdersBatch(items: InsertOrderData[]): Promise<Order
 
 export async function findOrders(query: OrderListQuery): Promise<PaginatedOrders> {
   const page = query.page ?? 1;
-  const limit = Math.min(query.limit ?? 20, 100);
+  const limit = query.limit ? Math.min(query.limit, 1000000) : 20;
   const offset = (page - 1) * limit;
 
   let baseQuery = db('orders');
@@ -168,9 +168,32 @@ export async function findOrders(query: OrderListQuery): Promise<PaginatedOrders
   const count = countObj?.count || 0;
   const total = typeof count === 'string' ? parseInt(count, 10) : Number(count);
 
+  const SORTABLE: Record<string, string> = {
+    id: 'id',
+    timestamp: 'timestamp',
+    subtotal: 'subtotal',
+    compositeTaxRate: 'composite_tax_rate',
+    stateRate: 'state_rate',
+    countyRate: 'county_rate',
+    cityRate: 'city_rate',
+    specialRates: 'special_rates',
+    specialDistrict: 'special_rates',
+    taxAmount: 'tax_amount',
+    totalAmount: 'total_amount',
+    state: 'state',
+    city: 'city',
+    county: 'county',
+    postcode: 'postcode',
+    latitude: 'latitude',
+    longitude: 'longitude',
+    jurisdictionSummary: 'city',
+  };
+  const sortCol = (query.sortBy && SORTABLE[query.sortBy]) ?? 'created_at';
+  const sortDir = query.sortOrder === 'asc' ? 'asc' : 'desc';
+
   const rows = await baseQuery
     .clone()
-    .orderBy('created_at', 'desc')
+    .orderBy(sortCol, sortDir)
     .limit(limit)
     .offset(offset);
 

@@ -43,6 +43,8 @@ export interface OrderFilters {
   totalMin?: number;
   totalMax?: number;
   search?: string;
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
 }
 
 export interface OrderStats {
@@ -79,6 +81,13 @@ export const ordersApi = {
 
   deleteOrder: async (id: string) => {
     await apiClient.delete(`/orders/${id}`);
+  },
+
+  exportOrders: async (filters?: OrderFilters) => {
+    const response = await apiClient.get<PaginatedOrders>(`/orders`, {
+      params: { page: 1, limit: 100000, ...filters },
+    });
+    return response.data.data;
   },
 
   importOrders: async (file: File) => {

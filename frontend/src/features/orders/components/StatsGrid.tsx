@@ -17,8 +17,8 @@ function formatDeltaNote(): string {
 }
 
 export default function StatsGrid() {
-    // Контроль вибраного фільтра піднімаємо вище (DashboardPage), щоб графік міг залежати від нього.
-    // Тут залишаємо backward-compatible дефолтний рендер.
+    // Selected filter control is lifted to DashboardPage so the chart can depend on it.
+    // Here we keep the default render for backwards compatibility.
 
     return <StatsGridControlled />;
 }

@@ -100,6 +100,8 @@ export async function getOrders(
       totalMin: toNum(req.query.totalMin),
       totalMax: toNum(req.query.totalMax),
       search: req.query.search as string | undefined,
+      sortBy: req.query.sortBy as string | undefined,
+      sortOrder: req.query.sortOrder as 'asc' | 'desc' | undefined,
     };
 
     const result = await listOrders(query);

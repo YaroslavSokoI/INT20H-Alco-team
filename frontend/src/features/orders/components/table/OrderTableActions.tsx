@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/Button";
-import { createOrderIcon, filterIcon, importIcon, searchIcon, refreshIcon } from "@/assets/assets.ts";
+import { createOrderIcon, filterIcon, importIcon, exportIcon, searchIcon, refreshIcon } from "@/assets/assets.ts";
 
 import { useOrderStore } from "@/store/orderStore";
 import { useState, useCallback, memo } from "react";
@@ -74,7 +74,17 @@ function RangeInput({
 }
 
 const OrderTableActions = memo(({ onImport, onCreate, isCreating }: OrderTableActionsProps) => {
-    const { searchQuery, setSearchQuery, setFilters, filters, fetchOrders, isLoading } = useOrderStore();
+    const { searchQuery, setSearchQuery, setFilters, filters, fetchOrders, isLoading, exportOrders } = useOrderStore();
+    const [isExporting, setIsExporting] = useState(false);
+
+    const handleExport = useCallback(async () => {
+        setIsExporting(true);
+        try {
+            await exportOrders();
+        } finally {
+            setIsExporting(false);
+        }
+    }, [exportOrders]);
     const [showFilters, setShowFilters] = useState(false);
     const [local, setLocal] = useState<LocalFilters>({
         county: filters.county ?? "",
@@ -169,14 +179,24 @@ const OrderTableActions = memo(({ onImport, onCreate, isCreating }: OrderTableAc
                             </span>
                         )}
                     </Button>
-                    <Button 
-                        variant="outline" 
-                        size="md" 
+                    <Button
+                        variant="outline"
+                        size="md"
                         className="gap-1.5 font-semibold shadow-xs"
                         onClick={onImport}
                     >
                         <img src={importIcon} alt="" className="size-4" />
                         Import
+                    </Button>
+                    <Button
+                        variant="outline"
+                        size="md"
+                        className="gap-1.5 font-semibold shadow-xs"
+                        onClick={handleExport}
+                        disabled={isExporting || isLoading}
+                    >
+                        <img src={exportIcon} alt="" className={`size-4${isExporting ? " animate-pulse" : ""}`} />
+                        {isExporting ? "Exporting..." : "Export"}
                     </Button>
                     <Button variant="outline" size="md" className={`gap-1.5 font-semibold shadow-sm${isCreating ? " bg-black/5" : ""}`} onClick={onCreate}>
                         <img src={createOrderIcon} alt="" className="size-4" />

@@ -4,7 +4,7 @@ import { getOrderColumns } from "../components/table/columns";
 import {
     getCoreRowModel,
     useReactTable,
-    type VisibilityState,
+    type SortingState,
 } from "@tanstack/react-table";
 import type { OrderRow } from "@/types/order";
 
@@ -18,7 +18,10 @@ export function useOrdersTable() {
         pageSize,
         addOrder,
         updateOrder,
-        deleteOrder
+        deleteOrder,
+        setSorting: setStoreSorting,
+        sortBy,
+        sortOrder,
     } = useOrderStore();
 
     const [isCreating, setIsCreating] = useState(false);
@@ -54,6 +57,7 @@ export function useOrdersTable() {
             longitude: order.longitude.toString(),
             latitude: order.latitude.toString()
         });
+        setJurisdictionExpanded(true);
     }, []);
 
     const handleEditCancel = useCallback(() => {
@@ -77,48 +81,40 @@ export function useOrdersTable() {
 
     const [pendingDeleteId, setPendingDeleteId] = useState<number | string | null>(null);
 
-    const [taxExpanded, setTaxExpanded] = useState(false);
+    const [sorting, setSorting] = useState<SortingState>([{
+        id: sortBy || 'timestamp',
+        desc: sortOrder === 'asc' ? false : true
+    }]);
 
-    const jurisdictionDetailCols = ['state', 'city', 'county', 'specialDistrict', 'postcode', 'latitude', 'longitude', 'collapseJurisdiction'];
-    const taxDetailCols = ['stateRate', 'countyRate', 'cityRate', 'specialRates'];
-
-    const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({
-        jurisdictionSummary: true,
-        state: false,
-        city: false,
-        county: false,
-        specialDistrict: false,
-        postcode: false,
-        latitude: false,
-        longitude: false,
-        collapseJurisdiction: false,
-        stateRate: false,
-        countyRate: false,
-        cityRate: false,
-        specialRates: false,
+    const handleSortingChange = useCallback((updater: SortingState | ((prev: SortingState) => SortingState)) => {
+        const next = typeof updater === 'function' ? updater(sorting) : updater;
+        setSorting(next);
+        const first = next[0];
+        setStoreSorting(first?.id, first ? (first.desc ? 'desc' : 'asc') : undefined);
+    }, [sorting, setStoreSorting]);
+    const [jurisdictionExpanded, setJurisdictionExpanded] = useState<boolean>(() => {
+        const saved = localStorage.getItem("orderTable_jurisdictionExpanded");
+        return saved ? JSON.parse(saved) : false;
+    });
+    const [taxExpanded, setTaxExpanded] = useState<boolean>(() => {
+        const saved = localStorage.getItem("orderTable_taxExpanded");
+        return saved ? JSON.parse(saved) : false;
     });
 
-    const toggleJurisdiction = useCallback(() => {
-        setColumnVisibility(v => {
-            const next = !v['state'];
-            return {
-                ...v,
-                jurisdictionSummary: !next,
-                ...Object.fromEntries(jurisdictionDetailCols.map(c => [c, next])),
-            };
-        });
-    }, []);
+    useEffect(() => {
+        localStorage.setItem("orderTable_jurisdictionExpanded", JSON.stringify(jurisdictionExpanded));
+    }, [jurisdictionExpanded]);
 
-    const toggleTax = useCallback(() => {
-        setTaxExpanded(prev => {
-            const next = !prev;
-            setColumnVisibility(v => ({
-                ...v,
-                ...Object.fromEntries(taxDetailCols.map(c => [c, next])),
-            }));
-            return next;
-        });
-    }, []);
+    useEffect(() => {
+        localStorage.setItem("orderTable_taxExpanded", JSON.stringify(taxExpanded));
+    }, [taxExpanded]);
+
+    useEffect(() => {
+        if (isCreating) setJurisdictionExpanded(true);
+    }, [isCreating]);
+
+    const toggleJurisdiction = useCallback(() => setJurisdictionExpanded(prev => !prev), []);
+    const toggleTax = useCallback(() => setTaxExpanded(prev => !prev), []);
 
     const handleDelete = useCallback((id: number | string) => {
         setPendingDeleteId(id);
@@ -140,16 +136,18 @@ export function useOrdersTable() {
 
     const columns = useMemo(() => getOrderColumns(
         handleExpand, handleEditStart, handleDelete, pendingDeleteId, handleDeleteConfirm, handleDeleteCancel,
-        toggleJurisdiction,
-        taxExpanded, toggleTax,
-    ), [handleExpand, handleEditStart, handleDelete, pendingDeleteId, handleDeleteConfirm, handleDeleteCancel, toggleJurisdiction, taxExpanded, toggleTax]);
+        toggleJurisdiction, toggleTax, taxExpanded,
+    ), [handleExpand, handleEditStart, handleDelete, pendingDeleteId, handleDeleteConfirm, handleDeleteCancel, toggleJurisdiction, toggleTax, taxExpanded]);
 
     const table = useReactTable({
         data: orders,
         columns,
-        state: { columnVisibility },
-        onColumnVisibilityChange: setColumnVisibility,
         getCoreRowModel: getCoreRowModel(),
+        manualSorting: true,
+        enableSortingRemoval: false,
+        onSortingChange: handleSortingChange,
+        state: { sorting },
+        meta: { taxExpanded },
     });
 
     const totalPages = Math.max(1, Math.ceil(totalOrders / pageSize));
@@ -195,5 +193,7 @@ export function useOrdersTable() {
         handleCreate,
         handleUpdate,
         handleEditCancel,
+        jurisdictionExpanded,
+        taxExpanded,
     };
 }

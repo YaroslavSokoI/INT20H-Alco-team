@@ -65,7 +65,7 @@ function addDays(d: Date, days: number): Date {
 }
 
 function formatWeekdayLabel(d: Date): string {
-    // Mon. Tue. ... (як на скріншоті)
+    // Mon. Tue. ...
     return d.toLocaleDateString("en-US", { weekday: "short" }) + ".";
 }
 
@@ -109,7 +109,7 @@ function buildSeries(orders: Array<{ timestamp: string; subtotal: number; taxAmo
     }
 
     if (period === "m") {
-        // 4 тижні (W1..W4)
+        // 4 weeks (W1..W4)
         const end = startOfDay(now);
         const start = addDays(end, -27);
 

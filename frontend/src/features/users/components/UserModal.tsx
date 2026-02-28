@@ -23,7 +23,7 @@ export default function UserModal({ isOpen, onClose }: UserModalProps) {
     setError(null);
 
     if (password.length < 6) {
-      setError("Пароль має бути не менше 6 символів");
+      setError("Password must be at least 6 characters");
       return;
     }
 
@@ -35,7 +35,7 @@ export default function UserModal({ isOpen, onClose }: UserModalProps) {
       setPassword("");
       setRole("manager");
     } catch (err: any) {
-      const message = err.response?.data?.error || err.response?.data?.message || "Не вдалося створити користувача";
+      const message = err.response?.data?.error || err.response?.data?.message || "Failed to create user";
       setError(message);
       console.error("Failed to create user", err);
     } finally {
@@ -60,6 +60,7 @@ export default function UserModal({ isOpen, onClose }: UserModalProps) {
             <input
               type="text"
               required
+              autoComplete="off"
               className="w-full rounded-lg border border-border px-3 py-2 outline-none focus:ring-2 focus:ring-primary/20"
               value={login}
               onChange={(e) => setLogin(e.target.value)}
@@ -73,6 +74,7 @@ export default function UserModal({ isOpen, onClose }: UserModalProps) {
             <input
               type="password"
               required
+              autoComplete="new-password"
               className="w-full rounded-lg border border-border px-3 py-2 outline-none focus:ring-2 focus:ring-primary/20"
               value={password}
               onChange={(e) => setPassword(e.target.value)}

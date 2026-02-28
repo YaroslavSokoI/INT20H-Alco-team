@@ -19,7 +19,7 @@ const OrderDetailModal = memo(({ order, onClose }: OrderDetailModalProps) => {
     if (!order) return null;
 
     const details = [
-        { label: "Order ID", value: String(order.id), highlight: true },
+        { label: "ID", value: String(order.id), highlight: true },
         { label: "Order Date", value: order.timestamp ? formatDate(order.timestamp) : "N/A" },
         { label: "City", value: order.city || "N/A" },
         { label: "County", value: order.county || "N/A" },
@@ -36,45 +36,39 @@ const OrderDetailModal = memo(({ order, onClose }: OrderDetailModalProps) => {
     ];
 
     return (
-        <div 
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-md animate-in fade-in duration-200"
+        <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-[2px] animate-in fade-in duration-200"
         >
-            <div 
+            <div
                 ref={modalRef}
-                className="w-full max-w-lg rounded-3xl bg-white p-8 shadow-2xl transition-all scale-in-center animate-in zoom-in-95 duration-200"
+                className="w-full max-w-lg rounded-lg bg-white shadow-xl animate-in zoom-in-95 duration-200"
             >
-                <div className="flex items-center justify-between mb-8">
+                <div className="flex items-center justify-between px-6 py-4 border-b border-border">
                     <div>
-                        <h2 className="text-2xl font-black text-text tracking-tight">Order Details</h2>
-                        <p className="text-sm text-text-muted font-medium">Detailed information about order #{order.id}</p>
+                        <h2 className="text-base font-semibold text-text tracking-tight">Order Details</h2>
+                        <p className="text-xs text-text-muted">Order #{order.id}</p>
                     </div>
-                    <button 
+                    <button
                         onClick={onClose}
-                        className="size-10 flex items-center justify-center rounded-xl bg-black/5 hover:bg-black/10 transition-colors"
+                        className="size-8 flex items-center justify-center rounded-md text-text-muted hover:bg-black/5 hover:text-text transition-colors"
                     >
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>
                     </button>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 gap-px bg-border p-0 border-b border-border">
                     {details.map((item) => (
-                        <div 
-                            key={item.label} 
-                            className={`p-4 rounded-2xl border transition-all ${
-                                item.highlight 
-                                ? "col-span-2 bg-primary/5 border-primary/20 shadow-sm" 
-                                : "bg-surface/30 border-border/50 hover:border-border"
-                            }`}
+                        <div
+                            key={item.label}
+                            className={`px-5 py-3.5 bg-white ${item.highlight ? "col-span-2 bg-primary/3" : ""}`}
                         >
-                            <div className="flex items-center gap-2 mb-1.5">
-                                <div className="text-[10px] font-bold text-text-muted uppercase tracking-widest">
-                                    {item.label}
-                                </div>
+                            <div className="text-[10px] font-semibold text-text-muted uppercase tracking-wider mb-1">
+                                {item.label}
                             </div>
-                            <div className={`leading-none ${
-                                item.highlight 
-                                ? "text-primary font-black text-3xl" 
-                                : "text-text font-bold text-base"
+                            <div className={`${
+                                item.highlight
+                                ? "text-primary font-bold text-xl"
+                                : "text-text font-semibold text-sm"
                             }`}>
                                 {item.value}
                             </div>
@@ -82,11 +76,8 @@ const OrderDetailModal = memo(({ order, onClose }: OrderDetailModalProps) => {
                     ))}
                 </div>
 
-                <div className="mt-10 flex gap-3">
-                    <Button variant="outline" onClick={onClose} className="flex-1 h-12 rounded-xl font-bold">
-                        Print Receipt
-                    </Button>
-                    <Button onClick={onClose} className="flex-1 h-12 rounded-xl font-bold shadow-lg shadow-primary/20">
+                <div className="px-6 py-3 flex justify-end">
+                    <Button onClick={onClose} className="h-8 px-4 text-xs rounded-md font-medium">
                         Close
                     </Button>
                 </div>
