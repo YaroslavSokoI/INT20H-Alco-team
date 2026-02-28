@@ -223,7 +223,7 @@ export default function OrdersChart({ metric, className }: Props) {
                             type="button"
                             onClick={() => setPeriod(p)}
                             className={
-                                "px-2.5 py-1 text-xs font-semibold uppercase rounded-[6px] transition-colors focus:outline-none focus-visible:ring-0 " +
+                                "px-2.5 py-1 text-xs font-semibold uppercase rounded-md transition-colors focus:outline-none focus-visible:ring-0 " +
                                 (period === p ? "bg-white text-success shadow-xs" : "text-black/50 hover:text-black/70")
                             }
                             aria-pressed={period === p}
@@ -234,7 +234,7 @@ export default function OrdersChart({ metric, className }: Props) {
                 </div>
             </div>
 
-            <div className={`mt-3 flex min-h-[90px] transition-opacity duration-200 ${isLoading ? "opacity-30 pointer-events-none" : ""}`}>
+            <div className={`mt-3 flex min-h-22.5 transition-opacity duration-200 ${isLoading ? "opacity-30 pointer-events-none" : ""}`}>
                 <div
                     className="h-full w-full select-none"
                     onMouseDown={(e) => {

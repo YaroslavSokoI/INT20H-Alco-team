@@ -8,9 +8,9 @@ RUN npm install
 COPY . .
 RUN npm run build
 
-# Якщо geocoder-data/ вже скачана локально (npm run geocoder:download),
-# вона скопіюється через COPY . . вище.
-# Якщо ні — скачуємо під час build.
+# If geocoder-data/ is already downloaded locally (npm run geocoder:download),
+# it will be copied via COPY . . above.
+# If not - download during build.
 ENV GEOCODER_DUMP_DIR=/app/geocoder-data
 RUN if [ ! -f /app/geocoder-data/cities1000.txt ]; then \
       echo "[Geocoder] Downloading GeoNames data..." && \

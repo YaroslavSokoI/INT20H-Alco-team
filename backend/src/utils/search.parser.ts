@@ -50,7 +50,7 @@ export function parseSearch(input: string): ParsedSearch {
   const structured: SearchCondition[] = [];
   let remaining = input;
 
-  // Match "Multi Word Key=value" or "Key=value" — greedy from longest keys first
+  // Match "Multi Word Key=value" or "Key=value" - greedy from longest keys first
   const sortedKeys = Object.keys(KEY_MAP).sort((a, b) => b.length - a.length);
 
   for (const key of sortedKeys) {

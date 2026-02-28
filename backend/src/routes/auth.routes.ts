@@ -70,7 +70,7 @@ const loginSchema = z.object({
  *             schema:
  *               $ref: '#/components/schemas/LoginResponse'
  *       400:
- *         description: Validation error — missing or empty fields
+ *         description: Validation error - missing or empty fields
  *         content:
  *           application/json:
  *             schema:

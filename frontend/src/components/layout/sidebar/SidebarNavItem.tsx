@@ -30,7 +30,7 @@ export default function SidebarNavItem({
             <span
                 className={cn(
                     "whitespace-nowrap overflow-hidden transition-all duration-500",
-                    collapsed ? "opacity-0 max-w-0 ml-0" : "opacity-100 max-w-[200px] ml-3"
+                    collapsed ? "opacity-0 max-w-0 ml-0" : "opacity-100 max-w-50 ml-3"
                 )}
             >
                 {label}
@@ -48,7 +48,7 @@ export default function SidebarNavItem({
                         base,
                         variant === "danger" ? danger : "text-black/70 ",
                         isActive && variant !== "danger" && "bg-gradient-primary text-white shadow-sm",
-                        collapsed ? "px-[22px]" : "px-4"
+                        collapsed ? "px-5.5" : "px-4"
                     )
                 }
             >
@@ -66,7 +66,7 @@ export default function SidebarNavItem({
             className={cn(
                 base,
                 variant === "danger" ? danger : "text-black/70",
-                collapsed ? "px-[22px]" : "px-4"
+                collapsed ? "px-5.5" : "px-4"
             )}
         >
             {content}

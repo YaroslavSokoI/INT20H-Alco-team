@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useAuthStore } from "@/store/authStore";
 import { Button } from "@/components/ui/Button";
+import LogoIcon from "@/assets/logo.svg?react";
 
 export default function LoginPage() {
   const { login } = useAuthStore();
@@ -27,10 +28,8 @@ export default function LoginPage() {
     <div className="flex min-h-screen items-center justify-center bg-surface p-4">
       <div className="w-full max-w-md space-y-8 rounded-2xl bg-white p-8 shadow-lg border border-border">
         <div className="text-center">
-          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-primary text-white font-bold text-2xl shadow-lg shadow-primary/20">
-            A
-          </div>
-          <h2 className="mt-6 text-3xl font-bold tracking-tight text-text">
+          <LogoIcon className="mx-auto h-8 w-auto" />
+          <h2 className="mt-4 text-xl font-bold tracking-tight text-text">
             Welcome
           </h2>
           <p className="mt-2 text-sm text-text-muted">

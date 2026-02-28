@@ -60,7 +60,7 @@ function RangeInput({
                     value={minVal}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => onMinChange(e.target.value)}
                 />
-                <span className="text-border shrink-0">—</span>
+                <span className="text-border shrink-0">-</span>
                 <input
                     type={type}
                     placeholder={placeholder[1]}

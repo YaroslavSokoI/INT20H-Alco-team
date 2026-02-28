@@ -45,7 +45,7 @@ const OrderEditRow = memo(({ order, setOrder, onSave, onCancel, jurisdictionExpa
             </td>
             {/* 3. jurisdictionSummary */}
             <td style={js}>
-                <span className="text-text-muted/60 text-xs">{[order.city || order.county, order.state].filter(Boolean).join(', ') || '—'}</span>
+                <span className="text-text-muted/60 text-xs">{[order.city || order.county, order.state].filter(Boolean).join(', ') || '-'}</span>
             </td>
             {/* 4. state */}
             <td style={jd}>
@@ -61,7 +61,7 @@ const OrderEditRow = memo(({ order, setOrder, onSave, onCancel, jurisdictionExpa
             </td>
             {/* 7. specialDistrict */}
             <td style={jd}>
-                <input className={disabledInput} value={order.specialRates > 0 ? 'MCTD' : '—'} disabled />
+                <input className={disabledInput} value={order.specialRates > 0 ? 'MCTD' : '-'} disabled />
             </td>
             {/* 8. postcode */}
             <td style={jd}>

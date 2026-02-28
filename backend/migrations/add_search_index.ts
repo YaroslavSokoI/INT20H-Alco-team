@@ -5,5 +5,5 @@ export async function up(knex: Knex): Promise<void> {
 }
 
 export async function down(_knex: Knex): Promise<void> {
-  // pg_trgm extension is shared — do not drop it in down migration
+  // pg_trgm extension is shared - do not drop it in down migration
 }

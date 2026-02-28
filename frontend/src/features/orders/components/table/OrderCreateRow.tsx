@@ -11,7 +11,7 @@ interface OrderCreateRowProps {
 }
 
 const inputClass = "w-full bg-transparent border-b border-border/50 outline-none pb-0.5 placeholder:text-text-muted/50 focus:border-primary/50 transition-colors";
-const emptyCell = <span className="text-text-muted/30">—</span>;
+const emptyCell = <span className="text-text-muted/30">-</span>;
 
 const T = 'max-width 0.4s ease, padding-left 0.4s ease, padding-right 0.4s ease, opacity 0.35s ease';
 const cs = (show: boolean): CSSProperties =>
