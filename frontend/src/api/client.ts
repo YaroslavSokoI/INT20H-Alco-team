@@ -9,9 +9,17 @@ const apiClient = axios.create({
 
 // Add token interceptor
 apiClient.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+  const authStorageStr = localStorage.getItem('auth-storage');
+  if (authStorageStr) {
+    try {
+      const authData = JSON.parse(authStorageStr);
+      const token = authData?.state?.token;
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+    } catch (e) {
+      console.error('Failed to parse auth token from local storage', e);
+    }
   }
   return config;
 });

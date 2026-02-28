@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/Button";
 import { createOrderIcon, filterIcon, importIcon, exportIcon, searchIcon, refreshIcon } from "@/assets/assets.ts";
 
 import { useOrderStore } from "@/store/orderStore";
-import { useState, useCallback, memo } from "react";
+import { useState, useCallback, memo, useRef, useEffect } from "react";
 
 interface OrderTableActionsProps {
     onImport: () => void;
@@ -77,15 +77,28 @@ const OrderTableActions = memo(({ onImport, onCreate, isCreating }: OrderTableAc
     const { searchQuery, setSearchQuery, setFilters, filters, fetchOrders, isLoading, exportOrders } = useOrderStore();
     const [isExporting, setIsExporting] = useState(false);
 
-    const handleExport = useCallback(async () => {
+    const handleExport = useCallback(async (format: 'csv' | 'json') => {
         setIsExporting(true);
+        setIsExportMenuOpen(false);
         try {
-            await exportOrders();
+            await exportOrders(format);
         } finally {
             setIsExporting(false);
         }
     }, [exportOrders]);
     const [showFilters, setShowFilters] = useState(false);
+    const [isExportMenuOpen, setIsExportMenuOpen] = useState(false);
+    const exportMenuRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        function handleClickOutside(event: MouseEvent) {
+            if (exportMenuRef.current && !exportMenuRef.current.contains(event.target as Node)) {
+                setIsExportMenuOpen(false);
+            }
+        }
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
     const [local, setLocal] = useState<LocalFilters>({
         county: filters.county ?? "",
         city: filters.city ?? "",
@@ -188,16 +201,34 @@ const OrderTableActions = memo(({ onImport, onCreate, isCreating }: OrderTableAc
                         <img src={importIcon} alt="" className="size-4" />
                         Import
                     </Button>
-                    <Button
-                        variant="outline"
-                        size="md"
-                        className="gap-1.5 font-semibold shadow-xs"
-                        onClick={handleExport}
-                        disabled={isExporting || isLoading}
-                    >
-                        <img src={exportIcon} alt="" className={`size-4${isExporting ? " animate-pulse" : ""}`} />
-                        {isExporting ? "Exporting..." : "Export"}
-                    </Button>
+                    <div className="relative" ref={exportMenuRef}>
+                        <Button
+                            variant="outline"
+                            size="md"
+                            className="gap-1.5 font-semibold shadow-xs"
+                            onClick={() => setIsExportMenuOpen(!isExportMenuOpen)}
+                            disabled={isExporting || isLoading}
+                        >
+                            <img src={exportIcon} alt="" className={`size-4${isExporting ? " animate-pulse" : ""}`} />
+                            {isExporting ? "Exporting..." : "Export"}
+                        </Button>
+                        {isExportMenuOpen && (
+                            <div className="absolute right-0 top-full mt-2 w-40 rounded-xl border border-border bg-white shadow-lg p-1.5 z-50">
+                                <button
+                                    onClick={() => handleExport('csv')}
+                                    className="w-full text-left px-3 py-2 text-sm text-text rounded-lg hover:bg-black/5 transition-colors"
+                                >
+                                    Export as CSV
+                                </button>
+                                <button
+                                    onClick={() => handleExport('json')}
+                                    className="w-full text-left px-3 py-2 text-sm text-text rounded-lg hover:bg-black/5 transition-colors"
+                                >
+                                    Export as JSON
+                                </button>
+                            </div>
+                        )}
+                    </div>
                     <Button variant="outline" size="md" className={`gap-1.5 font-semibold shadow-sm${isCreating ? " bg-black/5" : ""}`} onClick={onCreate}>
                         <img src={createOrderIcon} alt="" className="size-4" />
                         Create

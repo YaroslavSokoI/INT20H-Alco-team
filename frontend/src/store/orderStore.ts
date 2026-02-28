@@ -28,7 +28,7 @@ interface OrderState {
     updateOrder: (id: string, order: Partial<OrderRow>) => Promise<void>;
     deleteOrder: (id: string) => Promise<void>;
     importOrders: (file: File) => Promise<unknown>;
-    exportOrders: () => Promise<void>;
+    exportOrders: (format?: 'csv' | 'json') => Promise<void>;
 }
 
 export const useOrderStore = create<OrderState>()(
@@ -141,7 +141,7 @@ export const useOrderStore = create<OrderState>()(
                     console.error("Failed to delete order:", error);
                 }
             },
-            exportOrders: async () => {
+            exportOrders: async (format: 'csv' | 'json' = 'csv') => {
                 const { filters, searchQuery, sortBy, sortOrder } = get();
                 const apiFilters: OrderFilters = {};
                 if (filters.county) apiFilters.county = filters.county;
@@ -162,21 +162,32 @@ export const useOrderStore = create<OrderState>()(
 
                 const orders = await ordersApi.exportOrders(apiFilters);
 
-                const headers = ['ID', 'UUID', 'Date', 'State', 'City', 'County', 'Postcode', 'Latitude', 'Longitude', 'Subtotal', 'Tax Rate', 'State Rate', 'County Rate', 'City Rate', 'Special Rates', 'Tax', 'Total'];
-                const esc = (v: unknown) => `"${String(v ?? '').replace(/"/g, '""')}"`;
-                const rows = orders.map(o => [
-                    o.id, o.uuid, o.timestamp, o.state, o.city, o.county, o.postcode,
-                    o.latitude, o.longitude, o.subtotal, o.compositeTaxRate,
-                    o.stateRate, o.countyRate, o.cityRate, o.specialRates,
-                    o.taxAmount, o.totalAmount,
-                ].map(esc).join(','));
-                const csv = [headers.map(esc).join(','), ...rows].join('\n');
+                let blob: Blob;
+                let filename: string;
 
-                const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+                if (format === 'json') {
+                    const json = JSON.stringify(orders, null, 2);
+                    blob = new Blob([json], { type: 'application/json;charset=utf-8;' });
+                    filename = `orders-${new Date().toISOString().slice(0, 10)}.json`;
+                } else {
+                    const headers = ['ID', 'UUID', 'Date', 'State', 'City', 'County', 'Postcode', 'Latitude', 'Longitude', 'Subtotal', 'Tax Rate', 'State Rate', 'County Rate', 'City Rate', 'Special Rates', 'Tax', 'Total'];
+                    const esc = (v: unknown) => `"${String(v ?? '').replace(/"/g, '""')}"`;
+                    const rows = orders.map(o => [
+                        o.id, o.uuid, o.timestamp, o.state, o.city, o.county, o.postcode,
+                        o.latitude, o.longitude, o.subtotal, o.compositeTaxRate,
+                        o.stateRate, o.countyRate, o.cityRate, o.specialRates,
+                        o.taxAmount, o.totalAmount,
+                    ].map(esc).join(','));
+                    const csv = [headers.map(esc).join(','), ...rows].join('\n');
+
+                    blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+                    filename = `orders-${new Date().toISOString().slice(0, 10)}.csv`;
+                }
+
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = `orders-${new Date().toISOString().slice(0, 10)}.csv`;
+                a.download = filename;
                 a.click();
                 URL.revokeObjectURL(url);
             },

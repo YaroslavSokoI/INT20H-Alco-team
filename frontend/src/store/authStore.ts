@@ -48,7 +48,6 @@ export const useAuthStore = create<AuthState>()(
       login: async (loginName, password) => {
         try {
           const { token } = await authApi.login(loginName, password);
-          localStorage.setItem('token', token);
           const user = parseToken(token);
           set({
             token,
@@ -62,7 +61,6 @@ export const useAuthStore = create<AuthState>()(
       },
 
       logout: () => {
-        localStorage.removeItem('token');
         set({ user: null, isAuthenticated: false, token: null, users: [] });
       },
 
