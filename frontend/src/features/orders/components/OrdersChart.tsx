@@ -2,6 +2,7 @@ import { useMemo, useState, useEffect } from "react";
 import type { StatMetric } from "./StatsGrid";
 import { formatCurrency } from "@/lib/formatters";
 import { ordersApi, type ApiOrder } from "@/api/orders";
+import { useOrderStore } from "@/store/orderStore";
 import {
     Area,
     AreaChart,
@@ -172,6 +173,7 @@ export default function OrdersChart({ metric, className }: Props) {
     const [period, setPeriod] = useState<Period>("w");
     const [chartOrders, setChartOrders] = useState<ApiOrder[]>([]);
     const [isLoading, setIsLoading] = useState(false);
+    const { totalOrders } = useOrderStore();
 
     const resolvedMetric: StatMetric = metric ?? "sales";
 
@@ -198,7 +200,7 @@ export default function OrdersChart({ metric, className }: Props) {
         return () => {
             mounted = false;
         };
-    }, [period]);
+    }, [period, totalOrders]);
 
     const series = useMemo(() => buildSeries(chartOrders, resolvedMetric, period), [chartOrders, resolvedMetric, period]);
 

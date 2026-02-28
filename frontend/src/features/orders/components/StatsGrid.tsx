@@ -12,15 +12,8 @@ function formatDelta(delta: number): string {
     return `${sign}${Math.abs(delta)}%`;
 }
 
-function formatDeltaNote(delta: number): string {
-    const sign = delta >= 0 ? "+" : "";
-    return `${sign}${delta}% vs previous import`;
-}
 
 export default function StatsGrid() {
-    // Selected filter control is lifted to DashboardPage so the chart can depend on it.
-    // Here we keep the default render for backwards compatibility.
-
     return <StatsGridControlled />;
 }
 
@@ -46,7 +39,7 @@ export function StatsGridControlled({ selectedMetric = null, onSelectMetric }: C
                 title: "Total Orders",
                 value: (stats.totalOrders || totalOrders).toLocaleString(),
                 deltaText: formatDelta(stats.deltaOrders),
-                deltaNote: formatDeltaNote(stats.deltaOrders),
+                deltaNote: "vs prior 30 days",
                 positive: stats.deltaOrders >= 0,
                 icon: <img src={cart} alt="" className="size-4 opacity-70" />,
             },
@@ -55,7 +48,7 @@ export function StatsGridControlled({ selectedMetric = null, onSelectMetric }: C
                 title: "VAT Collected",
                 value: formatCurrency(stats.totalTax || 0),
                 deltaText: formatDelta(stats.deltaTax),
-                deltaNote: formatDeltaNote(stats.deltaTax),
+                deltaNote: "vs prior 30 days",
                 positive: stats.deltaTax >= 0,
                 icon: <img src={percent} alt="" className="size-4 opacity-70" />,
             },
@@ -64,7 +57,7 @@ export function StatsGridControlled({ selectedMetric = null, onSelectMetric }: C
                 title: "Total Sales",
                 value: formatCurrency(stats.totalSales || 0),
                 deltaText: formatDelta(stats.deltaSales),
-                deltaNote: formatDeltaNote(stats.deltaSales),
+                deltaNote: "vs prior 30 days",
                 positive: stats.deltaSales >= 0,
                 icon: <img src={dollar} alt="" className="size-4 opacity-70" />,
             },
