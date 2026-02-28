@@ -319,38 +319,30 @@ export async function getOrderStats(): Promise<{
     .count('id as totalOrders')
     .countDistinct('import_id as totalImports') as unknown as RawStatsRow[];
 
-  const recentImports = await db('orders')
-    .select('import_id')
-    .max('created_at as max_created_at')
-    .whereNotNull('import_id')
-    .groupBy('import_id')
-    .orderBy('max_created_at', 'desc')
-    .limit(2) as unknown as { import_id: string }[];
+  const now = new Date();
+  const last30Start = new Date(now);
+  last30Start.setDate(last30Start.getDate() - 30);
+  const prev30Start = new Date(now);
+  prev30Start.setDate(prev30Start.getDate() - 60);
 
-  let current: RawStatsRow = { totalOrders: 0, totalSales: 0, totalTax: 0, totalImports: 0 };
-  let previous: RawStatsRow = { totalOrders: 0, totalSales: 0, totalTax: 0, totalImports: 0 };
+  const [currentStats] = await db('orders')
+    .where('timestamp', '>=', last30Start)
+    .where('timestamp', '<', now)
+    .sum('total_amount as totalSales')
+    .sum('tax_amount as totalTax')
+    .count('id as totalOrders')
+    .countDistinct('import_id as totalImports') as unknown as RawStatsRow[];
 
-  if (recentImports.length > 0) {
-    const latestId = recentImports[0].import_id;
-    const [latestStats] = await db('orders')
-      .where('import_id', latestId)
-      .sum('total_amount as totalSales')
-      .sum('tax_amount as totalTax')
-      .count('id as totalOrders')
-      .countDistinct('import_id as totalImports') as unknown as RawStatsRow[];
-    current = latestStats;
-  }
+  const [previousStats] = await db('orders')
+    .where('timestamp', '>=', prev30Start)
+    .where('timestamp', '<', last30Start)
+    .sum('total_amount as totalSales')
+    .sum('tax_amount as totalTax')
+    .count('id as totalOrders')
+    .countDistinct('import_id as totalImports') as unknown as RawStatsRow[];
 
-  if (recentImports.length > 1) {
-    const prevId = recentImports[1].import_id;
-    const [prevStats] = await db('orders')
-      .where('import_id', prevId)
-      .sum('total_amount as totalSales')
-      .sum('tax_amount as totalTax')
-      .count('id as totalOrders')
-      .countDistinct('import_id as totalImports') as unknown as RawStatsRow[];
-    previous = prevStats;
-  }
+  const current: RawStatsRow = currentStats ?? { totalOrders: 0, totalSales: 0, totalTax: 0, totalImports: 0 };
+  const previous: RawStatsRow = previousStats ?? { totalOrders: 0, totalSales: 0, totalTax: 0, totalImports: 0 };
 
   const delta = (curr: number, prev: number): number => {
     if (prev === 0) return curr > 0 ? 100 : 0;
