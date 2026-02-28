@@ -27,6 +27,7 @@ interface OrderState {
     addOrder: (order: { latitude: number; longitude: number; subtotal: number; timestamp?: string }) => Promise<void>;
     updateOrder: (id: string, order: Partial<OrderRow>) => Promise<void>;
     deleteOrder: (id: string) => Promise<void>;
+    deleteSelected: () => Promise<number>;
     importOrders: (file: File) => Promise<unknown>;
     exportOrders: (format?: 'csv' | 'json') => Promise<void>;
 }
@@ -140,6 +141,27 @@ export const useOrderStore = create<OrderState>()(
                 } catch (error) {
                     console.error("Failed to delete order:", error);
                 }
+            },
+            deleteSelected: async () => {
+                const { filters, searchQuery } = get();
+                const apiFilters: OrderFilters = {};
+                if (filters.county) apiFilters.county = filters.county;
+                if (filters.city) apiFilters.city = filters.city;
+                if (filters.dateFrom) apiFilters.dateFrom = new Date(filters.dateFrom).toISOString();
+                if (filters.dateTo) apiFilters.dateTo = new Date(filters.dateTo).toISOString();
+                if (filters.subtotalMin !== undefined) apiFilters.subtotalMin = filters.subtotalMin;
+                if (filters.subtotalMax !== undefined) apiFilters.subtotalMax = filters.subtotalMax;
+                if (filters.taxRateMin !== undefined) apiFilters.taxRateMin = filters.taxRateMin;
+                if (filters.taxRateMax !== undefined) apiFilters.taxRateMax = filters.taxRateMax;
+                if (filters.taxMin !== undefined) apiFilters.taxMin = filters.taxMin;
+                if (filters.taxMax !== undefined) apiFilters.taxMax = filters.taxMax;
+                if (filters.totalMin !== undefined) apiFilters.totalMin = filters.totalMin;
+                if (filters.totalMax !== undefined) apiFilters.totalMax = filters.totalMax;
+                if (searchQuery.trim()) apiFilters.search = searchQuery.trim();
+
+                const { deleted } = await ordersApi.deleteSelected(apiFilters);
+                await get().fetchOrders();
+                return deleted;
             },
             exportOrders: async (format: 'csv' | 'json' = 'csv') => {
                 const { filters, searchQuery, sortBy, sortOrder } = get();

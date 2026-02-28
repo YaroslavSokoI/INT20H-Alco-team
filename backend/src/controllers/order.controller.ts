@@ -2,7 +2,7 @@ import type { Request, Response, NextFunction } from 'express';
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
-import { createOrder, importOrdersFromCsv, listOrders, getOrderStats, updateOrder, deleteOrder } from '../services/order.service';
+import { createOrder, importOrdersFromCsv, importOrdersFromJson, listOrders, getOrderStats, updateOrder, deleteOrder, deleteOrdersByFilter } from '../services/order.service';
 import { createError } from '../middleware/errorHandler';
 
 const upload = multer({
@@ -16,15 +16,19 @@ const upload = multer({
     },
     filename: (_req, file, cb) => {
       const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-      cb(null, file.fieldname + '-' + uniqueSuffix + '.csv');
+      const ext = file.originalname.endsWith('.json') ? '.json' : '.csv';
+      cb(null, file.fieldname + '-' + uniqueSuffix + ext);
     }
   }),
-  limits: { fileSize: 10 * 1024 * 1024 },
+  limits: { fileSize: 100 * 1024 * 1024 },
   fileFilter: (_req, file, cb) => {
-    if (file.mimetype === 'text/csv' || file.originalname.endsWith('.csv')) {
+    if (
+      file.mimetype === 'text/csv' || file.originalname.endsWith('.csv') ||
+      file.mimetype === 'application/json' || file.originalname.endsWith('.json')
+    ) {
       cb(null, true);
     } else {
-      cb(new Error('Only CSV files are allowed'));
+      cb(new Error('Only CSV and JSON files are allowed'));
     }
   },
 });
@@ -38,11 +42,14 @@ export async function importOrders(
 ): Promise<void> {
   try {
     if (!req.file) {
-      return next(createError('CSV file is required (field name: "file")', 400));
+      return next(createError('File is required (field name: "file")', 400));
     }
 
     const filePath = req.file.path;
-    const result = await importOrdersFromCsv(filePath);
+    const isJson = req.file.originalname.endsWith('.json') || req.file.mimetype === 'application/json';
+    const result = isJson
+      ? await importOrdersFromJson(filePath)
+      : await importOrdersFromCsv(filePath);
 
     fs.unlink(filePath, (err) => {
       if (err) console.error(`Failed to delete file ${filePath}:`, err);
@@ -139,6 +146,35 @@ export async function deleteOrderHandler(
     const deleted = await deleteOrder(id);
     if (!deleted) return next(createError('Order not found', 404));
     res.status(204).send();
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function deleteOrdersBulkHandler(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const toNum = (v: unknown) => (v ? Number(v) : undefined);
+    const query = {
+      county: req.query.county as string | undefined,
+      city: req.query.city as string | undefined,
+      dateFrom: req.query.dateFrom as string | undefined,
+      dateTo: req.query.dateTo as string | undefined,
+      subtotalMin: toNum(req.query.subtotalMin),
+      subtotalMax: toNum(req.query.subtotalMax),
+      taxRateMin: toNum(req.query.taxRateMin),
+      taxRateMax: toNum(req.query.taxRateMax),
+      taxMin: toNum(req.query.taxMin),
+      taxMax: toNum(req.query.taxMax),
+      totalMin: toNum(req.query.totalMin),
+      totalMax: toNum(req.query.totalMax),
+      search: req.query.search as string | undefined,
+    };
+    const deleted = await deleteOrdersByFilter(query);
+    res.json({ deleted });
   } catch (err) {
     next(err);
   }

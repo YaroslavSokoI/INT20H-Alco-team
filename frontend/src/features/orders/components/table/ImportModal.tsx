@@ -29,7 +29,7 @@ export default function ImportModal({ isOpen, onClose, onImport }: ImportModalPr
         e.preventDefault();
         setIsDragging(false);
         const droppedFile = e.dataTransfer.files[0];
-        if (droppedFile && droppedFile.name.endsWith('.csv')) {
+        if (droppedFile && (droppedFile.name.endsWith('.csv') || droppedFile.name.endsWith('.json'))) {
             setFile(droppedFile);
         }
     };
@@ -65,7 +65,7 @@ export default function ImportModal({ isOpen, onClose, onImport }: ImportModalPr
                 onClick={(e) => e.stopPropagation()}
             >
                 <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-xl font-bold">Import CSV File</h2>
+                    <h2 className="text-xl font-bold">Import File</h2>
                     <button onClick={onClose} className="text-text-muted hover:text-text">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>
                     </button>
@@ -84,7 +84,7 @@ export default function ImportModal({ isOpen, onClose, onImport }: ImportModalPr
                         type="file"
                         ref={fileInputRef}
                         onChange={handleFileSelect}
-                        accept=".csv"
+                        accept=".csv,.json"
                         className="hidden"
                     />
 
@@ -94,9 +94,9 @@ export default function ImportModal({ isOpen, onClose, onImport }: ImportModalPr
                                 <img src={importIcon} alt="" className="size-8" />
                             </div>
                             <p className="text-sm font-medium text-text text-center">
-                                Drag and drop your CSV file here or click to browse
+                                Drag and drop your CSV or JSON file here or click to browse
                             </p>
-                            <p className="text-xs text-text-muted mt-2">Maximum file size: 10MB</p>
+                            <p className="text-xs text-text-muted mt-2">Maximum file size: 100MB</p>
                         </>
                     ) : (
                         <div className="flex flex-col items-center" onClick={(e) => e.stopPropagation()}>

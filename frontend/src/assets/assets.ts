@@ -9,7 +9,7 @@ import filterIcon from './filter.svg';
 import importIcon from './import.svg';
 import exportIcon from './export.svg';
 import createIcon from './create-user.svg';
-import deleteIcon from './deleteIcon.svg'
+import deleteIcon from './delete.svg'
 import editIcon from './editIcon.svg'
 import expandIcon from './expandIcon.svg'
 import userIcon from './user.svg'

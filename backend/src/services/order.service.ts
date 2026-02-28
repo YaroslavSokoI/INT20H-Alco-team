@@ -1,6 +1,7 @@
 import { calculateTax, isWithinNY } from './tax.service';
 import { randomUUID } from 'crypto';
 import { parseCsvStream } from '../utils/csv.parser';
+import { parseJsonStream } from '../utils/json.parser';
 import {
   insertOrder,
   insertOrdersBatch,
@@ -8,6 +9,7 @@ import {
   getOrderStats as getStatsFromRepo,
   updateOrder as updateOrderInRepo,
   deleteOrder as deleteOrderFromRepo,
+  deleteOrdersByFilter as deleteOrdersByFilterFromRepo,
 } from '../repositories/order.repository';
 import pLimit from 'p-limit';
 import type {
@@ -36,7 +38,11 @@ export interface ImportResult {
 const BATCH_SIZE = 500;
 const NOMINATIM_CONCURRENCY = 10;
 
-export async function importOrdersFromCsv(filePath: string): Promise<ImportResult> {
+type ImportRow =
+  | { index: number; dto: CreateOrderDto; error?: never }
+  | { index: number; dto?: never; error: string };
+
+async function processOrderRows(rowStream: AsyncIterable<ImportRow>): Promise<ImportResult> {
   const errors: ImportResult['errors'] = [];
   let imported = 0;
 
@@ -86,44 +92,46 @@ export async function importOrdersFromCsv(filePath: string): Promise<ImportResul
     }
   };
 
-  try {
-    for await (const row of parseCsvStream(filePath)) {
-      if (row.error || !row.dto) {
-        errors.push({ row: row.index, reason: row.error ?? 'Invalid row' });
-        continue;
-      }
-
-      if (!isWithinNY(row.dto.latitude, row.dto.longitude)) {
-        errors.push({
-          row: row.index,
-          reason: `Coordinates (${row.dto.latitude}, ${row.dto.longitude}) are outside New York State.`,
-        });
-        continue;
-      }
-
-      if (row.dto) {
-        row.dto.import_id = importId;
-      }
-      validBatch.push({ index: row.index, dto: row.dto });
-
-      if (validBatch.length >= BATCH_SIZE) {
-        await processBatch(validBatch);
-        validBatch = [];
-      }
+  for await (const row of rowStream) {
+    if (row.error || !row.dto) {
+      errors.push({ row: row.index, reason: row.error ?? 'Invalid row' });
+      continue;
     }
 
-    if (validBatch.length > 0) {
+    if (!isWithinNY(row.dto.latitude, row.dto.longitude)) {
+      errors.push({
+        row: row.index,
+        reason: `Coordinates (${row.dto.latitude}, ${row.dto.longitude}) are outside New York State.`,
+      });
+      continue;
+    }
+
+    row.dto.import_id = importId;
+    validBatch.push({ index: row.index, dto: row.dto });
+
+    if (validBatch.length >= BATCH_SIZE) {
       await processBatch(validBatch);
+      validBatch = [];
     }
+  }
+
+  if (validBatch.length > 0) {
+    await processBatch(validBatch);
+  }
+
+  return { imported, skipped: errors.length, errors };
+}
+
+export async function importOrdersFromCsv(filePath: string): Promise<ImportResult> {
+  try {
+    return await processOrderRows(parseCsvStream(filePath));
   } catch (err) {
     throw new Error(`Streaming failed: ${err instanceof Error ? err.message : String(err)}`);
   }
+}
 
-  return {
-    imported,
-    skipped: errors.length,
-    errors,
-  };
+export async function importOrdersFromJson(filePath: string): Promise<ImportResult> {
+  return processOrderRows(parseJsonStream(filePath));
 }
 
 export async function listOrders(query: OrderListQuery): Promise<PaginatedOrders> {
@@ -146,6 +154,10 @@ export async function updateOrder(
 
 export async function deleteOrder(id: number): Promise<boolean> {
   return deleteOrderFromRepo(id);
+}
+
+export async function deleteOrdersByFilter(query: Omit<OrderListQuery, 'page' | 'limit' | 'sortBy' | 'sortOrder'>): Promise<number> {
+  return deleteOrdersByFilterFromRepo(query);
 }
 
 export async function getOrderStats() {

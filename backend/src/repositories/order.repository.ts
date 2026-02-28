@@ -260,6 +260,42 @@ export async function deleteOrder(id: number): Promise<boolean> {
   return Number(count) > 0;
 }
 
+export async function deleteOrdersByFilter(query: Omit<OrderListQuery, 'page' | 'limit' | 'sortBy' | 'sortOrder'>): Promise<number> {
+  let q = db('orders');
+
+  if (query.county) q = q.where('county', query.county);
+  if (query.city) q = q.where('city', query.city);
+  if (query.dateFrom) q = q.where('timestamp', '>=', new Date(query.dateFrom));
+  if (query.dateTo) q = q.where('timestamp', '<=', new Date(query.dateTo));
+  if (query.subtotalMin !== undefined) q = q.where('subtotal', '>=', query.subtotalMin);
+  if (query.subtotalMax !== undefined) q = q.where('subtotal', '<=', query.subtotalMax);
+  if (query.taxRateMin !== undefined) q = q.where('composite_tax_rate', '>=', query.taxRateMin);
+  if (query.taxRateMax !== undefined) q = q.where('composite_tax_rate', '<=', query.taxRateMax);
+  if (query.taxMin !== undefined) q = q.where('tax_amount', '>=', query.taxMin);
+  if (query.taxMax !== undefined) q = q.where('tax_amount', '<=', query.taxMax);
+  if (query.totalMin !== undefined) q = q.where('total_amount', '>=', query.totalMin);
+  if (query.totalMax !== undefined) q = q.where('total_amount', '<=', query.totalMax);
+
+  if (query.search) {
+    const { defaultTerms, structured } = parseSearch(query.search);
+    const DEFAULT_FIELDS = [
+      `CAST(id AS TEXT)`, `uuid::text`, `city`, `county`, `state`, `postcode`, `CAST(timestamp AS TEXT)`,
+    ];
+    for (const term of defaultTerms) {
+      q = q.where(function () {
+        DEFAULT_FIELDS.forEach(f => this.orWhereRaw(`${f} ILIKE ?`, [`%${term}%`]));
+      });
+    }
+    for (const { field, term, exact } of structured) {
+      if (exact) q = q.whereRaw(`${field} = ?`, [term]);
+      else q = q.whereRaw(`${field} ILIKE ?`, [`%${term}%`]);
+    }
+  }
+
+  const count = await q.delete();
+  return Number(count);
+}
+
 export async function getOrderStats(): Promise<{
   totalOrders: number;
   totalSales: number;

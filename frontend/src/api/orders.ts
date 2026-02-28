@@ -94,6 +94,11 @@ export const ordersApi = {
     return response.data.data;
   },
 
+  deleteSelected: async (filters?: OrderFilters): Promise<{ deleted: number }> => {
+    const response = await apiClient.delete<{ deleted: number }>('/orders', { params: filters });
+    return response.data;
+  },
+
   importOrders: async (file: File) => {
     const formData = new FormData();
     formData.append('file', file);

@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/Button";
-import { createOrderIcon, filterIcon, importIcon, exportIcon, searchIcon, refreshIcon } from "@/assets/assets.ts";
+import { createOrderIcon, filterIcon, importIcon, exportIcon, searchIcon, refreshIcon, deleteIcon } from "@/assets/assets.ts";
 
 import { useOrderStore } from "@/store/orderStore";
 import { useState, useCallback, memo, useRef, useEffect } from "react";
@@ -74,8 +74,11 @@ function RangeInput({
 }
 
 const OrderTableActions = memo(({ onImport, onCreate, isCreating }: OrderTableActionsProps) => {
-    const { searchQuery, setSearchQuery, setFilters, filters, fetchOrders, isLoading, exportOrders } = useOrderStore();
+    const { searchQuery, setSearchQuery, setFilters, filters, fetchOrders, isLoading, exportOrders, deleteSelected, totalOrders } = useOrderStore();
     const [isExporting, setIsExporting] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+    const [deleteConfirmText, setDeleteConfirmText] = useState("");
 
     const handleExport = useCallback(async (format: 'csv' | 'json') => {
         setIsExporting(true);
@@ -86,6 +89,16 @@ const OrderTableActions = memo(({ onImport, onCreate, isCreating }: OrderTableAc
             setIsExporting(false);
         }
     }, [exportOrders]);
+
+    const handleDelete = useCallback(async () => {
+        setIsDeleting(true);
+        try {
+            await deleteSelected();
+        } finally {
+            setIsDeleting(false);
+            setShowDeleteConfirm(false);
+        }
+    }, [deleteSelected]);
     const [showFilters, setShowFilters] = useState(false);
     const [isExportMenuOpen, setIsExportMenuOpen] = useState(false);
     const exportMenuRef = useRef<HTMLDivElement>(null);
@@ -233,8 +246,60 @@ const OrderTableActions = memo(({ onImport, onCreate, isCreating }: OrderTableAc
                         <img src={createOrderIcon} alt="" className="size-4" />
                         Create
                     </Button>
+                    <Button
+                        variant="outline"
+                        size="md"
+                        className="gap-1.5 font-semibold shadow-xs text-danger border-danger/30 hover:bg-danger/5"
+                        onClick={() => { setDeleteConfirmText(""); setShowDeleteConfirm(true); }}
+                        disabled={isDeleting || isLoading || totalOrders === 0}
+                    >
+                        <img src={deleteIcon} alt="" className="size-4" />
+                        Delete
+                    </Button>
                 </div>
             </div>
+
+            {showDeleteConfirm && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+                    <div className="w-full max-w-sm rounded-xl bg-white p-6 shadow-xl animate-in fade-in zoom-in duration-200">
+                        <h3 className="text-lg font-bold text-text mb-2">Delete Orders</h3>
+                        <p className="text-sm text-text-muted mb-4">
+                            Are you sure you want to delete{" "}
+                            <span className="font-semibold text-danger">{totalOrders.toLocaleString()}</span>{" "}
+                            {totalOrders === 1 ? "order" : "orders"} matching the current filters? This action cannot be undone.
+                        </p>
+                        {totalOrders >= 1000 && (
+                            <div className="mb-4">
+                                <p className="text-xs text-danger font-semibold mb-2">
+                                    You are about to delete a large number of records. Type <span className="font-mono bg-danger/10 px-1 rounded">DELETE</span> to confirm.
+                                </p>
+                                <input
+                                    type="text"
+                                    className="w-full rounded-lg border border-danger/40 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-danger/20 transition-all"
+                                    placeholder="Type DELETE to confirm"
+                                    value={deleteConfirmText}
+                                    onChange={e => setDeleteConfirmText(e.target.value)}
+                                    autoComplete="off"
+                                />
+                            </div>
+                        )}
+                        <div className="flex justify-end gap-3">
+                            <Button variant="outline" size="md" onClick={() => { setShowDeleteConfirm(false); setDeleteConfirmText(""); }} disabled={isDeleting}>
+                                Cancel
+                            </Button>
+                            <Button
+                                size="md"
+                                className="bg-danger hover:bg-danger/90 text-white shadow-sm"
+                                onClick={handleDelete}
+                                isLoading={isDeleting}
+                                disabled={totalOrders >= 1000 && deleteConfirmText !== "DELETE"}
+                            >
+                                Delete
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {showFilters && (
                 <div className="p-6 bg-white border border-border rounded-2xl space-y-6 animate-in slide-in-from-top-2 duration-200">
