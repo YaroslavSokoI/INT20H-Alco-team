@@ -101,12 +101,10 @@ export async function importOrdersFromCsv(filePath: string): Promise<ImportResul
         continue;
       }
 
-<<<<<<< HEAD
+      if (row.dto) {
+        row.dto.import_id = importId;
+      }
       validBatch.push({ index: row.index, dto: row.dto });
-=======
-      row.dto.import_id = importId;
-      validBatch.push(row);
->>>>>>> 2633061 (feat: track and compare latest CSV import stats)
 
       if (validBatch.length >= BATCH_SIZE) {
         await processBatch(validBatch);

@@ -58,15 +58,11 @@ export async function insertOrder(data: InsertOrderData): Promise<Order> {
       county_rate: tax.countyRate,
       city_rate: tax.cityRate,
       special_rates: tax.specialRates,
-<<<<<<< HEAD
       city: jurisdiction.city,
       county: jurisdiction.county,
       state: jurisdiction.state,
       postcode: jurisdiction.postcode,
-=======
-      jurisdictions: JSON.stringify(jurisdiction),
       import_id: dto.import_id,
->>>>>>> 2633061 (feat: track and compare latest CSV import stats)
     })
     .returning('*');
 
@@ -88,15 +84,11 @@ export async function insertOrdersBatch(items: InsertOrderData[]): Promise<Order
     county_rate: tax.countyRate,
     city_rate: tax.cityRate,
     special_rates: tax.specialRates,
-<<<<<<< HEAD
     city: jurisdiction.city,
     county: jurisdiction.county,
     state: jurisdiction.state,
     postcode: jurisdiction.postcode,
-=======
-    jurisdictions: JSON.stringify(jurisdiction),
     import_id: dto.import_id,
->>>>>>> 2633061 (feat: track and compare latest CSV import stats)
   }));
 
   const inserted = await db('orders').insert(rows).returning('*');
@@ -147,7 +139,6 @@ export async function findOrders(query: OrderListQuery): Promise<PaginatedOrders
     baseQuery = baseQuery.where('total_amount', '<=', query.totalMax);
   }
 
-<<<<<<< HEAD
   if (query.search) {
     const { defaultTerms, structured } = parseSearch(query.search);
     const DEFAULT_FIELDS = [
@@ -172,7 +163,9 @@ export async function findOrders(query: OrderListQuery): Promise<PaginatedOrders
       } else {
         baseQuery = baseQuery.whereRaw(`${field} ILIKE ?`, [`%${term}%`]);
       }
-=======
+    }
+  }
+
   if (query.importId) {
     if (query.importId === 'latest') {
       const latestImport = await db('orders')
@@ -192,7 +185,6 @@ export async function findOrders(query: OrderListQuery): Promise<PaginatedOrders
       }
     } else {
       baseQuery = baseQuery.where('import_id', query.importId);
->>>>>>> 2633061 (feat: track and compare latest CSV import stats)
     }
   }
 

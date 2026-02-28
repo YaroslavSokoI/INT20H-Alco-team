@@ -86,13 +86,10 @@ export interface OrderListQuery {
   taxMax?: number;
   totalMin?: number;
   totalMax?: number;
-<<<<<<< HEAD
   search?: string;
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';
-=======
   importId?: string;
->>>>>>> 2633061 (feat: track and compare latest CSV import stats)
 }
 
 export interface PaginatedOrders {

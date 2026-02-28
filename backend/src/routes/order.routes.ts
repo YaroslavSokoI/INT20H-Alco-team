@@ -38,13 +38,10 @@ const listOrdersSchema = z.object({
   taxMax: numericParam,
   totalMin: numericParam,
   totalMax: numericParam,
-<<<<<<< HEAD
   search: z.string().optional(),
   sortBy: z.string().optional(),
   sortOrder: z.enum(['asc', 'desc']).optional(),
-=======
   importId: z.string().optional(),
->>>>>>> 2633061 (feat: track and compare latest CSV import stats)
 });
 
 /**
