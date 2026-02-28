@@ -45,6 +45,7 @@ export interface OrderFilters {
   search?: string;
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';
+  importId?: string;
 }
 
 export interface OrderStats {

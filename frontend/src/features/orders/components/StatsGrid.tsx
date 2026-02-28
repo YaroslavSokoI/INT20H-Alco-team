@@ -12,8 +12,9 @@ function formatDelta(delta: number): string {
     return `${sign}${Math.abs(delta)}%`;
 }
 
-function formatDeltaNote(): string {
-    return `compared to previous 30 days`;
+function formatDeltaNote(delta: number): string {
+    const sign = delta >= 0 ? "+" : "";
+    return `${sign}${delta}% vs previous import`;
 }
 
 export default function StatsGrid() {
@@ -40,43 +41,43 @@ export function StatsGridControlled({ selectedMetric = null, onSelectMetric }: C
         positive: boolean;
         icon: ReactNode;
     }> = [
-        {
-            metric: "orders",
-            title: "Total Orders",
-            value: (stats.totalOrders || totalOrders).toLocaleString(),
-            deltaText: formatDelta(stats.deltaOrders),
-            deltaNote: formatDeltaNote(),
-            positive: stats.deltaOrders >= 0,
-            icon: <img src={cart} alt="" className="size-4 opacity-70" />,
-        },
-        {
-            metric: "tax",
-            title: "VAT Collected",
-            value: formatCurrency(stats.totalTax || 0),
-            deltaText: formatDelta(stats.deltaTax),
-            deltaNote: formatDeltaNote(),
-            positive: stats.deltaTax >= 0,
-            icon: <img src={percent} alt="" className="size-4 opacity-70" />,
-        },
-        {
-            metric: "sales",
-            title: "Total Sales",
-            value: formatCurrency(stats.totalSales || 0),
-            deltaText: formatDelta(stats.deltaSales),
-            deltaNote: formatDeltaNote(),
-            positive: stats.deltaSales >= 0,
-            icon: <img src={dollar} alt="" className="size-4 opacity-70" />,
-        },
-        {
-            metric: "imports",
-            title: "Total Imports",
-            value: (stats.totalOrders || totalOrders).toLocaleString(),
-            deltaText: formatDelta(stats.deltaOrders),
-            deltaNote: formatDeltaNote(),
-            positive: stats.deltaOrders >= 0,
-            icon: <img src={file} alt="" className="size-4 opacity-70" />,
-        },
-    ];
+            {
+                metric: "orders",
+                title: "Total Orders",
+                value: (stats.totalOrders || totalOrders).toLocaleString(),
+                deltaText: formatDelta(stats.deltaOrders),
+                deltaNote: formatDeltaNote(stats.deltaOrders),
+                positive: stats.deltaOrders >= 0,
+                icon: <img src={cart} alt="" className="size-4 opacity-70" />,
+            },
+            {
+                metric: "tax",
+                title: "VAT Collected",
+                value: formatCurrency(stats.totalTax || 0),
+                deltaText: formatDelta(stats.deltaTax),
+                deltaNote: formatDeltaNote(stats.deltaTax),
+                positive: stats.deltaTax >= 0,
+                icon: <img src={percent} alt="" className="size-4 opacity-70" />,
+            },
+            {
+                metric: "sales",
+                title: "Total Sales",
+                value: formatCurrency(stats.totalSales || 0),
+                deltaText: formatDelta(stats.deltaSales),
+                deltaNote: formatDeltaNote(stats.deltaSales),
+                positive: stats.deltaSales >= 0,
+                icon: <img src={dollar} alt="" className="size-4 opacity-70" />,
+            },
+            {
+                metric: "imports",
+                title: "Total Imports",
+                value: (stats.totalOrders || totalOrders).toLocaleString(),
+                deltaText: formatDelta(stats.deltaOrders),
+                deltaNote: formatDeltaNote(stats.deltaOrders),
+                positive: stats.deltaOrders >= 0,
+                icon: <img src={file} alt="" className="size-4 opacity-70" />,
+            },
+        ];
 
     return (
         <div className="grid h-full grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4 xl:auto-rows-fr items-stretch">

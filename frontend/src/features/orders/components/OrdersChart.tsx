@@ -1,7 +1,7 @@
-import { useMemo, useState } from "react";
-import { useOrderStore } from "@/store/orderStore";
+import { useMemo, useState, useEffect } from "react";
 import type { StatMetric } from "./StatsGrid";
 import { formatCurrency } from "@/lib/formatters";
+import { ordersApi, type ApiOrder } from "@/api/orders";
 import {
     Area,
     AreaChart,
@@ -150,11 +150,51 @@ function buildSeries(orders: Array<{ timestamp: string; subtotal: number; taxAmo
 
 export default function OrdersChart({ metric, className }: Props) {
     const [period, setPeriod] = useState<Period>("w");
-    const { orders } = useOrderStore();
+    const [chartOrders, setChartOrders] = useState<ApiOrder[]>([]);
+    const [isLoading, setIsLoading] = useState(false);
 
     const resolvedMetric: StatMetric = metric ?? "sales";
 
-    const series = useMemo(() => buildSeries(orders, resolvedMetric, period), [orders, resolvedMetric, period]);
+    useEffect(() => {
+        let mounted = true;
+        setIsLoading(true);
+
+        const fetchChartData = async () => {
+            try {
+                const now = new Date();
+                let dateFrom: Date;
+                if (period === "w") {
+                    dateFrom = addDays(startOfDay(now), -6);
+                } else if (period === "m") {
+                    dateFrom = addDays(startOfDay(now), -27);
+                } else {
+                    dateFrom = new Date(now.getFullYear(), 0, 1);
+                }
+
+                // Fetch up to 1000 orders as a reasonable maximum for the chart for now
+                const response = await ordersApi.getOrders(1, 10000, {
+                    dateFrom: dateFrom.toISOString(),
+                    importId: 'latest',
+                });
+
+                if (mounted) {
+                    setChartOrders(response.data);
+                }
+            } catch (err) {
+                console.error("Failed to fetch chart data", err);
+            } finally {
+                if (mounted) setIsLoading(false);
+            }
+        };
+
+        fetchChartData();
+
+        return () => {
+            mounted = false;
+        };
+    }, [period]);
+
+    const series = useMemo(() => buildSeries(chartOrders, resolvedMetric, period), [chartOrders, resolvedMetric, period]);
 
     const data = series.length ? series : [{ label: "", value: 0 }];
 
@@ -186,11 +226,10 @@ export default function OrdersChart({ metric, className }: Props) {
                 </div>
             </div>
 
-            <div className="mt-3 flex min-h-[90px]">
+            <div className={`mt-3 flex min-h-[90px] transition-opacity duration-200 ${isLoading ? "opacity-30 pointer-events-none" : ""}`}>
                 <div
                     className="h-full w-full select-none"
                     onMouseDown={(e) => {
-                        // Prevent focus/selection outline when clicking inside the chart.
                         e.preventDefault();
                     }}
                 >
@@ -210,6 +249,7 @@ export default function OrdersChart({ metric, className }: Props) {
                                 tickLine={false}
                                 axisLine={false}
                                 interval={0}
+                                padding={{ left: 16, right: 16 }}
                             />
                             <YAxis hide domain={["auto", "auto"]} />
 
