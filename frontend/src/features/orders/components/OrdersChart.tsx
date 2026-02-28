@@ -84,8 +84,15 @@ function metricValue(metric: StatMetric, order: { subtotal: number; taxAmount: n
 function buildSeries(orders: Array<{ timestamp: string; subtotal: number; taxAmount: number }>, metric: StatMetric, period: Period): SeriesPoint[] {
     let now = new Date();
     if (orders.length > 0) {
-        const maxTime = Math.max(...orders.map(o => new Date(o.timestamp).getTime()));
-        if (!isNaN(maxTime)) {
+        let maxTime = -Infinity;
+        for (const o of orders) {
+            if (!o.timestamp) continue;
+            const t = new Date(o.timestamp).getTime();
+            if (!isNaN(t) && t > maxTime) {
+                maxTime = t;
+            }
+        }
+        if (maxTime !== -Infinity) {
             now = new Date(maxTime);
         }
     }
@@ -104,8 +111,9 @@ function buildSeries(orders: Array<{ timestamp: string; subtotal: number; taxAmo
         });
 
         for (const o of orders) {
+            if (!o.timestamp) continue;
             const d = startOfDay(new Date(o.timestamp));
-            const idx = Math.floor((d.getTime() - start.getTime()) / (24 * 60 * 60 * 1000));
+            const idx = Math.round((d.getTime() - start.getTime()) / (24 * 60 * 60 * 1000));
             if (idx >= 0 && idx < 7) {
                 buckets[idx].value += metricValue(metric, o);
             }
@@ -127,8 +135,9 @@ function buildSeries(orders: Array<{ timestamp: string; subtotal: number; taxAmo
         ];
 
         for (const o of orders) {
+            if (!o.timestamp) continue;
             const d = startOfDay(new Date(o.timestamp));
-            const diffDays = Math.floor((d.getTime() - start.getTime()) / (24 * 60 * 60 * 1000));
+            const diffDays = Math.round((d.getTime() - start.getTime()) / (24 * 60 * 60 * 1000));
             if (diffDays >= 0 && diffDays < 28) {
                 const idx = Math.min(3, Math.floor(diffDays / 7));
                 buckets[idx].value += metricValue(metric, o);
@@ -146,6 +155,7 @@ function buildSeries(orders: Array<{ timestamp: string; subtotal: number; taxAmo
     });
 
     for (const o of orders) {
+        if (!o.timestamp) continue;
         const d = new Date(o.timestamp);
         if (d.getFullYear() !== year) continue;
         buckets[d.getMonth()].value += metricValue(metric, o);
