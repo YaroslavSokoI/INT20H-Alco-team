@@ -39,7 +39,7 @@ export const useOrderStore = create<OrderState>()(
             currentPage: 1,
             pageSize: 10,
             totalOrders: 0,
-            stats: { totalOrders: 0, totalSales: 0, totalTax: 0, deltaOrders: 0, deltaSales: 0, deltaTax: 0 },
+            stats: { totalOrders: 0, totalSales: 0, totalTax: 0, totalImports: 0, deltaOrders: 0, deltaSales: 0, deltaTax: 0, deltaImports: 0 },
             searchQuery: "",
             filters: {},
             sortBy: 'timestamp',

@@ -71,10 +71,10 @@ export function StatsGridControlled({ selectedMetric = null, onSelectMetric }: C
             {
                 metric: "imports",
                 title: "Total Imports",
-                value: (stats.totalOrders || totalOrders).toLocaleString(),
-                deltaText: formatDelta(stats.deltaOrders),
-                deltaNote: formatDeltaNote(stats.deltaOrders),
-                positive: stats.deltaOrders >= 0,
+                value: (stats.totalImports || 0).toLocaleString(),
+                deltaText: formatDelta(stats.deltaImports || 0),
+                deltaNote: formatDeltaNote(stats.deltaImports || 0),
+                positive: (stats.deltaImports || 0) >= 0,
                 icon: <img src={file} alt="" className="size-4 opacity-70" />,
             },
         ];

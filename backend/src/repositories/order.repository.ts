@@ -264,17 +264,24 @@ export async function getOrderStats(): Promise<{
   totalOrders: number;
   totalSales: number;
   totalTax: number;
+  totalImports: number;
   deltaOrders: number;
   deltaSales: number;
   deltaTax: number;
+  deltaImports: number;
 }> {
   type RawStatsRow = {
     totalOrders: string | number | null;
     totalSales: string | number | null;
     totalTax: string | number | null;
+    totalImports: string | number | null;
   };
 
-  const [allStats] = await db('orders').sum('total_amount as totalSales').sum('tax_amount as totalTax').count('id as totalOrders') as unknown as RawStatsRow[];
+  const [allStats] = await db('orders')
+    .sum('total_amount as totalSales')
+    .sum('tax_amount as totalTax')
+    .count('id as totalOrders')
+    .countDistinct('import_id as totalImports') as unknown as RawStatsRow[];
 
   const recentImports = await db('orders')
     .select('import_id')
@@ -284,8 +291,8 @@ export async function getOrderStats(): Promise<{
     .orderBy('max_created_at', 'desc')
     .limit(2) as unknown as { import_id: string }[];
 
-  let current: RawStatsRow = { totalOrders: 0, totalSales: 0, totalTax: 0 };
-  let previous: RawStatsRow = { totalOrders: 0, totalSales: 0, totalTax: 0 };
+  let current: RawStatsRow = { totalOrders: 0, totalSales: 0, totalTax: 0, totalImports: 0 };
+  let previous: RawStatsRow = { totalOrders: 0, totalSales: 0, totalTax: 0, totalImports: 0 };
 
   if (recentImports.length > 0) {
     const latestId = recentImports[0].import_id;
@@ -293,7 +300,8 @@ export async function getOrderStats(): Promise<{
       .where('import_id', latestId)
       .sum('total_amount as totalSales')
       .sum('tax_amount as totalTax')
-      .count('id as totalOrders') as unknown as RawStatsRow[];
+      .count('id as totalOrders')
+      .countDistinct('import_id as totalImports') as unknown as RawStatsRow[];
     current = latestStats;
   }
 
@@ -303,7 +311,8 @@ export async function getOrderStats(): Promise<{
       .where('import_id', prevId)
       .sum('total_amount as totalSales')
       .sum('tax_amount as totalTax')
-      .count('id as totalOrders') as unknown as RawStatsRow[];
+      .count('id as totalOrders')
+      .countDistinct('import_id as totalImports') as unknown as RawStatsRow[];
     previous = prevStats;
   }
 
@@ -319,12 +328,18 @@ export async function getOrderStats(): Promise<{
   const currTax = Number(current.totalTax || 0);
   const prevTax = Number(previous.totalTax || 0);
 
+  // For imports delta, we only have 1 import per run usually, but we calculate based on distinct count
+  const currImports = Number(current.totalImports || 0);
+  const prevImports = Number(previous.totalImports || 0);
+
   return {
     totalOrders: Number(allStats.totalOrders || 0),
     totalSales: Number(allStats.totalSales || 0),
     totalTax: Number(allStats.totalTax || 0),
+    totalImports: Number(allStats.totalImports || 0),
     deltaOrders: delta(currOrders, prevOrders),
     deltaSales: delta(currSales, prevSales),
     deltaTax: delta(currTax, prevTax),
+    deltaImports: delta(currImports, prevImports),
   };
 }

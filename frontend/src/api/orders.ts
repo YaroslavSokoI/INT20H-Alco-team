@@ -52,9 +52,11 @@ export interface OrderStats {
   totalOrders: number;
   totalSales: number;
   totalTax: number;
+  totalImports: number;
   deltaOrders: number;
   deltaSales: number;
   deltaTax: number;
+  deltaImports: number;
 }
 
 export const ordersApi = {
