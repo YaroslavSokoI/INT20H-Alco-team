@@ -30,6 +30,7 @@ function rowToOrder(row: OrderRow): Order {
     state: row.state,
     postcode: row.postcode,
     createdAt: row.created_at,
+    import_id: row.import_id,
   };
 }
 
@@ -57,10 +58,15 @@ export async function insertOrder(data: InsertOrderData): Promise<Order> {
       county_rate: tax.countyRate,
       city_rate: tax.cityRate,
       special_rates: tax.specialRates,
+<<<<<<< HEAD
       city: jurisdiction.city,
       county: jurisdiction.county,
       state: jurisdiction.state,
       postcode: jurisdiction.postcode,
+=======
+      jurisdictions: JSON.stringify(jurisdiction),
+      import_id: dto.import_id,
+>>>>>>> 2633061 (feat: track and compare latest CSV import stats)
     })
     .returning('*');
 
@@ -82,10 +88,15 @@ export async function insertOrdersBatch(items: InsertOrderData[]): Promise<Order
     county_rate: tax.countyRate,
     city_rate: tax.cityRate,
     special_rates: tax.specialRates,
+<<<<<<< HEAD
     city: jurisdiction.city,
     county: jurisdiction.county,
     state: jurisdiction.state,
     postcode: jurisdiction.postcode,
+=======
+    jurisdictions: JSON.stringify(jurisdiction),
+    import_id: dto.import_id,
+>>>>>>> 2633061 (feat: track and compare latest CSV import stats)
   }));
 
   const inserted = await db('orders').insert(rows).returning('*');
@@ -136,6 +147,7 @@ export async function findOrders(query: OrderListQuery): Promise<PaginatedOrders
     baseQuery = baseQuery.where('total_amount', '<=', query.totalMax);
   }
 
+<<<<<<< HEAD
   if (query.search) {
     const { defaultTerms, structured } = parseSearch(query.search);
     const DEFAULT_FIELDS = [
@@ -160,6 +172,27 @@ export async function findOrders(query: OrderListQuery): Promise<PaginatedOrders
       } else {
         baseQuery = baseQuery.whereRaw(`${field} ILIKE ?`, [`%${term}%`]);
       }
+=======
+  if (query.importId) {
+    if (query.importId === 'latest') {
+      const latestImport = await db('orders')
+        .select('import_id')
+        .whereNotNull('import_id')
+        .groupBy('import_id')
+        .orderBy('max_created_at', 'desc')
+        .max('created_at as max_created_at')
+        .limit(1)
+        .first() as unknown as { import_id: string } | undefined;
+
+      if (latestImport?.import_id) {
+        baseQuery = baseQuery.where('import_id', latestImport.import_id);
+      } else {
+        // If there are no imports with an ID, force an empty result or handle gracefully
+        baseQuery = baseQuery.whereRaw('1 = 0');
+      }
+    } else {
+      baseQuery = baseQuery.where('import_id', query.importId);
+>>>>>>> 2633061 (feat: track and compare latest CSV import stats)
     }
   }
 
@@ -249,15 +282,38 @@ export async function getOrderStats(): Promise<{
     totalTax: string | number | null;
   };
 
-  const now = new Date();
-  const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-  const sixtyDaysAgo = new Date(now.getTime() - 60 * 24 * 60 * 60 * 1000);
+  const [allStats] = await db('orders').sum('total_amount as totalSales').sum('tax_amount as totalTax').count('id as totalOrders') as unknown as RawStatsRow[];
 
-  const [[allStats], [current], [previous]] = await Promise.all([
-    db('orders').sum('total_amount as totalSales').sum('tax_amount as totalTax').count('id as totalOrders') as unknown as Promise<RawStatsRow[]>,
-    db('orders').where('timestamp', '>=', thirtyDaysAgo).sum('total_amount as totalSales').sum('tax_amount as totalTax').count('id as totalOrders') as unknown as Promise<RawStatsRow[]>,
-    db('orders').where('timestamp', '>=', sixtyDaysAgo).where('timestamp', '<', thirtyDaysAgo).sum('total_amount as totalSales').sum('tax_amount as totalTax').count('id as totalOrders') as unknown as Promise<RawStatsRow[]>,
-  ]);
+  const recentImports = await db('orders')
+    .select('import_id')
+    .max('created_at as max_created_at')
+    .whereNotNull('import_id')
+    .groupBy('import_id')
+    .orderBy('max_created_at', 'desc')
+    .limit(2) as unknown as { import_id: string }[];
+
+  let current: RawStatsRow = { totalOrders: 0, totalSales: 0, totalTax: 0 };
+  let previous: RawStatsRow = { totalOrders: 0, totalSales: 0, totalTax: 0 };
+
+  if (recentImports.length > 0) {
+    const latestId = recentImports[0].import_id;
+    const [latestStats] = await db('orders')
+      .where('import_id', latestId)
+      .sum('total_amount as totalSales')
+      .sum('tax_amount as totalTax')
+      .count('id as totalOrders') as unknown as RawStatsRow[];
+    current = latestStats;
+  }
+
+  if (recentImports.length > 1) {
+    const prevId = recentImports[1].import_id;
+    const [prevStats] = await db('orders')
+      .where('import_id', prevId)
+      .sum('total_amount as totalSales')
+      .sum('tax_amount as totalTax')
+      .count('id as totalOrders') as unknown as RawStatsRow[];
+    previous = prevStats;
+  }
 
   const delta = (curr: number, prev: number): number => {
     if (prev === 0) return curr > 0 ? 100 : 0;

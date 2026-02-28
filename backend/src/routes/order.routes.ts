@@ -17,7 +17,7 @@ const router = Router();
 const createOrderSchema = z.object({
   latitude: z.number({ required_error: 'latitude is required' }),
   longitude: z.number({ required_error: 'longitude is required' }),
-  subtotal: z.number({ required_error: 'subtotal is required' }).positive(),
+  subtotal: z.number({ required_error: 'subtotal is required' }).min(0),
   timestamp: z.string().datetime().optional(),
 });
 
@@ -38,9 +38,13 @@ const listOrdersSchema = z.object({
   taxMax: numericParam,
   totalMin: numericParam,
   totalMax: numericParam,
+<<<<<<< HEAD
   search: z.string().optional(),
   sortBy: z.string().optional(),
   sortOrder: z.enum(['asc', 'desc']).optional(),
+=======
+  importId: z.string().optional(),
+>>>>>>> 2633061 (feat: track and compare latest CSV import stats)
 });
 
 /**

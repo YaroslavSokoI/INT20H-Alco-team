@@ -32,6 +32,7 @@ export interface Order {
   state: string;
   postcode: string;
   createdAt: Date;
+  import_id?: string | null;
 }
 
 export interface CreateOrderDto {
@@ -39,6 +40,7 @@ export interface CreateOrderDto {
   longitude: number;
   subtotal: number;
   timestamp?: string;
+  import_id?: string | null;
 }
 
 export interface OrderRow {
@@ -60,6 +62,7 @@ export interface OrderRow {
   state: string;
   postcode: string;
   created_at: Date;
+  import_id?: string | null;
 }
 
 declare module 'knex/types/tables' {
@@ -83,9 +86,13 @@ export interface OrderListQuery {
   taxMax?: number;
   totalMin?: number;
   totalMax?: number;
+<<<<<<< HEAD
   search?: string;
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';
+=======
+  importId?: string;
+>>>>>>> 2633061 (feat: track and compare latest CSV import stats)
 }
 
 export interface PaginatedOrders {

@@ -102,6 +102,7 @@ export async function getOrders(
       search: req.query.search as string | undefined,
       sortBy: req.query.sortBy as string | undefined,
       sortOrder: req.query.sortOrder as 'asc' | 'desc' | undefined,
+      importId: req.query.importId as string | undefined,
     };
 
     const result = await listOrders(query);

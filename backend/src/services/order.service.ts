@@ -1,4 +1,5 @@
 import { calculateTax, isWithinNY } from './tax.service';
+import { randomUUID } from 'crypto';
 import { parseCsvStream } from '../utils/csv.parser';
 import {
   insertOrder,
@@ -41,6 +42,7 @@ export async function importOrdersFromCsv(filePath: string): Promise<ImportResul
 
   const limit = pLimit(NOMINATIM_CONCURRENCY);
   let validBatch: Array<{ index: number; dto: CreateOrderDto }> = [];
+  const importId = randomUUID();
 
   const processBatch = async (batch: typeof validBatch) => {
     if (batch.length === 0) return;
@@ -99,7 +101,12 @@ export async function importOrdersFromCsv(filePath: string): Promise<ImportResul
         continue;
       }
 
+<<<<<<< HEAD
       validBatch.push({ index: row.index, dto: row.dto });
+=======
+      row.dto.import_id = importId;
+      validBatch.push(row);
+>>>>>>> 2633061 (feat: track and compare latest CSV import stats)
 
       if (validBatch.length >= BATCH_SIZE) {
         await processBatch(validBatch);
