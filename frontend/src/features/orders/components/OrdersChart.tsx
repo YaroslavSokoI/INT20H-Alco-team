@@ -75,14 +75,20 @@ function metricValue(metric: StatMetric, order: { subtotal: number; taxAmount: n
         case "imports":
             return 1;
         case "sales":
-            return order.subtotal;
+            return Number(order.subtotal) || 0;
         case "tax":
-            return order.taxAmount;
+            return Number(order.taxAmount) || 0;
     }
 }
 
 function buildSeries(orders: Array<{ timestamp: string; subtotal: number; taxAmount: number }>, metric: StatMetric, period: Period): SeriesPoint[] {
-    const now = new Date();
+    let now = new Date();
+    if (orders.length > 0) {
+        const maxTime = Math.max(...orders.map(o => new Date(o.timestamp).getTime()));
+        if (!isNaN(maxTime)) {
+            now = new Date(maxTime);
+        }
+    }
 
     if (period === "w") {
         const end = startOfDay(now);
