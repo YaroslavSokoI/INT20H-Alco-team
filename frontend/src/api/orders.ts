@@ -19,6 +19,7 @@ export interface ApiOrder {
   state: string;
   postcode: string;
   createdAt: string;
+  import_id?: string | null;
 }
 
 export interface PaginatedOrders {

@@ -107,7 +107,9 @@ export function StatsGridControlled({ selectedMetric = null, onSelectMetric }: C
                         filterActive={selectedMetric === s.metric}
                         onFilterClick={() => {
                             if (!onSelectMetric) return;
-                            onSelectMetric(selectedMetric === s.metric ? null : s.metric);
+                            if (selectedMetric !== s.metric) {
+                                onSelectMetric(s.metric);
+                            }
                         }}
                     />
                 ))

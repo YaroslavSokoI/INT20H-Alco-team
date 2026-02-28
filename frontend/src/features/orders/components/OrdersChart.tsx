@@ -72,8 +72,9 @@ function formatWeekdayLabel(d: Date): string {
 function metricValue(metric: StatMetric, order: { subtotal: number; taxAmount: number }): number {
     switch (metric) {
         case "orders":
-        case "imports":
             return 1;
+        case "imports":
+            return 1; // handled specially in buildSeries
         case "sales":
             return Number(order.subtotal) || 0;
         case "tax":
@@ -81,7 +82,7 @@ function metricValue(metric: StatMetric, order: { subtotal: number; taxAmount: n
     }
 }
 
-function buildSeries(orders: Array<{ timestamp: string; subtotal: number; taxAmount: number }>, metric: StatMetric, period: Period): SeriesPoint[] {
+function buildSeries(orders: Array<{ timestamp: string; subtotal: number; taxAmount: number; import_id?: string | null }>, metric: StatMetric, period: Period): SeriesPoint[] {
     let now = new Date();
     if (orders.length > 0) {
         let maxTime = -Infinity;
@@ -107,6 +108,7 @@ function buildSeries(orders: Array<{ timestamp: string; subtotal: number; taxAmo
                 day,
                 label: formatWeekdayLabel(day),
                 value: 0,
+                importIds: new Set<string>(),
             };
         });
 
@@ -115,11 +117,15 @@ function buildSeries(orders: Array<{ timestamp: string; subtotal: number; taxAmo
             const d = startOfDay(new Date(o.timestamp));
             const idx = Math.round((d.getTime() - start.getTime()) / (24 * 60 * 60 * 1000));
             if (idx >= 0 && idx < 7) {
-                buckets[idx].value += metricValue(metric, o);
+                if (metric === "imports") {
+                    if (o.import_id) buckets[idx].importIds.add(o.import_id);
+                } else {
+                    buckets[idx].value += metricValue(metric, o);
+                }
             }
         }
 
-        return buckets.map(({ label, value }) => ({ label, value }));
+        return buckets.map(({ label, value, importIds }) => ({ label, value: metric === "imports" ? importIds.size : value }));
     }
 
     if (period === "m") {
@@ -127,11 +133,11 @@ function buildSeries(orders: Array<{ timestamp: string; subtotal: number; taxAmo
         const end = startOfDay(now);
         const start = addDays(end, -27);
 
-        const buckets: SeriesPoint[] = [
-            { label: "W1", value: 0 },
-            { label: "W2", value: 0 },
-            { label: "W3", value: 0 },
-            { label: "W4", value: 0 },
+        const buckets = [
+            { label: "W1", value: 0, importIds: new Set<string>() },
+            { label: "W2", value: 0, importIds: new Set<string>() },
+            { label: "W3", value: 0, importIds: new Set<string>() },
+            { label: "W4", value: 0, importIds: new Set<string>() },
         ];
 
         for (const o of orders) {
@@ -140,28 +146,36 @@ function buildSeries(orders: Array<{ timestamp: string; subtotal: number; taxAmo
             const diffDays = Math.round((d.getTime() - start.getTime()) / (24 * 60 * 60 * 1000));
             if (diffDays >= 0 && diffDays < 28) {
                 const idx = Math.min(3, Math.floor(diffDays / 7));
-                buckets[idx].value += metricValue(metric, o);
+                if (metric === "imports") {
+                    if (o.import_id) buckets[idx].importIds.add(o.import_id);
+                } else {
+                    buckets[idx].value += metricValue(metric, o);
+                }
             }
         }
 
-        return buckets;
+        return buckets.map(({ label, value, importIds }) => ({ label, value: metric === "imports" ? importIds.size : value }));
     }
 
     const year = now.getFullYear();
     const buckets = Array.from({ length: 12 }).map((_, m) => {
         const d = new Date(year, m, 1);
         const label = d.toLocaleDateString("en-US", { month: "short" });
-        return { label, value: 0 };
+        return { label, value: 0, importIds: new Set<string>() };
     });
 
     for (const o of orders) {
         if (!o.timestamp) continue;
         const d = new Date(o.timestamp);
         if (d.getFullYear() !== year) continue;
-        buckets[d.getMonth()].value += metricValue(metric, o);
+        if (metric === "imports") {
+            if (o.import_id) buckets[d.getMonth()].importIds.add(o.import_id);
+        } else {
+            buckets[d.getMonth()].value += metricValue(metric, o);
+        }
     }
 
-    return buckets;
+    return buckets.map(({ label, value, importIds }) => ({ label, value: metric === "imports" ? importIds.size : value }));
 }
 
 export default function OrdersChart({ metric, className }: Props) {
@@ -177,9 +191,7 @@ export default function OrdersChart({ metric, className }: Props) {
 
         const fetchChartData = async () => {
             try {
-                const response = await ordersApi.getOrders(1, 10000, {
-                    importId: 'latest',
-                });
+                const response = await ordersApi.getOrders(1, 1000000);
 
                 if (mounted) {
                     setChartOrders(response.data);
