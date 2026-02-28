@@ -49,9 +49,7 @@ const OrderCreateRow = memo(({ newOrder, setNewOrder, onSave, onCancel, jurisdic
             </td>
             {/* 3. jurisdictionSummary */}
             <td style={js}>{emptyCell}</td>
-            {/* 4. collapseJurisdiction */}
-            <td style={jd}></td>
-            {/* 5. state */}
+            {/* 4. state */}
             <td style={jd}>{emptyCell}</td>
             {/* 6. city */}
             <td style={jd}>{emptyCell}</td>
@@ -81,6 +79,8 @@ const OrderCreateRow = memo(({ newOrder, setNewOrder, onSave, onCancel, jurisdic
                     onChange={(e) => setNewOrder({ ...newOrder, longitude: e.target.value })}
                 />
             </td>
+            {/* 11. collapseJurisdiction */}
+            <td style={jd}></td>
             {/* 12. subtotal */}
             <td style={always}>
                 <input
