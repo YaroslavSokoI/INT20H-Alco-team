@@ -60,6 +60,20 @@ export const getOrderColumns = (
         }),
 
         // ── Jurisdiction expanded ──────────────────────────────────────────────
+        columnHelper.display({
+            id: 'collapseJurisdiction',
+            size: 110,
+            header: () => (
+                <button
+                    onClick={(e) => { e.stopPropagation(); onToggleJurisdiction(); }}
+                    className="flex items-center gap-1 font-semibold text-inherit hover:text-primary transition-colors"
+                    title="Collapse"
+                >
+                    Jurisdiction <ChevronLeft />
+                </button>
+            ),
+            cell: () => null,
+        }),
         columnHelper.accessor("state", {
             header: "State",
             cell: info => info.getValue() || '-',
@@ -83,21 +97,6 @@ export const getOrderColumns = (
         }),
         columnHelper.accessor("latitude", { header: "Latitude" }),
         columnHelper.accessor("longitude", { header: "Longitude" }),
-        columnHelper.display({
-            id: 'collapseJurisdiction',
-            size: 110,
-            header: () => (
-                <button
-                    onClick={(e) => { e.stopPropagation(); onToggleJurisdiction(); }}
-                    className="flex items-center gap-1 font-semibold text-text-muted hover:text-primary transition-colors"
-                    title="Collapse"
-                >
-                    <ChevronLeft /> Jurisdictions
-                </button>
-            ),
-            cell: () => null,
-        }),
-
         // ── Always visible ─────────────────────────────────────────────────────
         columnHelper.accessor("subtotal", {
             header: "Subtotal",

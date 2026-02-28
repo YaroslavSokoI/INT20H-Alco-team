@@ -47,7 +47,9 @@ const OrderEditRow = memo(({ order, setOrder, onSave, onCancel, jurisdictionExpa
             <td style={js}>
                 <span className="text-text-muted/60 text-xs">{[order.city || order.county, order.state].filter(Boolean).join(', ') || '—'}</span>
             </td>
-            {/* 4. state */}
+            {/* 4. collapseJurisdiction */}
+            <td style={jd}></td>
+            {/* 5. state */}
             <td style={jd}>
                 <input className={disabledInput} value={order.state || ''} disabled />
             </td>
@@ -85,8 +87,6 @@ const OrderEditRow = memo(({ order, setOrder, onSave, onCancel, jurisdictionExpa
                     onChange={(e) => setOrder({ ...order, longitude: e.target.value })}
                 />
             </td>
-            {/* 11. collapseJurisdiction */}
-            <td style={jd}></td>
             {/* 12. subtotal */}
             <td style={always}>
                 <input
