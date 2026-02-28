@@ -1,11 +1,11 @@
 import StatCard from "./StatCard";
 import { useOrderStore } from "@/store/orderStore";
 import { Skeleton } from "@/components/ui/Skeleton";
-import { cart, percent, dollar, file } from "@/assets/assets.ts";
+import { cart, percent, dollar } from "@/assets/assets.ts";
 import { formatCurrency } from "@/lib/formatters";
 import type { ReactNode } from "react";
 
-export type StatMetric = "orders" | "tax" | "sales" | "imports";
+export type StatMetric = "orders" | "tax" | "sales" | "aov";
 
 function formatDelta(delta: number): string {
     const sign = delta >= 0 ? "↑ +" : "↓ ";
@@ -69,13 +69,13 @@ export function StatsGridControlled({ selectedMetric = null, onSelectMetric }: C
                 icon: <img src={dollar} alt="" className="size-4 opacity-70" />,
             },
             {
-                metric: "imports",
-                title: "Total Imports",
-                value: (stats.totalImports || 0).toLocaleString(),
-                deltaText: formatDelta(stats.deltaImports || 0),
-                deltaNote: formatDeltaNote(stats.deltaImports || 0),
-                positive: (stats.deltaImports || 0) >= 0,
-                icon: <img src={file} alt="" className="size-4 opacity-70" />,
+                metric: "aov",
+                title: "Average Order Value",
+                value: formatCurrency((stats.totalOrders || 0) > 0 ? (stats.totalSales || 0) / stats.totalOrders : 0),
+                deltaText: "",
+                deltaNote: "Average amount per order",
+                positive: true,
+                icon: <img src={dollar} alt="" className="size-4 opacity-70" />,
             },
         ];
 

@@ -25,7 +25,7 @@ type SeriesPoint = {
 };
 
 function formatMetricValue(metric: StatMetric, value: number): string {
-    if (metric === "sales" || metric === "tax") return formatCurrency(value);
+    if (metric === "sales" || metric === "tax" || metric === "aov") return formatCurrency(value);
     return value.toLocaleString();
 }
 
@@ -73,9 +73,8 @@ function metricValue(metric: StatMetric, order: { subtotal: number; taxAmount: n
     switch (metric) {
         case "orders":
             return 1;
-        case "imports":
-            return 1; // handled specially in buildSeries
         case "sales":
+        case "aov":
             return Number(order.subtotal) || 0;
         case "tax":
             return Number(order.taxAmount) || 0;
@@ -108,7 +107,7 @@ function buildSeries(orders: Array<{ timestamp: string; subtotal: number; taxAmo
                 day,
                 label: formatWeekdayLabel(day),
                 value: 0,
-                importIds: new Set<string>(),
+                count: 0,
             };
         });
 
@@ -117,15 +116,12 @@ function buildSeries(orders: Array<{ timestamp: string; subtotal: number; taxAmo
             const d = startOfDay(new Date(o.timestamp));
             const idx = Math.round((d.getTime() - start.getTime()) / (24 * 60 * 60 * 1000));
             if (idx >= 0 && idx < 7) {
-                if (metric === "imports") {
-                    if (o.import_id) buckets[idx].importIds.add(o.import_id);
-                } else {
-                    buckets[idx].value += metricValue(metric, o);
-                }
+                buckets[idx].value += metricValue(metric, o);
+                buckets[idx].count += 1;
             }
         }
 
-        return buckets.map(({ label, value, importIds }) => ({ label, value: metric === "imports" ? importIds.size : value }));
+        return buckets.map(({ label, value, count }) => ({ label, value: metric === "aov" ? (count > 0 ? value / count : 0) : value }));
     }
 
     if (period === "m") {
@@ -134,10 +130,10 @@ function buildSeries(orders: Array<{ timestamp: string; subtotal: number; taxAmo
         const start = addDays(end, -27);
 
         const buckets = [
-            { label: "W1", value: 0, importIds: new Set<string>() },
-            { label: "W2", value: 0, importIds: new Set<string>() },
-            { label: "W3", value: 0, importIds: new Set<string>() },
-            { label: "W4", value: 0, importIds: new Set<string>() },
+            { label: "W1", value: 0, count: 0 },
+            { label: "W2", value: 0, count: 0 },
+            { label: "W3", value: 0, count: 0 },
+            { label: "W4", value: 0, count: 0 },
         ];
 
         for (const o of orders) {
@@ -146,36 +142,30 @@ function buildSeries(orders: Array<{ timestamp: string; subtotal: number; taxAmo
             const diffDays = Math.round((d.getTime() - start.getTime()) / (24 * 60 * 60 * 1000));
             if (diffDays >= 0 && diffDays < 28) {
                 const idx = Math.min(3, Math.floor(diffDays / 7));
-                if (metric === "imports") {
-                    if (o.import_id) buckets[idx].importIds.add(o.import_id);
-                } else {
-                    buckets[idx].value += metricValue(metric, o);
-                }
+                buckets[idx].value += metricValue(metric, o);
+                buckets[idx].count += 1;
             }
         }
 
-        return buckets.map(({ label, value, importIds }) => ({ label, value: metric === "imports" ? importIds.size : value }));
+        return buckets.map(({ label, value, count }) => ({ label, value: metric === "aov" ? (count > 0 ? value / count : 0) : value }));
     }
 
     const year = now.getFullYear();
     const buckets = Array.from({ length: 12 }).map((_, m) => {
         const d = new Date(year, m, 1);
         const label = d.toLocaleDateString("en-US", { month: "short" });
-        return { label, value: 0, importIds: new Set<string>() };
+        return { label, value: 0, count: 0 };
     });
 
     for (const o of orders) {
         if (!o.timestamp) continue;
         const d = new Date(o.timestamp);
         if (d.getFullYear() !== year) continue;
-        if (metric === "imports") {
-            if (o.import_id) buckets[d.getMonth()].importIds.add(o.import_id);
-        } else {
-            buckets[d.getMonth()].value += metricValue(metric, o);
-        }
+        buckets[d.getMonth()].value += metricValue(metric, o);
+        buckets[d.getMonth()].count += 1;
     }
 
-    return buckets.map(({ label, value, importIds }) => ({ label, value: metric === "imports" ? importIds.size : value }));
+    return buckets.map(({ label, value, count }) => ({ label, value: metric === "aov" ? (count > 0 ? value / count : 0) : value }));
 }
 
 export default function OrdersChart({ metric, className }: Props) {
@@ -219,7 +209,7 @@ export default function OrdersChart({ metric, className }: Props) {
             <div className="flex items-center justify-between">
                 <div className="text-sm font-medium text-black/60">
                     {resolvedMetric === "orders" && "Orders"}
-                    {resolvedMetric === "imports" && "Imports"}
+                    {resolvedMetric === "aov" && "Average Order Value"}
                     {resolvedMetric === "sales" && "Sales"}
                     {resolvedMetric === "tax" && "Tax"}
                 </div>
