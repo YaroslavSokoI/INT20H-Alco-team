@@ -24,8 +24,10 @@ const Sidebar = () => {
                 <Link to="/" className="relative flex items-center justify-center h-8 w-full min-w-8">
                     <div
                         className={cn(
-                            "absolute transition-all duration-500 flex items-center justify-center",
-                            collapsed ? "opacity-100 scale-100" : "opacity-0 scale-90 pointer-events-none"
+                            "absolute flex items-center justify-center transition-all duration-300",
+                            collapsed
+                                ? "opacity-100 scale-100 delay-100"
+                                : "opacity-0 scale-75 -translate-x-4 pointer-events-none"
                         )}
                     >
                         <LogoIcon className="w-auto h-5" />
@@ -33,8 +35,10 @@ const Sidebar = () => {
 
                     <div
                         className={cn(
-                            "absolute transition-all duration-500 flex items-center justify-center",
-                            collapsed ? "opacity-0 scale-90 pointer-events-none" : "opacity-100 scale-100"
+                            "absolute flex items-center justify-center transition-all duration-300",
+                            collapsed
+                                ? "opacity-0 scale-75 translate-x-4 pointer-events-none"
+                                : "opacity-100 scale-100 delay-100"
                         )}
                     >
                         <h1 className="font-semibold text-xl whitespace-nowrap">Alko<span className="text-primary">DOLIV</span></h1>

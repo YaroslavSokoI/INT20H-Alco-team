@@ -161,19 +161,7 @@ export default function OrdersChart({ metric, className }: Props) {
 
         const fetchChartData = async () => {
             try {
-                const now = new Date();
-                let dateFrom: Date;
-                if (period === "w") {
-                    dateFrom = addDays(startOfDay(now), -6);
-                } else if (period === "m") {
-                    dateFrom = addDays(startOfDay(now), -27);
-                } else {
-                    dateFrom = new Date(now.getFullYear(), 0, 1);
-                }
-
-                // Fetch up to 1000 orders as a reasonable maximum for the chart for now
                 const response = await ordersApi.getOrders(1, 10000, {
-                    dateFrom: dateFrom.toISOString(),
                     importId: 'latest',
                 });
 
