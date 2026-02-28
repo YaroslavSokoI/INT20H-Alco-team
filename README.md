@@ -9,11 +9,7 @@
 
 **Проєкт розгорнутий і доступний за посиланням:** [https://alco-team.ddns.net](https://alco-team.ddns.net)
 
-> **Demo credentials**
-> | Field    | Value   |
-> |----------|---------|
-> | Login    | `admin` |
-> | Password | `admin` |
+> **Demo:** login `admin` / password `admin`
 
 
 
