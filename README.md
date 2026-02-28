@@ -9,7 +9,7 @@
 
 **Проєкт розгорнутий і доступний за посиланням:** [https://alco-team.ddns.net](https://alco-team.ddns.net)
 
-> **Demo:** login `admin` / password `admin`
+> **Demo:** login: `admin` / password: `admin`
 
 
 
