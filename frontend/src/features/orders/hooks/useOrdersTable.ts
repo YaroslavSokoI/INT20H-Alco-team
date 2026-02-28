@@ -136,8 +136,8 @@ export function useOrdersTable() {
 
     const columns = useMemo(() => getOrderColumns(
         handleExpand, handleEditStart, handleDelete, pendingDeleteId, handleDeleteConfirm, handleDeleteCancel,
-        toggleJurisdiction, jurisdictionExpanded, toggleTax, taxExpanded,
-    ), [handleExpand, handleEditStart, handleDelete, pendingDeleteId, handleDeleteConfirm, handleDeleteCancel, toggleJurisdiction, jurisdictionExpanded, toggleTax, taxExpanded]);
+        toggleJurisdiction, toggleTax, taxExpanded,
+    ), [handleExpand, handleEditStart, handleDelete, pendingDeleteId, handleDeleteConfirm, handleDeleteCancel, toggleJurisdiction, toggleTax, taxExpanded]);
 
     const table = useReactTable({
         data: orders,

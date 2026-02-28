@@ -24,7 +24,6 @@ export const getOrderColumns = (
     onDeleteConfirm: () => void,
     onDeleteCancel: () => void,
     onToggleJurisdiction: () => void,
-    jurisdictionExpanded: boolean,
     onToggleTax: () => void,
     taxExpanded: boolean,
 ) => [
@@ -45,12 +44,10 @@ export const getOrderColumns = (
             id: 'jurisdictionSummary',
             size: 160,
             enableSorting: true,
-            header: () => jurisdictionExpanded ? (
-                <span className="font-semibold">Jurisdiction</span>
-            ) : (
+            header: () => (
                 <button
                     onClick={(e) => { e.stopPropagation(); onToggleJurisdiction(); }}
-                    className="flex items-center gap-1 font-semibold text-inherit hover:text-primary transition-colors cursor-pointer"
+                    className="flex items-center gap-1 font-semibold text-inherit hover:text-primary transition-colors"
                 >
                     Jurisdiction <ChevronRight />
                 </button>
@@ -69,10 +66,10 @@ export const getOrderColumns = (
             header: () => (
                 <button
                     onClick={(e) => { e.stopPropagation(); onToggleJurisdiction(); }}
-                    className="flex items-center gap-1 font-semibold text-text-muted hover:text-primary transition-colors cursor-pointer"
+                    className="flex items-center gap-1 font-semibold text-inherit hover:text-primary transition-colors"
                     title="Collapse"
                 >
-                    <ChevronLeft /> Jurisdiction
+                    Jurisdiction <ChevronLeft />
                 </button>
             ),
             cell: () => null,
